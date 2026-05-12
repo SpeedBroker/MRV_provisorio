@@ -11,7 +11,10 @@
 
     <div class="header">
         RESIDENCIAIS MRV EM SÃO PAULO - mai/26
-        <button id="btn-sobre">Sobre</button>
+        <div class="header-buttons">
+            <button id="btn-impressos" class="btn-header">Impressos</button>
+            <button id="btn-sobre" class="btn-header">Sobre</button>
+        </div>
     </div>
 
     <div class="wrapper">
@@ -33,6 +36,7 @@
         </aside>
     </div>
 
+    <!-- MODAL: SOBRE -->
     <div id="modal-sobre" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
@@ -53,6 +57,23 @@
                 <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
                     <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: IMPRESSOS (DOCUMENTOS) -->
+    <div id="modal-impressos" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Documentos e Impressos</h2>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
+            
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Acesse abaixo os documentos gerais para consulta e download:</p>
+                <div id="lista-impressos-container" class="lista-documentos">
+                    <!-- A lista será gerada pelo desktop.js -->
+                    <div style="text-align:center; padding:20px; color:#999;">Carregando documentos...</div>
+                </div>
             </div>
         </div>
     </div>
