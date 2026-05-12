@@ -65,6 +65,37 @@ body {
     color: var(--mrv-verde); 
 }
 
+
+/* Faz o título ficar na esquerda e os botões na direita */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 60px; /* Ajuste conforme a altura da sua faixa */
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+}
+
+/* Estilo para deixar o botão Impressos igual ao do Sobre */
+#btn-impressos, #btn-sobre {
+    background: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+#btn-impressos:hover, #btn-sobre:hover {
+    background: white;
+    color: #006d38; /* Verde da MRV */
+}
 /* ==========================================================================
    3. ESTRUTURA PRINCIPAL (WRAPPER)
    ========================================================================== */
