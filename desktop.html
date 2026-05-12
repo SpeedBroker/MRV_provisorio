@@ -6,11 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <link rel="stylesheet" href="desktop.css">
+    <style>
+        /* Ajuste rápido para garantir que os botões fiquem na faixa verde */
+        .header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0 20px !important;
+            box-sizing: border-box;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-header {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+        .btn-header:hover {
+            background: white;
+            color: #006d38; /* Verde MRV */
+        }
+    </style>
 </head>
 <body>
 
     <div class="header">
-        RESIDENCIAIS MRV EM SÃO PAULO - mai/26
+        <div>RESIDENCIAIS MRV EM SÃO PAULO - mai/26</div>
         <div class="header-buttons">
             <button id="btn-impressos" class="btn-header">Impressos</button>
             <button id="btn-sobre" class="btn-header">Sobre</button>
@@ -40,7 +68,7 @@
     <div id="modal-sobre" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
+            <h2 style="color: #006d38; margin-bottom: 10px;">Sobre o Projeto</h2>
             <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
             
             <div class="modal-body" style="text-align: center;">
@@ -54,7 +82,7 @@
                     </p>
                 </div>
 
-                <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
+                <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback" style="text-decoration: none; background: #25d366; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block;">
                     <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
                 </a>
             </div>
@@ -65,13 +93,12 @@
     <div id="modal-impressos" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Documentos e Impressos</h2>
+            <h2 style="color: #006d38; margin-bottom: 10px;">Documentos e Impressos</h2>
             <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
             
             <div class="modal-body">
                 <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Acesse abaixo os documentos gerais para consulta e download:</p>
                 <div id="lista-impressos-container" class="lista-documentos">
-                    <!-- A lista será gerada pelo desktop.js -->
                     <div style="text-align:center; padding:20px; color:#999;">Carregando documentos...</div>
                 </div>
             </div>
