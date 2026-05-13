@@ -6,12 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <link rel="stylesheet" href="desktop.css">
+    <style>
+        /* Ajuste específico para os botões ficarem alinhados à direita */
+        .header-buttons {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px; /* Espaço entre DOCUMENTOS e SOBRE */
+        }
+
+        /* Estilo para o novo botão seguir o padrão do seu CSS */
+        #btn-documentos {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        #btn-documentos:hover { 
+            background: white; 
+            color: var(--mrv-verde); 
+        }
+    </style>
 </head>
 <body>
 
     <div class="header">
         RESIDENCIAIS MRV EM SÃO PAULO - mai/26
-        <button id="btn-sobre">Sobre</button>
+        <div class="header-buttons">
+            <button id="btn-documentos">Documentos</button>
+            <button id="btn-sobre">Sobre</button>
+        </div>
     </div>
 
     <div class="wrapper">
