@@ -1,43 +1,51 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="notranslate">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard MRV SP</title>
+    
+    <link rel="stylesheet" href="desktop.css">
+
     <style>
         /* Ajuste do Header para manter o título no lugar e alinhar botões */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 40px; /* Margem maior nas laterais para o título não colar no canto */
-            height: 60px; /* Altura fixa para garantir alinhamento vertical */
-            background-color: #006d38; /* Verde MRV */
+            padding: 0 40px; 
+            height: 60px;
+            background-color: #006d38;
             color: white;
             position: relative;
         }
 
         .header-buttons {
             display: flex;
-            gap: 15px; /* Espaço controlado entre os botões */
+            gap: 15px;
             align-items: center;
+            position: static !important; /* Garante que não use o estilo antigo do CSS */
+            transform: none !important;
         }
 
-        /* Novo estilo dos botões: Retangular, Amarelo, Bordas Suaves */
+        /* Botão Amarelo Retangular (Estilo que você aprovou) */
         .btn-header-novo {
-            background-color: #fbc02d; /* Amarelo escuro */
+            background-color: #fbc02d; 
             color: #333 !important;
             border: none;
             padding: 8px 20px;
-            border-radius: 4px; /* Bordas suavizadas como os da lista lateral */
+            border-radius: 4px; 
             font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
             text-transform: uppercase;
-            height: fit-content;
+            height: auto;
             line-height: normal;
         }
 
         .btn-header-novo:hover {
-            background-color: #fdd835; /* Amarelo um pouco mais claro no hover */
+            background-color: #fdd835;
         }
     </style>
 </head>
@@ -69,30 +77,6 @@
                 <p>Clique em algum Residencial ou em alguma região verde do mapa</p>
             </div>
         </aside>
-    </div>
-
-    <div id="modal-sobre" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
-            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
-            
-            <div class="modal-body" style="text-align: center;">
-                <p style="margin-bottom: 20px; color: #333; line-height: 1.5;">
-                    Esse dashboard foi feito para acessarmos de forma rápida informações básicas dos residenciais MRV durante atendimento a leads.
-                </p>
-                
-                <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
-                    <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
-                        As informações podem estar desatualizadas e até erradas, então caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
-                    </p>
-                </div>
-
-                <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
-                    <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
-                </a>
-            </div>
-        </div>
     </div>
 
     <script src="mapa-SP.js"></script>
