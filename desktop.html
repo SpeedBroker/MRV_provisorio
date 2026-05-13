@@ -1,49 +1,54 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="notranslate">
 <head>
-    <meta charset="UTF-8">
-    <meta name="google" content="notranslate">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP</title>
-    <link rel="stylesheet" href="desktop.css">
     <style>
-        /* Ajuste específico para os botões ficarem alinhados à direita */
-        .header-buttons {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+        /* Ajuste do Header para manter o título no lugar e alinhar botões */
+        .header {
             display: flex;
-            gap: 10px; /* Espaço entre DOCUMENTOS e SOBRE */
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px; /* Margem maior nas laterais para o título não colar no canto */
+            height: 60px; /* Altura fixa para garantir alinhamento vertical */
+            background-color: #006d38; /* Verde MRV */
+            color: white;
+            position: relative;
         }
 
-        /* Estilo para o novo botão seguir o padrão do seu CSS */
-        #btn-documentos {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid white;
-            color: white;
-            padding: 6px 18px;
-            border-radius: 20px;
-            cursor: pointer;
+        .header-buttons {
+            display: flex;
+            gap: 15px; /* Espaço controlado entre os botões */
+            align-items: center;
+        }
+
+        /* Novo estilo dos botões: Retangular, Amarelo, Bordas Suaves */
+        .btn-header-novo {
+            background-color: #fbc02d; /* Amarelo escuro */
+            color: #333 !important;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px; /* Bordas suavizadas como os da lista lateral */
             font-size: 0.85rem;
             font-weight: bold;
-            transition: all 0.2s;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            height: fit-content;
+            line-height: normal;
         }
 
-        #btn-documentos:hover { 
-            background: white; 
-            color: var(--mrv-verde); 
+        .btn-header-novo:hover {
+            background-color: #fdd835; /* Amarelo um pouco mais claro no hover */
         }
     </style>
 </head>
 <body>
 
-    <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
-        <div>RESIDENCIAIS MRV EM SÃO PAULO - mai/26</div>
+    <div class="header">
+        <div class="header-titulo">RESIDENCIAIS MRV EM SÃO PAULO - mai/26</div>
         
-        <div style="display: flex; gap: 10px; position: static !important;">
-            <button id="btn-documentos" style="position: static !important; float: none !important;">Documentos</button>
-            <button id="btn-sobre" style="position: static !important; float: none !important;">Sobre</button>
+        <div class="header-buttons">
+            <button id="btn-documentos" class="btn-header-novo">Documentos</button>
+            <button id="btn-sobre" class="btn-header-novo">Sobre</button>
         </div>
     </div>
 
