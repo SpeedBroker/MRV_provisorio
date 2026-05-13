@@ -1,51 +1,59 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="notranslate">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP</title>
-    
     <link rel="stylesheet" href="desktop.css">
 
     <style>
-        /* Ajuste do Header para manter o título no lugar e alinhar botões */
+        /* Ajuste do Header para blindar o layout */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px; 
-            height: 60px;
-            background-color: #006d38;
-            color: white;
-            position: relative;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0 40px !important; 
+            height: 60px !important;
+            background-color: #006d38 !important;
+            color: white !important;
+            position: relative !important;
+            box-sizing: border-box !important;
         }
 
+        .header-titulo {
+            font-weight: bold !important;
+            font-size: 1.2rem !important;
+        }
+
+        /* Container dos botões que impede a sobreposição */
         .header-buttons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            position: static !important; /* Garante que não use o estilo antigo do CSS */
+            display: flex !important;
+            gap: 12px !important;
+            position: relative !important; /* Força a saída do absolute do CSS antigo */
+            right: auto !important;
+            top: auto !important;
             transform: none !important;
+            align-items: center !important;
         }
 
-        /* Botão Amarelo Retangular (Estilo que você aprovou) */
+        /* Estilo unificado para os dois botões (Amarelo e Retangular) */
         .btn-header-novo {
-            background-color: #fbc02d; 
+            background-color: #fbc02d !important; /* Amarelo MRV */
             color: #333 !important;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px; 
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-transform: uppercase;
-            height: auto;
-            line-height: normal;
+            border: none !important;
+            padding: 8px 18px !important;
+            border-radius: 4px !important; /* Bordas suaves */
+            font-size: 0.8rem !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            text-transform: uppercase !important;
+            transition: background 0.2s !important;
+            white-space: nowrap !important; /* Impede que o texto quebre */
+            display: inline-block !important;
+            line-height: normal !important;
+            height: auto !important;
+            width: auto !important;
         }
 
         .btn-header-novo:hover {
-            background-color: #fdd835;
+            background-color: #fdd835 !important;
         }
     </style>
 </head>
