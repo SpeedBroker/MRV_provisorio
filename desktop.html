@@ -6,61 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <link rel="stylesheet" href="desktop.css">
-    <style>
-        /* Correção para os botões não ficarem um em cima do outro */
-        .header {
-            overflow: hidden;
-            padding: 10px 20px;
-            display: block !important; /* Força o bloco para o float funcionar */
-        }
-        .header-titulo {
-            float: left;
-            line-height: 40px;
-        }
-        .header-buttons {
-            float: right;
-            display: flex;
-            gap: 10px;
-        }
-        .btn-header {
-            background: transparent;
-            border: 1px solid white;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            height: 34px;
-        }
-        .btn-header:hover {
-            background: white;
-            color: #006d38;
-        }
-        /* Estilo para os itens da lista de documentos no modal */
-        .item-impresso-link {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: #f9f9f9;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #333;
-            border: 1px solid #eee;
-        }
-        .item-impresso-link:hover { background: #f0f0f0; }
-        .badge-pdf { background: #006d38; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
-    </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-titulo">RESIDENCIAIS MRV EM SÃO PAULO - mai/26</div>
-        <div class="header-buttons">
-            <button id="btn-impressos" class="btn-header">Impressos</button>
-            <button id="btn-sobre" class="btn-header">Sobre</button>
-        </div>
+        RESIDENCIAIS MRV EM SÃO PAULO - mai/26
+        <button id="btn-sobre">Sobre</button>
     </div>
 
     <div class="wrapper">
@@ -82,28 +33,26 @@
         </aside>
     </div>
 
-    <!-- MODAL: SOBRE -->
     <div id="modal-sobre" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h2 style="color: #006d38; margin-bottom: 10px;">Sobre o Projeto</h2>
+            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
             <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+            
             <div class="modal-body" style="text-align: center;">
-                <p>Painel de consulta rápida para corretores MRV.</p>
-                <br>
-                <a href="https://wa.me/5511999999999" target="_blank" style="text-decoration:none; background:#25d366; color:white; padding:10px; border-radius:5px; display:inline-block;">Enviar Feedback</a>
-            </div>
-        </div>
-    </div>
+                <p style="margin-bottom: 20px; color: #333; line-height: 1.5;">
+                    Esse dashboard foi feito para acessarmos de forma rápida informações básicas dos residenciais MRV durante atendimento a leads.
+                </p>
+                
+                <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
+                    <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
+                        As informações podem estar desatualizadas e até erradas, então caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
+                    </p>
+                </div>
 
-    <!-- MODAL: IMPRESSOS -->
-    <div id="modal-impressos" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h2 style="color: #006d38; margin-bottom: 10px;">Documentos e Impressos</h2>
-            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
-            <div id="lista-impressos-container">
-                <div style="text-align:center; padding:20px; color:#999;">Aguardando carregamento da planilha...</div>
+                <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
+                    <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
+                </a>
             </div>
         </div>
     </div>
