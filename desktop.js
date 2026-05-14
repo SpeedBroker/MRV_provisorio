@@ -467,51 +467,62 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DE DOCUMENTOS (VERSÃO CORRIGIDA PÓS-TESTE)
+   BLOCO 08: LÓGICA DE DOCUMENTOS (VERSÃO FINAL COM AJUSTE VISUAL)
    ========================================================================== */
 document.addEventListener('click', async function(event) {
-    // Detecta o clique no botão
+    // Detecta o clique no botão DOCUMENTOS (pelo ID ou pelo texto)
     if (event.target.id === 'btn-documentos' || event.target.innerText === 'DOCUMENTOS') {
         
         const painel = document.getElementById("ficha-tecnica");
         if (!painel) return;
 
+        // 1. Prepara o painel lateral
         painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Organizando arquivos...</p>';
+        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando base de dados...</p>';
 
+        // URL da aba Documentos (GID 122737037)
         const URL_DOCS = "https://docs.google.com/spreadsheets/d/15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E/export?format=csv&gid=122737037&v=" + new Date().getTime();
 
         try {
             const r = await fetch(URL_DOCS);
             const csv = await r.text();
             
+            // Limpa o aviso de carregamento
             painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-            let htmlFinal = '<div style="margin-top: 10px; padding: 0 5px;">';
+            
+            // Container com fundo que preenche a tela (min-height) para evitar a faixa preta no fundo
+            let htmlFinal = '<div id="container-docs-gerais" style="margin-top: 10px; padding: 0 5px; min-height: 100vh; background-color: #f4f4f4;">';
 
-            // 1. Divide em linhas e pula a primeira ("Documentos")
+            // Divide linhas, remove vazias e pula o cabeçalho (A1)
             const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 10).slice(1);
 
             linhas.forEach((linha) => {
-                // 2. LIMPEZA TOTAL: Remove aspas e espaços
                 let textoLimpo = linha.replace(/"/g, "").trim();
-                
-                // 3. SEPARAÇÃO INTELIGENTE: Procura onde começa o link (http)
                 let posHttp = textoLimpo.indexOf("http");
                 
                 if (posHttp !== -1) {
                     let link = textoLimpo.substring(posHttp).trim();
-                    // O título é tudo que vem antes do http (tirando a vírgula que sobrar)
                     let titulo = textoLimpo.substring(0, posHttp).replace(/,$/, "").trim();
                     
-                    if (link.startsWith("http")) {
-                        // 4. Cria o card usando sua função do Bloco 07
-                        htmlFinal += criarCardMaterial(titulo || "Documento Geral", link, '📄');
-                    }
+                    // NOME FINAL DO DOCUMENTO
+                    let nomeFinal = titulo || "Documento de Apoio";
+
+                    // GERAÇÃO DO CARD
+                    // O ícone '📄' agora vai com um estilo de z-index forçado se necessário
+                    htmlFinal += criarCardMaterial(nomeFinal, link, '📄');
                 }
             });
 
             htmlFinal += '</div>';
             painel.innerHTML += htmlFinal;
+
+            // AJUSTE DINÂMICO: Garante que o ícone (emoji) fique por cima de tudo
+            // Isso corrige o problema da miniatura por baixo da faixa verde
+            const miniaturas = painel.querySelectorAll('.material-icon'); // ou a classe que seu card usa para o ícone
+            miniaturas.forEach(icon => {
+                icon.style.position = 'relative';
+                icon.style.zIndex = '10';
+            });
 
         } catch (e) {
             painel.innerHTML = '<p style="color:red; padding:20px;">Erro ao processar: ' + e.message + '</p>';
@@ -519,11 +530,19 @@ document.addEventListener('click', async function(event) {
     }
 });
 
-// Modal "Sobre" funcionando em paralelo
+// Lógica do Modal "Sobre" (Separada para garantir o funcionamento)
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
     const btn = document.getElementById("btn-sobre");
     const span = document.querySelector(".modal-close");
-    if(btn && modal) btn.onclick = () => { modal.style.display = "block"; };
-    if(span && modal) span.onclick = () => { modal.style.display = "none"; };
+    
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
+    }
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
 });
