@@ -467,18 +467,16 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DE DOCUMENTOS (VERSÃO FINAL COM SOBREPOSIÇÃO DE ÍCONE)
+   BLOCO 08: LÓGICA DE DOCUMENTOS (VERSÃO FINAL - MINIATURA POR CIMA)
    ========================================================================== */
 document.addEventListener('click', async function(event) {
-    // Detecta o clique no botão DOCUMENTOS
     if (event.target.id === 'btn-documentos' || event.target.innerText === 'DOCUMENTOS') {
         
         const painel = document.getElementById("ficha-tecnica");
         if (!painel) return;
 
-        // Limpa e prepara o painel
         painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando base de dados...</p>';
+        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Organizando arquivos...</p>';
 
         const URL_DOCS = "https://docs.google.com/spreadsheets/d/15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E/export?format=csv&gid=122737037&v=" + new Date().getTime();
 
@@ -488,8 +486,8 @@ document.addEventListener('click', async function(event) {
             
             painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
             
-            // Container com fundo cinza claro para evitar a faixa preta no fundo
-            let htmlFinal = '<div id="container-docs-gerais" style="margin-top: 10px; padding: 0 5px; min-height: 100vh; background-color: #f4f4f4;">';
+            // Fundo que preenche a tela para tirar a faixa preta
+            let htmlFinal = '<div id="container-docs-gerais" style="margin-top: 10px; padding: 0 5px; min-height: 100vh; background-color: #f4f4f4; position: relative;">';
 
             const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 10).slice(1);
 
@@ -500,36 +498,39 @@ document.addEventListener('click', async function(event) {
                 if (posHttp !== -1) {
                     let link = textoLimpo.substring(posHttp).trim();
                     let titulo = textoLimpo.substring(0, posHttp).replace(/,$/, "").trim();
-                    let nomeFinal = titulo || "Documento de Apoio";
-
-                    // Inserindo o card
-                    htmlFinal += criarCardMaterial(nomeFinal, link, '📄');
+                    htmlFinal += criarCardMaterial(titulo || "Documento", link, '📄');
                 }
             });
 
             htmlFinal += '</div>';
             painel.innerHTML += htmlFinal;
 
-            // --- AJUSTE DE SOBREPOSIÇÃO (Z-INDEX) ---
-            // Localizamos as faixas verdes e os ícones para garantir a ordem correta
-            const cards = painel.querySelectorAll('.material-card'); // Ajuste para a classe real do seu card
-            cards.forEach(card => {
-                // Garante que o card não esconda o que está fora dele
-                card.style.overflow = 'visible'; 
-                
-                // Busca o elemento do ícone/emoji dentro do card
-                const icone = card.querySelector('.material-icon') || card.querySelector('span:first-child');
-                if (icone) {
-                    icone.style.position = 'relative';
-                    icone.style.zIndex = '999'; // Força para ficar acima da faixa
-                }
-                
-                // Se a faixa verde for um elemento específico (ex: .faixa-verde)
-                const faixa = card.querySelector('.header-verde'); // Ajuste para a classe da sua faixa
-                if (faixa) {
-                    faixa.style.zIndex = '1'; // Mantém a faixa na camada de baixo
-                }
-            });
+            // --- AJUSTE DE "CAMADAS" (Z-INDEX) ---
+            // Esperamos um milissegundo para o navegador renderizar e então forçamos a sobreposição
+            setTimeout(() => {
+                const cards = painel.querySelectorAll('div[style*="position: relative"]'); // Pega os cards pela estrutura comum
+                cards.forEach(card => {
+                    // 1. Remove o corte do card para o ícone aparecer fora
+                    card.style.overflow = 'visible'; 
+                    
+                    // 2. Procura o ícone (geralmente o primeiro span ou div com o emoji)
+                    const icone = card.querySelector('span') || card.firstChild;
+                    if (icone && icone.nodeType === 1) {
+                        icone.style.position = 'absolute'; // Muda para absolute para flutuar
+                        icone.style.zIndex = '9999';       // Camada máxima
+                        icone.style.pointerEvents = 'none'; // Não atrapalha o clique no botão
+                    }
+
+                    // 3. Garante que a faixa verde (se houver) fique abaixo
+                    const elementosInternos = card.children;
+                    for (let el of elementosInternos) {
+                        if (el !== icone) {
+                            el.style.position = 'relative';
+                            el.style.zIndex = '1';
+                        }
+                    }
+                });
+            }, 50);
 
         } catch (e) {
             painel.innerHTML = '<p style="color:red; padding:20px;">Erro ao processar: ' + e.message + '</p>';
@@ -537,19 +538,11 @@ document.addEventListener('click', async function(event) {
     }
 });
 
-// Lógica do Modal "Sobre"
+// Modal Sobre
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
     const btn = document.getElementById("btn-sobre");
     const span = document.querySelector(".modal-close");
-    
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
+    if(btn && modal) btn.onclick = () => { modal.style.display = "block"; };
+    if(span && modal) span.onclick = () => { modal.style.display = "none"; };
 });
