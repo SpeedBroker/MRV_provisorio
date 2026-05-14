@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="notranslate">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard MRV SP</title>
+    
     <link rel="stylesheet" href="desktop.css">
 
     <style>
+        /* Ajuste definitivo do Header */
         .header {
             display: flex !important;
-            align-items: center !important;
             justify-content: space-between !important;
-            padding: 0 50px !important; /* Afasta o título da quina esquerda */
+            align-items: center !important;
+            padding: 0 40px !important; /* Move o título para a direita */
             height: 60px !important;
             background-color: #006d38 !important;
             position: relative !important;
-            box-sizing: border-box !important;
         }
 
         .header-titulo {
@@ -20,27 +24,31 @@
             font-weight: bold !important;
             font-size: 1.1rem !important;
             margin: 0 !important;
-            white-space: nowrap !important;
         }
 
+        /* Container que trava os botões lado a lado */
         .header-buttons-container {
             display: flex !important;
-            gap: 15px !important;
+            gap: 12px !important;
             align-items: center !important;
         }
 
-        /* Estilo Amarelo que você gostou */
+        /* Botão Amarelo (Estilo Residencial) */
         .btn-mrv-style {
             background-color: #fbc02d !important;
             color: #333 !important;
             border: none !important;
-            padding: 8px 20px !important;
+            padding: 8px 18px !important;
             border-radius: 4px !important;
             font-size: 0.8rem !important;
             font-weight: bold !important;
             text-transform: uppercase !important;
             cursor: pointer !important;
-            position: static !important; /* Impede a sobreposição */
+            /* Reset de posição para ignorar o desktop.css */
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            margin: 0 !important;
         }
 
         .btn-mrv-style:hover {
