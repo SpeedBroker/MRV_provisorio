@@ -474,22 +474,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById("btn-sobre");
     const span = document.querySelector(".modal-close");
 
+    // Lógica simples do Modal
     if(btn && modal) {
         btn.onclick = () => { modal.style.display = "block"; };
     }
     if(span && modal) {
         span.onclick = () => { modal.style.display = "none"; };
     }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
     
+    // Lógica do Botão Documentos
     const btnDocumentos = document.getElementById("btn-documentos");
     const fichaTecnica = document.getElementById("ficha-tecnica");
 
-    if (btnDocumentos) {
+    if (btnDocumentos && fichaTecnica) {
         btnDocumentos.onclick = async () => {
+            // 1. Limpa a lateral e coloca o título
             fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
             
+            // 2. Busca dados se a variável global estiver vazia
             if (DADOS_DOCUMENTOS.length === 0) {
-                fichaTecnica.innerHTML += `<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando...</p>`;
+                fichaTecnica.innerHTML += `<p style="padding:20px; color:#666; font-size:0.7rem;">Buscando documentos na planilha...</p>`;
                 
                 const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
                 const GID_DOCS = "122737037"; 
@@ -498,39 +505,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const resp = await fetch(URL_DOCS);
                     const csv = await resp.text();
-                    // Pega as linhas e remove o cabeçalho
-                    DADOS_DOCUMENTOS = csv.split(/\r?\n/).filter(l => l.trim() !== "");
+                    
+                    // Converte o CSV em Array, remove linhas vazias e pula o título "Documentos" na A1
+                    DADOS_DOCUMENTOS = csv.split(/\r?\n/)
+                                          .filter(linha => linha.trim() !== "")
+                                          .slice(1);
                 } catch (err) {
-                    fichaTecnica.innerHTML = "<p style='padding:20px; color:red;'>Erro de conexão.</p>";
+                    console.error("Erro ao carregar:", err);
+                    fichaTecnica.innerHTML = "<p style='padding:20px; color:red;'>Erro de conexão com a aba de documentos.</p>";
                     return;
                 }
             }
 
+            // 3. Renderiza os botões
             fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
             let htmlDocs = `<div style="margin-top: 10px; padding: 0 5px;">`;
             
-            // Pulamos a primeira linha (cabeçalho)
-            const linhasDados = DADOS_DOCUMENTOS.slice(1);
-
-            linhasDados.forEach((linha, index) => {
-                // LIMPEZA AGRESSIVA: Remove aspas e espaços extras
-                let textoPuro = linha.replace(/[欣"]/g, "").trim();
+            DADOS_DOCUMENTOS.forEach(linha => {
+                // Limpa as aspas do CSV
+                let linhaLimpa = linha.replace(/"/g, "").trim();
                 
-                // Tenta achar o link dentro da linha
-                let posHttp = textoPuro.indexOf("http");
+                // Divide no primeiro encontro da vírgula
+                let partes = linhaLimpa.split(",");
                 
-                if (posHttp !== -1) {
-                    let linkFinal = textoPuro.substring(posHttp).trim();
-                    // O que vem antes do http é o título (se houver)
-                    let tituloPotencial = textoPuro.substring(0, posHttp).replace(/,/g, "").trim();
-                    let tituloFinal = tituloPotencial || `Documento ${index + 1}`;
-
-                    htmlDocs += criarCardMaterial(tituloFinal, linkFinal, '📄');
+                if (partes.length >= 2) {
+                    let titulo = partes[0].trim();
+                    // Junta o resto caso o link contenha vírgulas por erro
+                    let link = partes.slice(1).join(",").trim();
+                    
+                    if (titulo && link.startsWith("http")) {
+                        // Reutiliza sua função de cards do Bloco 07
+                        htmlDocs += criarCardMaterial(titulo, link, '📄');
+                    }
                 }
             });
 
-            if (htmlDocs === `<div style="margin-top: 10px; padding: 0 5px;">`) {
-                htmlDocs += `<p style="text-align:center; font-size:0.7rem; color:#999;">Nenhum link válido encontrado.</p>`;
+            if (DADOS_DOCUMENTOS.length === 0) {
+                htmlDocs += `<p style="padding:20px; font-size:0.7rem; color:#999;">Nenhum documento encontrado.</p>`;
             }
 
             htmlDocs += `</div>`;
