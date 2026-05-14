@@ -467,93 +467,82 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DE DOCUMENTOS (RESOLUÇÃO DEFINITIVA DE SOBREPOSIÇÃO)
+   BLOCO 08: GESTÃO DE DOCUMENTOS - VERSÃO FINAL
    ========================================================================== */
-document.addEventListener('click', async function(event) {
-    // Detecta clique no botão ou no texto do botão
-    if (event.target.id === 'btn-documentos' || event.target.innerText === 'DOCUMENTOS') {
-        
-        const painel = document.getElementById("ficha-tecnica");
-        if (!painel) return;
+document.addEventListener('DOMContentLoaded', () => {
+    const btnDocumentos = document.getElementById("btn-documentos");
+    const fichaTecnica = document.getElementById("ficha-tecnica");
 
-        // 1. Limpa o painel e prepara o carregamento
-        painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Buscando arquivos...</p>';
-
-        const URL_DOCS = "https://docs.google.com/spreadsheets/d/15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E/export?format=csv&gid=122737037&v=" + new Date().getTime();
-
-        try {
-            const r = await fetch(URL_DOCS);
-            const csv = await r.text();
+    if (btnDocumentos) {
+        btnDocumentos.onclick = async () => {
+            // 1. Limpa e prepara o painel
+            fichaTecnica.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
+            fichaTecnica.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando arquivos...</p>';
             
-            painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-            
-            // Container com min-height para evitar o fundo preto e cor de fundo do seu reset
-            let htmlFinal = '<div id="container-docs-gerais" style="margin-top: 10px; padding: 0 5px; min-height: 100vh; background-color: var(--cinza-claro); position: relative;">';
+            const URL_DOCS = "https://docs.google.com/spreadsheets/d/15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E/export?format=csv&gid=122737037&v=" + new Date().getTime();
 
-            const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 10).slice(1);
-
-            linhas.forEach((linha) => {
-                let textoLimpo = linha.replace(/"/g, "").trim();
-                let posHttp = textoLimpo.indexOf("http");
+            try {
+                const resp = await fetch(URL_DOCS);
+                const csv = await resp.text();
                 
-                if (posHttp !== -1) {
-                    let link = textoLimpo.substring(posHttp).trim();
-                    let titulo = textoLimpo.substring(0, posHttp).replace(/,$/, "").trim();
-                    htmlFinal += criarCardMaterial(titulo || "Documento de Apoio", link, '📄');
-                }
-            });
+                // Limpa para desenhar
+                fichaTecnica.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
+                
+                // Container que evita a faixa preta no fundo
+                let htmlFinal = '<div id="container-docs-gerais" style="margin-top: 15px; padding: 0 5px; min-height: 100vh; background-color: var(--cinza-claro);">';
 
-            htmlFinal += '</div>';
-            painel.innerHTML += htmlFinal;
+                const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 10).slice(1);
 
-            // --- AJUSTE VISUAL "TOP LEVEL" ---
-            // Aplicamos estilos diretamente nas classes que você definiu no desktop.css
-            setTimeout(() => {
-                // 1. Garante que o card permita elementos saírem dele
-                const cards = painel.querySelectorAll('.card-material-item');
-                cards.forEach(card => {
-                    card.style.setProperty('overflow', 'visible', 'important');
-                    card.style.setProperty('position', 'relative', 'important');
+                linhas.forEach((linha) => {
+                    let textoLimpo = linha.replace(/"/g, "").trim();
+                    let posHttp = textoLimpo.indexOf("http");
+                    
+                    if (posHttp !== -1) {
+                        let link = textoLimpo.substring(posHttp).trim();
+                        let titulo = textoLimpo.substring(0, posHttp).replace(/,$/, "").trim();
+                        
+                        // MONTAGEM DO CARD COM O ÍCONE POR CIMA (Z-INDEX) E ALINHADO
+                        htmlFinal += `
+                        <div class="card-material-item" style="position: relative; overflow: visible; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div style="display: flex; align-items: center; gap: 10px; flex: 1; overflow: visible;">
+                                <span style="
+                                    position: absolute; 
+                                    top: -10px; 
+                                    left: 8px; 
+                                    z-index: 999; 
+                                    background: white; 
+                                    border-radius: 4px; 
+                                    padding: 2px; 
+                                    border: 1px solid #ccc; 
+                                    font-size: 1.1rem;
+                                    line-height: 1;
+                                ">📄</span>
+                                <span style="font-size: 0.72rem; font-weight: 600; color: #333; margin-left: 30px;">${titulo || "Documento"}</span>
+                            </div>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <a href="${link}" target="_blank" class="card-btn-abrir">Abrir</a>
+                                <button onclick="navigator.clipboard.writeText('${link}')" class="card-btn-copiar">Copiar</button>
+                            </div>
+                        </div>`;
+                    }
                 });
 
-                // 2. Localiza o ícone (card-icon) e joga para cima
-                const icones = painel.querySelectorAll('.card-icon');
-                icones.forEach(icon => {
-                    icon.style.setProperty('position', 'relative', 'important');
-                    icon.style.setProperty('z-index', '999', 'important');
-                    // Pequeno ajuste para ele "subir" um pouco na faixa
-                    icon.style.setProperty('margin-top', '-5px', 'important');
-                    icon.style.setProperty('transform', 'scale(1.2)', 'important');
-                });
+                htmlFinal += '</div>';
+                fichaTecnica.innerHTML += htmlFinal;
 
-                // 3. Garante que o container da esquerda não abaixe o ícone
-                const leftWrappers = painel.querySelectorAll('.card-material-left');
-                leftWrappers.forEach(div => {
-                    div.style.setProperty('overflow', 'visible', 'important');
-                    div.style.setProperty('z-index', '998', 'important');
-                });
-            }, 50);
-
-        } catch (e) {
-            painel.innerHTML = '<p style="color:red; padding:20px;">Erro ao processar: ' + e.message + '</p>';
-        }
+            } catch (err) {
+                fichaTecnica.innerHTML = `<div style="padding:20px; color:red;">Erro ao carregar: ${err.message}</div>`;
+                console.error("Erro no Bloco 08:", err);
+            }
+        };
     }
 });
 
-// Lógica do Modal Sobre (Padronizada)
+// Lógica do Modal Sobre (Garante que não trava o carregamento)
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
     const btn = document.getElementById("btn-sobre");
     const span = document.querySelector(".modal-close");
-    
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
+    if(btn && modal) btn.onclick = () => { modal.style.display = "block"; };
+    if(span && modal) span.onclick = () => { modal.style.display = "none"; };
 });
