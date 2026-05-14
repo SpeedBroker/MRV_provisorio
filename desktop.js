@@ -467,7 +467,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE) E DOCUMENTOS GERAIS (TESTE LINK PURO)
+   BLOCO 08: LÓGICA DO MODAL (SOBRE) E DOCUMENTOS GERAIS
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
             
             if (DADOS_DOCUMENTOS.length === 0) {
-                fichaTecnica.innerHTML += `<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando links...</p>`;
+                fichaTecnica.innerHTML += `<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando documentos...</p>`;
                 
                 const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
                 const GID_DOCS = "122737037"; 
@@ -502,8 +502,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const resp = await fetch(URL_DOCS);
                     const csv = await resp.text();
                     
-                    // Pega as linhas e ignora a primeira (cabeçalho "Documentos")
-                    DADOS_DOCUMENTOS = csv.split(/\r?\n/).filter(l => l.trim().includes("http")).slice(1);
+                    // Pega as linhas, remove vazias e pula apenas a primeira (A1 - Título "Documentos")
+                    let linhas = csv.split(/\r?\n/).filter(l => l.trim() !== "");
+                    DADOS_DOCUMENTOS = linhas.slice(1); 
                     
                 } catch (err) {
                     fichaTecnica.innerHTML = "<p style='padding:20px; color:red;'>Erro ao baixar planilha.</p>";
@@ -511,27 +512,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // Renderização dos cards
             fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
             let htmlDocs = `<div style="margin-top: 10px; padding: 0 5px;">`;
             
-            DADOS_DOCUMENTOS.forEach((linha, index) => {
-                // Limpeza total: remove aspas e pega apenas a parte que começa com http
-                let linkPuro = linha.replace(/"/g, "").trim();
-                const posHttp = linkPuro.indexOf("http");
+            DADOS_DOCUMENTOS.forEach((linha) => {
+                // Limpeza de aspas que o Google coloca no CSV
+                let linhaLimpa = linha.replace(/"/g, "").trim();
+                
+                // Estratégia: Procurar o "http" para separar o que é título do que é link
+                let posHttp = linhaLimpa.indexOf("http");
                 
                 if (posHttp !== -1) {
-                    linkPuro = linkPuro.substring(posHttp).trim();
+                    // O link começa no http
+                    let linkFinal = linhaLimpa.substring(posHttp).trim();
+                    // O título é o que vem antes, removendo a vírgula que sobra no final
+                    let tituloFinal = linhaLimpa.substring(0, posHttp).replace(/,$/, "").trim();
                     
-                    // Título genérico para o teste
-                    let tituloTeste = `Documento Auxiliar ${index + 1}`;
-                    
-                    // Reutiliza sua função de card
-                    htmlDocs += criarCardMaterial(tituloTeste, linkPuro, '📄');
+                    // Se não houver título antes do link, coloca um padrão
+                    if (!tituloFinal) tituloFinal = "Documento Geral";
+
+                    htmlDocs += criarCardMaterial(tituloFinal, linkFinal, '📄');
                 }
             });
 
-            if (DADOS_DOCUMENTOS.length === 0) {
-                htmlDocs += `<p style="padding:10px; font-size:0.7rem; color: #999;">Nenhum link encontrado na aba.</p>`;
+            if (htmlDocs === `<div style="margin-top: 10px; padding: 0 5px;">`) {
+                htmlDocs += `<p style="padding:20px; font-size:0.7rem; color: #999;">Nenhum link válido encontrado.</p>`;
             }
 
             htmlDocs += `</div>`;
