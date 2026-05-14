@@ -467,58 +467,77 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE) E DOCUMENTOS GERAIS
+   BLOCO 08: LÓGICA DO MODAL (SOBRE) E DOCUMENTOS GERAIS (TESTE LINK PURO)
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Modal Sobre
-    var modal = document.getElementById("modal-sobre");
-    var btnSobre = document.getElementById("btn-sobre");
-    var spanFechar = document.querySelector(".modal-close");
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
 
-    if (btnSobre && modal) {
-        btnSobre.onclick = function() { modal.style.display = "block"; };
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
     }
-    if (spanFechar) {
-        spanFechar.onclick = function() { modal.style.display = "none"; };
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
     }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
+    
+    const btnDocumentos = document.getElementById("btn-documentos");
+    const fichaTecnica = document.getElementById("ficha-tecnica");
 
-    // 2. Botão Documentos
-    var btnDocs = document.getElementById("btn-documentos");
-    var ficha = document.getElementById("ficha-tecnica");
+    if (btnDocumentos) {
+        btnDocumentos.onclick = async () => {
+            fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
+            
+            if (DADOS_DOCUMENTOS.length === 0) {
+                fichaTecnica.innerHTML += `<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando links...</p>`;
+                
+                const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
+                const GID_DOCS = "122737037"; 
+                const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_DOCS}&v=${new Date().getTime()}`;
 
-    if (btnDocs && ficha) {
-        btnDocs.onclick = function() {
-            ficha.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-            ficha.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Carregando base de dados...</p>';
-
-            var SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-            var GID_DOCS = "122737037";
-            var URL_DOCS = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv&gid=" + GID_DOCS + "&v=" + new Date().getTime();
-
-            fetch(URL_DOCS)
-                .then(function(res) { return res.text(); })
-                .then(function(csv) {
-                    var linhas = csv.split(/\r?\n/).filter(function(l) { return l.trim().length > 5; });
-                    var html = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div><div style="margin-top: 10px; padding: 0 5px;">';
+                try {
+                    const resp = await fetch(URL_DOCS);
+                    const csv = await resp.text();
                     
-                    // Começa da segunda linha (pula o título "Documentos")
-                    for (var i = 1; i < linhas.length; i++) {
-                        var colunas = linhas[i].replace(/"/g, "").split(",");
-                        if (colunas.length >= 2) {
-                            var titulo = colunas[0].trim();
-                            var link = colunas[1].trim();
-                            if (link.indexOf("http") !== -1) {
-                                // Usa a função criarCardMaterial que já existe no seu Bloco 07
-                                html += criarCardMaterial(titulo, link, '📄');
-                            }
-                        }
-                    }
-                    html += '</div>';
-                    ficha.innerHTML = html;
-                })
-                .catch(function(err) {
-                    ficha.innerHTML = '<p style="padding:20px; color:red;">Erro ao carregar documentos.</p>';
-                });
+                    // Pega as linhas e ignora a primeira (cabeçalho "Documentos")
+                    DADOS_DOCUMENTOS = csv.split(/\r?\n/).filter(l => l.trim().includes("http")).slice(1);
+                    
+                } catch (err) {
+                    fichaTecnica.innerHTML = "<p style='padding:20px; color:red;'>Erro ao baixar planilha.</p>";
+                    return;
+                }
+            }
+
+            fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
+            let htmlDocs = `<div style="margin-top: 10px; padding: 0 5px;">`;
+            
+            DADOS_DOCUMENTOS.forEach((linha, index) => {
+                // Limpeza total: remove aspas e pega apenas a parte que começa com http
+                let linkPuro = linha.replace(/"/g, "").trim();
+                const posHttp = linkPuro.indexOf("http");
+                
+                if (posHttp !== -1) {
+                    linkPuro = linkPuro.substring(posHttp).trim();
+                    
+                    // Título genérico para o teste
+                    let tituloTeste = `Documento Auxiliar ${index + 1}`;
+                    
+                    // Reutiliza sua função de card
+                    htmlDocs += criarCardMaterial(tituloTeste, linkPuro, '📄');
+                }
+            });
+
+            if (DADOS_DOCUMENTOS.length === 0) {
+                htmlDocs += `<p style="padding:10px; font-size:0.7rem; color: #999;">Nenhum link encontrado na aba.</p>`;
+            }
+
+            htmlDocs += `</div>`;
+            fichaTecnica.innerHTML += htmlDocs;
         };
     }
 });
+
+window.onload = iniciarApp;
