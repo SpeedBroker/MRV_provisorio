@@ -8,66 +8,72 @@
     
     <link rel="stylesheet" href="desktop.css">
 
-    <style>
-        /* Ajuste do Cabeçalho */
-        .header {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 0 60px !important; /* Aumentei para o título desgrudar da esquerda */
-            height: 60px !important;
-            background-color: #006d38 !important;
-            position: relative !important;
-            box-sizing: border-box !important;
-        }
+<style>
+    /* ESTRUTURA BLINDADA DO HEADER */
+    .header {
+        display: grid !important;
+        grid-template-columns: 1fr auto 1fr !important; /* Divide em 3 áreas: Esquerda, Centro (vazio), Direita */
+        align-items: center !important;
+        padding: 0 40px !important; /* Afasta o título da borda esquerda */
+        height: 65px !important;
+        background-color: #006d38 !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+    }
 
-        .header-titulo {
-            color: white !important;
-            font-weight: bold !important;
-            font-size: 1.1rem !important;
-            margin: 0 !important;
-        }
+    .header-titulo {
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 1.2rem !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        grid-column: 1 !important; /* Força o título a ficar na primeira coluna */
+    }
 
-        /* Container dos Botões */
-        .header-buttons-container {
-            display: flex !important;
-            gap: 12px !important;
-            align-items: center !important;
-            position: static !important;
-        }
+    /* CONTAINER DOS BOTÕES: Força o alinhamento horizontal perfeito */
+    .header-buttons-container {
+        grid-column: 3 !important; /* Joga os botões para a coluna da direita */
+        display: flex !important;
+        flex-direction: row !important; /* Garante que fiquem lado a lado */
+        justify-content: flex-end !important;
+        align-items: center !important;
+        gap: 15px !important;
+        height: 100% !important;
+    }
 
-        /* Estilo Amarelo Retangular (Igual aos botões da lista lateral) */
-        .btn-mrv-style {
-            background-color: #fbc02d !important;
-            color: #333 !important;
-            border: none !important;
-            padding: 8px 18px !important;
-            border-radius: 4px !important;
-            font-size: 0.8rem !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            cursor: pointer !important;
-            position: static !important; /* Mata o absolute do desktop.css */
-            top: auto !important;
-            right: auto !important;
-            margin: 0 !important;
-        }
+    /* ESTILO DOS BOTÕES (Amarelo Retangular) */
+    .btn-mrv-style {
+        background-color: #fbc02d !important;
+        color: #333 !important;
+        border: none !important;
+        padding: 10px 22px !important;
+        border-radius: 4px !important;
+        font-size: 0.85rem !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+        cursor: pointer !important;
+        /* ANULA QUALQUER TENTATIVA DO CSS ANTIGO DE MOVER O BOTÃO */
+        position: static !important;
+        transform: none !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
 
-        .btn-mrv-style:hover {
-            background-color: #fdd835 !important;
-        }
-    </style>
-</head>
-<body>
+    .btn-mrv-style:hover {
+        background-color: #fdd835 !important;
+    }
+</style>
 
-    <div class="header">
-        <div class="header-titulo">RESIDENCIAIS MRV EM SÃO PAULO - mai/26</div>
-        
-        <div class="header-buttons-container">
-            <button id="btn-documentos" class="btn-mrv-style">Documentos</button>
-            <button id="btn-sobre" class="btn-mrv-style">Sobre</button>
-        </div>
+<div class="header">
+    <div class="header-titulo">RESIDENCIAIS MRV EM SÃO PAULO - mai/26</div>
+    
+    <div></div>
+
+    <div class="header-buttons-container">
+        <button id="btn-documentos" class="btn-mrv-style">Documentos</button>
+        <button id="btn-sobre" class="btn-mrv-style">Sobre</button>
     </div>
+</div>
 
     <div class="wrapper">
         <aside class="sidebar-esq" id="lista-imoveis">
