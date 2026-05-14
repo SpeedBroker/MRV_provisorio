@@ -130,6 +130,38 @@
             if(btnSobre && modal) { btnSobre.onclick = () => { modal.style.display = "block"; }; }
             if(span && modal) { span.onclick = () => { modal.style.display = "none"; }; }
         });
+        document.addEventListener('DOMContentLoaded', () => {
+        // Seletores dos elementos
+            const btnDocumentos = document.getElementById("btn-documentos");
+            const fichaTecnica = document.getElementById("ficha-tecnica");
+        
+            if (btnDocumentos) {
+                btnDocumentos.onclick = () => {
+                    // 1. Limpa o conteúdo atual da coluna da direita
+                    fichaTecnica.innerHTML = "";
+        
+                    // 2. Adiciona um cabeçalho para o usuário saber que está em "Documentos"
+                    const headerDoc = document.createElement("div");
+                    headerDoc.className = "titulo-regiao-ficha"; // Usando sua classe de estilo verde
+                    headerDoc.innerHTML = "DOCUMENTOS GERAIS";
+                    headerDoc.style.marginBottom = "20px";
+                    
+                    fichaTecnica.appendChild(headerDoc);
+        
+                    // 3. Placeholder de carregamento (onde os botões vão aparecer depois)
+                    const loadingMsg = document.createElement("div");
+                    loadingMsg.style.textAlign = "center";
+                    loadingMsg.style.color = "#666";
+                    loadingMsg.style.marginTop = "50px";
+                    loadingMsg.innerHTML = "Acessando base de documentos...";
+                    
+                    fichaTecnica.appendChild(loadingMsg);
+        
+                    // TODO: Aqui chamaremos a função para ler a aba "Documentos" da planilha
+                    console.log("Coluna direita limpa. Pronto para carregar documentos.");
+                };
+            }
+        });
     </script>
 </body>
 </html>
