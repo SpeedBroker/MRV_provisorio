@@ -467,17 +467,17 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA FINAL DE DOCUMENTOS (PÓS-CONEXÃO BEM SUCEDIDA)
+   BLOCO 08: LÓGICA DE DOCUMENTOS (VERSÃO CORRIGIDA PÓS-TESTE)
    ========================================================================== */
 document.addEventListener('click', async function(event) {
-    // Verifica clique pelo ID ou pelo texto do botão
+    // Detecta o clique no botão
     if (event.target.id === 'btn-documentos' || event.target.innerText === 'DOCUMENTOS') {
         
         const painel = document.getElementById("ficha-tecnica");
         if (!painel) return;
 
         painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Processando documentos...</p>';
+        painel.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Organizando arquivos...</p>';
 
         const URL_DOCS = "https://docs.google.com/spreadsheets/d/15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E/export?format=csv&gid=122737037&v=" + new Date().getTime();
 
@@ -485,36 +485,28 @@ document.addEventListener('click', async function(event) {
             const r = await fetch(URL_DOCS);
             const csv = await r.text();
             
-            // Limpa o painel para desenhar os botões
             painel.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
             let htmlFinal = '<div style="margin-top: 10px; padding: 0 5px;">';
 
-            // Transforma o CSV em linhas e pula a primeira (cabeçalho)
-            const linhas = csv.split(/\r?\n/).filter(l => l.trim() !== "").slice(1);
+            // 1. Divide em linhas e pula a primeira ("Documentos")
+            const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 10).slice(1);
 
             linhas.forEach((linha) => {
-                // Remove aspas duplas que o Google Sheets insere
-                let linhaLimpa = linha.replace(/"/g, "").trim();
+                // 2. LIMPEZA TOTAL: Remove aspas e espaços
+                let textoLimpo = linha.replace(/"/g, "").trim();
                 
-                // Encontra o link (http)
-                let posHttp = linhaLimpa.indexOf("http");
+                // 3. SEPARAÇÃO INTELIGENTE: Procura onde começa o link (http)
+                let posHttp = textoLimpo.indexOf("http");
                 
                 if (posHttp !== -1) {
-                    let link = linhaLimpa.substring(posHttp).trim();
-                    // O que vem antes do link é o título (remove vírgulas extras)
-                    let titulo = linhaLimpa.substring(0, posHttp).replace(/,/g, "").trim();
+                    let link = textoLimpo.substring(posHttp).trim();
+                    // O título é tudo que vem antes do http (tirando a vírgula que sobrar)
+                    let titulo = textoLimpo.substring(0, posHttp).replace(/,$/, "").trim();
                     
-                    // Se o título estiver vazio ou for apenas "Documento1", etc, tenta limpar
-                    if (!titulo || titulo.toLowerCase().includes("documento")) {
-                        // Tenta pegar o nome real se houver algo antes da vírgula do link
-                        let partes = linhaLimpa.split(",");
-                        if (partes.length >= 2 && partes[1].includes("http")) {
-                            titulo = partes[0].trim();
-                        }
+                    if (link.startsWith("http")) {
+                        // 4. Cria o card usando sua função do Bloco 07
+                        htmlFinal += criarCardMaterial(titulo || "Documento Geral", link, '📄');
                     }
-
-                    // Usa sua função padrão de cards
-                    htmlFinal += criarCardMaterial(titulo || "Documento", link, '📄');
                 }
             });
 
@@ -527,7 +519,7 @@ document.addEventListener('click', async function(event) {
     }
 });
 
-// Modal Sobre (Mantido)
+// Modal "Sobre" funcionando em paralelo
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
     const btn = document.getElementById("btn-sobre");
