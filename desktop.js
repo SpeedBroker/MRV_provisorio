@@ -474,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById("btn-sobre");
     const span = document.querySelector(".modal-close");
 
+    // Controle do Modal Sobre
     if(btn && modal) {
         btn.onclick = () => { modal.style.display = "block"; };
     }
@@ -484,15 +485,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target == modal) { modal.style.display = "none"; }
     };
     
+    // Controle do Botão Documentos
     const btnDocumentos = document.getElementById("btn-documentos");
     const fichaTecnica = document.getElementById("ficha-tecnica");
 
     if (btnDocumentos) {
         btnDocumentos.onclick = async () => {
-            // 1. Prepara o visual inicial
+            // 1. Limpa o painel lateral e coloca o título
             fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
             
-            // 2. Busca os dados se ainda não estiverem carregados
+            // 2. Carrega os dados se a lista estiver vazia
             if (DADOS_DOCUMENTOS.length === 0) {
                 fichaTecnica.innerHTML += `<p style="padding:20px; color:#666; font-size:0.7rem;">Acessando base de documentos...</p>`;
                 
@@ -504,34 +506,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     const resp = await fetch(URL_DOCS);
                     const csv = await resp.text();
                     
-                    // .slice(1) pula o cabeçalho "Documentos" que você colocou na A1
+                    // Converte em array, remove linhas vazias e pula o cabeçalho "Documentos"
                     DADOS_DOCUMENTOS = csv.split(/\r?\n/)
-                                          .filter(linha => linha.trim() !== "")
+                                          .filter(linha => linha.trim().length > 10)
                                           .slice(1); 
                 } catch (err) {
-                    console.error("Erro:", err);
-                    fichaTecnica.innerHTML = "<p style='padding:20px; color:red;'>Erro ao conectar com a base de dados.</p>";
+                    fichaTecnica.innerHTML = "<p style='padding:20px; color:red;'>Erro ao carregar documentos da planilha.</p>";
                     return;
                 }
             }
 
-            // 3. Renderiza os cards
+            // 3. Renderização final dos botões
             fichaTecnica.innerHTML = `<div class="vitrine-topo">DOCUMENTOS GERAIS</div>`;
             let htmlDocs = `<div style="margin-top: 10px; padding: 0 5px;">`;
             
             DADOS_DOCUMENTOS.forEach(linha => {
-                // Limpa as aspas que o CSV do Google costuma inserir
+                // Remove aspas que o Google Sheets as vezes insere
                 const linhaLimpa = linha.replace(/"/g, "");
                 
-                // Encontra a posição da primeira vírgula para separar Título de Link
-                const indexVirgula = linhaLimpa.indexOf(',');
+                // Separa o título do link usando a última vírgula como referência (mais seguro)
+                const ultimaVirgula = linhaLimpa.lastIndexOf(',');
                 
-                if (indexVirgula !== -1) {
-                    const titulo = linhaLimpa.substring(0, indexVirgula).trim();
-                    const link = linhaLimpa.substring(indexVirgula + 1).trim();
+                if (ultimaVirgula !== -1) {
+                    const titulo = linhaLimpa.substring(0, ultimaVirgula).trim();
+                    const link = linhaLimpa.substring(ultimaVirgula + 1).trim();
                     
-                    if (titulo && link) {
-                        // Reutiliza sua função do Bloco 07 para manter o padrão visual
+                    if (titulo && link.startsWith('http')) {
+                        // Utiliza sua função criarCardMaterial para manter o visual padrão
                         htmlDocs += criarCardMaterial(titulo, link, '📄');
                     }
                 }
