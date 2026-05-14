@@ -467,47 +467,48 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: DIAGNÓSTICO DE DOCUMENTOS
+   BLOCO 08: TESTE DE FORÇA BRUTA - DOCUMENTOS
    ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const btnDocumentos = document.getElementById("btn-documentos");
-    const fichaTecnica = document.getElementById("ficha-tecnica");
+document.addEventListener('click', async function(event) {
+    // 1. Verifica se o que foi clicado é o botão de documentos
+    // (Pode ser pelo ID ou pelo texto escrito no botão)
+    if (event.target.id === 'btn-documentos' || event.target.innerText === 'DOCUMENTOS') {
+        
+        const painel = document.getElementById("ficha-tecnica");
+        if (!painel) {
+            alert("Erro: Não encontrei o painel lateral (ficha-tecnica)");
+            return;
+        }
 
-    if (btnDocumentos) {
-        btnDocumentos.onclick = async () => {
-            // 1. Limpa e avisa que iniciou
-            fichaTecnica.innerHTML = `<div style="padding:10px; background:orange; color:black; font-weight:bold;">TESTE DE CONEXÃO INICIADO</div>`;
+        painel.innerHTML = '<div class="vitrine-topo">TESTE DE CARREGAMENTO</div>';
+        painel.innerHTML += '<p style="padding:20px;">Conectando à planilha...</p>';
+
+        const URL_TESTE = "https://docs.google.com/spreadsheets/d/15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E/export?format=csv&gid=122737037";
+
+        try {
+            const r = await fetch(URL_TESTE);
+            const dados = await r.text();
             
-            const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-            const GID_DOCS = "122737037"; 
-            const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_DOCS}&v=${new Date().getTime()}`;
-
-            try {
-                const resp = await fetch(URL_DOCS);
-                const csv = await resp.text();
+            // Se chegou aqui, a conexão funciona!
+            // Vamos apenas mostrar a primeira linha para confirmar
+            painel.innerHTML = `
+                <div class="vitrine-topo">CONECTADO!</div>
+                <div style="padding:15px; font-size:0.8rem;">
+                    <strong>Dados da Planilha:</strong><br>
+                    <textarea style="width:100%; height:200px;">${dados}</textarea>
+                </div>`;
                 
-                // 2. Mostra exatamente o que veio da planilha (Bruto)
-                fichaTecnica.innerHTML = `
-                    <div class="vitrine-topo">RESULTADO DO TESTE</div>
-                    <div style="padding:10px; font-size:0.8rem; color:blue;">
-                        <strong>Status:</strong> Conectado com sucesso!<br><br>
-                        <strong>Conteúdo Bruto recebido:</strong><br>
-                        <pre style="background:#eee; padding:5px; white-space: pre-wrap;">${csv}</pre>
-                    </div>
-                `;
-                
-                console.log("Dados recebidos da planilha:", csv);
-
-            } catch (err) {
-                // 3. Se der erro na conexão, mostra aqui
-                fichaTecnica.innerHTML = `
-                    <div style="padding:10px; background:red; color:white;">
-                        <strong>ERRO DE CONEXÃO:</strong><br>
-                        ${err.message}
-                    </div>
-                `;
-                console.error("Erro no fetch:", err);
-            }
-        };
+        } catch (e) {
+            painel.innerHTML = '<p style="color:red; padding:20px;">Erro fatal: ' + e.message + '</p>';
+        }
     }
+});
+
+// Mantém o modal "Sobre" funcionando separadamente
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
+    if(btn && modal) btn.onclick = () => { modal.style.display = "block"; };
+    if(span && modal) span.onclick = () => { modal.style.display = "none"; };
 });
