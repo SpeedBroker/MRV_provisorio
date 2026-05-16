@@ -1,276 +1,63 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br" class="notranslate">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
-    <style>
-        :root {
-            --primary-green: #007236;
-            --secondary-yellow: #febd11;
-            --dark-green: #004d24;
-            --light-bg: #f4f4f4;
-            --text-dark: #333333;
-            --white: #ffffff;
-            --orange-action: #f06b24;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* --- HEADER --- */
-        header {
-            background-color: var(--primary-green);
-            color: var(--white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 1000; /* Garante que o cabeçalho fique por cima de tudo */
-            position: relative;
-        }
-
-        header h1 {
-            font-size: 1.4rem;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            position: relative; /* Contexto de posicionamento para o menu flutuante */
-        }
-
-        .btn-nav {
-            background-color: var(--secondary-yellow);
-            color: var(--dark-green);
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        .btn-nav:hover {
-            background-color: #e0a60f;
-        }
-
-        /* --- MENU FLUTUANTE DE DOCUMENTOS --- */
-        /* Protegido com z-index alto e largura controlada para nunca quebrar ou sumir */
-        .dropdown-menu {
-            position: absolute;
-            top: 110%; /* Abre logo abaixo do botão */
-            right: 0;
-            background-color: var(--dark-green);
-            color: var(--white);
-            border-radius: 8px;
-            padding: 15px;
-            width: 280px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            display: none; /* Escondido por padrão */
-            z-index: 9999; /* Máxima prioridade visual */
-        }
-
-        /* Classe que ativa a exibição do menu */
-        .dropdown-menu.active {
-            display: block;
-        }
-
-        .dropdown-menu ul {
-            list-style: none;
-        }
-
-        .dropdown-menu li {
-            font-size: 0.85rem;
-            font-weight: bold;
-            font-style: italic;
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 4px;
-        }
-
-        .dropdown-menu li:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--secondary-yellow);
-        }
-
-        .dropdown-menu li:last-child {
-            border-bottom: none;
-        }
-
-        /* --- CONTAINER PRINCIPAL DO DASHBOARD ORIGINAL --- */
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* COLUNA ESQUERDA (RESIDENCIAIS) */
-        .sidebar-left {
-            width: 25%;
-            background-color: var(--white);
-            border-right: 1px solid #ddd;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .project-item {
-            padding: 12px;
-            background-color: var(--white);
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            text-align: left;
-        }
-
-        .project-item:hover {
-            background-color: #f9f9f9;
-            border-color: var(--primary-green);
-        }
-
-        /* Regra de destaque: borda verde e fundo cinza claro ao clicar */
-        .project-item.selected {
-            border: 2px solid var(--primary-green) !important;
-            background-color: #f0f0f0 !important;
-        }
-
-        /* CENTRO (ÁREA DO MAPA) */
-        .map-content {
-            width: 75%; /* Ocupa o restante da tela de forma limpa */
-            background-color: var(--white);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .map-header {
-            width: 100%;
-            background-color: #eaeaea;
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: #555;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .map-wrapper {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .placeholder-text {
-            color: #999;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="desktop.css">
 </head>
 <body>
 
-    <header>
-        <h1>Residenciais MRV em São Paulo</h1>
-        <div class="nav-buttons">
-            <button class="btn-nav" id="btn-documentos">Documentos</button>
-            <button class="btn-nav" id="btn-sobre">Sobre</button>
-            
-            <div class="dropdown-menu" id="menu-documentos">
-                <ul>
-                    <li onclick="abrirDocumento('https://www.google.com')">Carteira de Trabalho Digital</li>
-                    <li onclick="abrirDocumento('https://www.google.com')">Extrato do FGTS</li>
-                    <li onclick="abrirDocumento('https://www.google.com')">Certidão Estado Civil</li>
-                    <li onclick="abrirDocumento('https://www.google.com')">Certidão Dependente</li>
-                </ul>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-container">
-        
-        <div class="sidebar-left" id="sidebar-residenciais">
-            <button class="project-item" onclick="selecionarProjeto(this, 'Residencial Nascente Do Jequitibá')">Residencial Nascente Do Jequitibá</button>
-            <button class="project-item" onclick="selecionarProjeto(this, 'Residencial Parque das Flores')">Residencial Parque das Flores</button>
-            <button class="project-item" onclick="selecionarProjeto(this, 'Residencial Vila Verde')">Residencial Vila Verde</button>
-        </div>
-
-        <div class="map-content">
-            <div class="map-header" id="map-header-title">Selecione um residencial</div>
-            <div class="map-wrapper" id="map-container">
-                <div class="placeholder-text">[Área reservada para o seu Mapa SVG original]</div>
-            </div>
-        }
-        </div>
-
+    <div class="header">
+        RESIDENCIAIS MRV EM SÃO PAULO - mai/26
+        <button id="btn-sobre">Sobre</button>
     </div>
 
-    <script>
-        const btnDocumentos = document.getElementById('btn-documentos');
-        const menuDocumentos = document.getElementById('menu-documentos');
+    <div class="wrapper">
+        <aside class="sidebar-esq" id="lista-imoveis">
+            <div style="padding:20px; color:#666; font-size: 0.8rem;">Carregando residenciais...</div>
+        </aside>
+        
+        <main class="conteudo-centro">
+            <div id="cidade-titulo">Selecione uma região no mapa</div> 
+            <div id="caixa-a"></div> 
+            <div id="caixa-b"></div> 
+        </main>
 
-        // Abre e fecha o menu ao clicar no botão "Documentos"
-        btnDocumentos.addEventListener('click', (e) => {
-            e.stopPropagation(); // Evita que o clique feche o menu imediatamente
-            menuDocumentos.classList.toggle('active');
-        });
+        <aside class="sidebar-dir" id="ficha-tecnica">
+            <div style="text-align:center; color:#ccc; margin-top:100px;">
+                <p style="font-size: 30px;">📍</p>
+                <p>Clique em algum Residencial ou em alguma região verde do mapa</p>
+            </div>
+        </aside>
+    </div>
 
-        // Se o usuário clicar em qualquer outro lugar da tela, fecha o menu com segurança
-        document.addEventListener('click', (e) => {
-            if (!menuDocumentos.contains(e.target) && e.target !== btnDocumentos) {
-                menuDocumentos.classList.remove('active');
-            }
-        });
-
-        // Função para os cliques nos botões da esquerda (Mantendo seu padrão visual)
-        function selecionarProjeto(elemento, nomeProjeto) {
-            // Remove o destaque dos outros botões
-            document.querySelectorAll('.project-item').forEach(btn => btn.classList.remove('selected'));
-            // Aplica a borda verde e fundo cinza claro no selecionado
-            elemento.classList.add('selected');
+    <div id="modal-sobre" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
             
-            // Atualiza o cabeçalho interno
-            document.getElementById('map-header-title').innerText = nomeProjeto;
-        }
+            <div class="modal-body" style="text-align: center;">
+                <p style="margin-bottom: 20px; color: #333; line-height: 1.5;">
+                    Esse dashboard foi feito para acessarmos de forma rápida informações básicas dos residenciais MRV durante atendimento a leads.
+                </p>
+                
+                <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
+                    <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
+                        As informações podem estar desatualizadas e até erradas, então caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
+                    </p>
+                </div>
 
-        // Função de clique para os itens do menu de documentos
-        function abrirDocumento(url) {
-            window.open(url, '_blank');
-        }
-    </script>
+                <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
+                    <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="mapa-SP.js"></script>
+    <script src="desktop.js"></script>
 </body>
 </html>
