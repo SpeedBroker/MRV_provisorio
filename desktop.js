@@ -5,7 +5,6 @@ let DADOS_PLANILHA = [];
 let pathAtivo = null;  
 let imovelAtivo = null;  
 let mapaAtivo = 'GSP'; 
-let DADOS_DOCUMENTOS = [];
 
 const COL = {
     ID: 0, CATEGORIA: 1, ORDEM: 2, 
@@ -467,47 +466,22 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: DIAGNÓSTICO DE DOCUMENTOS
+   BLOCO 08: LÓGICA DO MODAL (SOBRE)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    const btnDocumentos = document.getElementById("btn-documentos");
-    const fichaTecnica = document.getElementById("ficha-tecnica");
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
 
-    if (btnDocumentos) {
-        btnDocumentos.onclick = async () => {
-            // 1. Limpa e avisa que iniciou
-            fichaTecnica.innerHTML = `<div style="padding:10px; background:orange; color:black; font-weight:bold;">TESTE DE CONEXÃO INICIADO</div>`;
-            
-            const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-            const GID_DOCS = "122737037"; 
-            const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_DOCS}&v=${new Date().getTime()}`;
-
-            try {
-                const resp = await fetch(URL_DOCS);
-                const csv = await resp.text();
-                
-                // 2. Mostra exatamente o que veio da planilha (Bruto)
-                fichaTecnica.innerHTML = `
-                    <div class="vitrine-topo">RESULTADO DO TESTE</div>
-                    <div style="padding:10px; font-size:0.8rem; color:blue;">
-                        <strong>Status:</strong> Conectado com sucesso!<br><br>
-                        <strong>Conteúdo Bruto recebido:</strong><br>
-                        <pre style="background:#eee; padding:5px; white-space: pre-wrap;">${csv}</pre>
-                    </div>
-                `;
-                
-                console.log("Dados recebidos da planilha:", csv);
-
-            } catch (err) {
-                // 3. Se der erro na conexão, mostra aqui
-                fichaTecnica.innerHTML = `
-                    <div style="padding:10px; background:red; color:white;">
-                        <strong>ERRO DE CONEXÃO:</strong><br>
-                        ${err.message}
-                    </div>
-                `;
-                console.error("Erro no fetch:", err);
-            }
-        };
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
     }
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
 });
+
+window.onload = iniciarApp;
