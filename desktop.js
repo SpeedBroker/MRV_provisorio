@@ -2,7 +2,7 @@
    BLOCO 01: CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
    ========================================================================== */
 let DADOS_PLANILHA = [];
-let DOCUMENTOS_GERAIS = []; // Armazenará os documentos da nova aba
+let DOCUMENTOS_GERAIS = []; 
 let pathAtivo = null;  
 let imovelAtivo = null;  
 let mapaAtivo = 'GSP'; 
@@ -29,7 +29,6 @@ const COL = {
    ========================================================================== */
 async function iniciarApp() {
     try { 
-        // Dispara o carregamento das duas abas em paralelo para dar velocidade
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
     } catch (err) { 
@@ -37,22 +36,18 @@ async function iniciarApp() {
     }
 }
 
-// AÇÃO EVOLUÍDA: Limpa a lateral e renderiza a lista de documentos da planilha
 function configurarBotaoDocumentos() {
     const btnDocs = document.getElementById('btn-documentos');
     if (btnDocs) {
         btnDocs.addEventListener('click', () => {
-            // Remove os destaques ativos do mapa e da lista lateral
             imovelAtivo = null;
             pathAtivo = null;
             document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
             gerarListaLateral();
             
-            // Atualiza o título superior
             const ct = document.getElementById('cidade-titulo');
             if (ct) ct.innerText = "DOCUMENTOS GERAIS CORPORATIVOS";
 
-            // Monta a lista de documentos na ficha técnica (área da direita)
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
                 let htmlDocs = `
@@ -66,7 +61,6 @@ function configurarBotaoDocumentos() {
                             <p>Nenhum documento encontrado na aba.</p>
                         </div>`;
                 } else {
-                    // Varre a lista carregada da planilha e desenha os cards de forma elegante
                     DOCUMENTOS_GERAIS.forEach(doc => {
                         htmlDocs += criarCardMaterial(doc.titulo, doc.url, '📝');
                     });
@@ -108,8 +102,6 @@ function copiarLink(url) {
 /* ==========================================================================
    BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
    ========================================================================== */
-
-// NOVA FUNÇÃO: Puxa os dados especificamente da aba "Documentos"
 async function carregarAbaDocumentos() {
     const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
     const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Documentos&v=${new Date().getTime()}`;
@@ -119,13 +111,10 @@ async function carregarAbaDocumentos() {
         let texto = await response.text();
         const linhasPuras = texto.split(/\r?\n/);
 
-        // Ignora o cabeçalho "Documentos" na linha 0
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            // Remove aspas extras que o Google Sheets coloca na exportação de texto
             const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!linhaLimpa) return null;
 
-            // Encontra a última vírgula que separa o Título da URL
             const ultimaVirgula = linhaLimpa.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
@@ -337,7 +326,8 @@ function gerarListaLateral() {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
         const classeZona = detectarClasseZona(item.zona); 
         
-        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" onclick="navegavarVitrine('${item.nome}')">
+        // AÇÃO CORRIGIDA: Removido o "va" duplicado de dentro do onclick
+        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" onclick="navegarVitrine('${item.nome}')">
                     <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
                 </div>`;
     }).join('');
@@ -540,7 +530,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                  </div>`;
                  
         let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
-        if (materiaisComplexo !== "") {
+        if (materialsComplexo !== "") {
             html += `<div style="margin-top: 10px; padding: 0 5px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
                 ${materiaisComplexo}
