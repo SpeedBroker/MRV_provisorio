@@ -51,7 +51,7 @@ function configurarBotaoDocumentos() {
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
                 let htmlDocs = `
-                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS E MODELOS GERAIS</div>
+                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
                     <div style="padding: 10px 0;">
                 `;
 
