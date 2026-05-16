@@ -73,12 +73,7 @@
             background-color: #e0a60f;
         }
 
-        .btn-nav:active {
-            transform: scale(0.98);
-        }
-
         /* --- MENU FLUTUANTE DE DOCUMENTOS --- */
-        /* Corrigido o z-index e overflow para não cortar o texto interno */
         .dropdown-menu {
             position: absolute;
             top: 105%;
@@ -131,24 +126,54 @@
             position: relative;
         }
 
-        /* --- COLUNA ESQUERDA (LISTA/STATUS) --- */
+        /* --- COLUNA ESQUERDA (RESIDENCIAIS) --- */
         .sidebar-left {
-            width: 20%;
+            width: 22%;
             background-color: var(--white);
             border-right: 1px solid #ddd;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .status-loading {
             color: #777;
             font-style: italic;
             font-size: 0.9rem;
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        /* Estilização dos botões de residenciais carregados dinamicamente */
+        .project-item {
+            padding: 12px;
+            background-color: var(--white);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .project-item:hover {
+            background-color: #f9f9f9;
+            border-color: var(--primary-green);
+        }
+
+        /* Destaque exigido para item clicado/selecionado */
+        .project-item.selected {
+            border: 2px solid var(--primary-green) !important;
+            background-color: #f0f0f0 !important;
         }
 
         /* --- CENTRO (MAPA SVG) --- */
         .map-content {
-            width: 50%;
+            width: 48%;
             background-color: var(--white);
             display: flex;
             flex-direction: column;
@@ -178,11 +203,27 @@
             padding: 20px;
         }
 
-        /* Placeholder para o seu SVG externo ou renderizado dinamicamente */
         .map-wrapper svg {
             width: 100%;
             height: 100%;
-            max-height: 500px;
+            max-height: 520px;
+        }
+
+        /* Elementos interativos dentro do SVG Map */
+        .map-path {
+            fill: #e0e0e0;
+            stroke: #ffffff;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+
+        .map-path:hover {
+            fill: #c8e6c9;
+        }
+
+        .map-path.active-region {
+            fill: #a5d6a7;
         }
 
         /* --- COLUNA DIREITA (DOCUMENTOS GERAIS) --- */
@@ -214,7 +255,6 @@
             gap: 12px;
         }
 
-        /* Estilização dos Cards de Documento */
         .doc-card {
             background: var(--white);
             border-radius: 8px;
@@ -224,12 +264,6 @@
             justify-content: space-between;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
             border: 1px solid #e8e8e8;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .doc-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
         }
 
         .doc-info {
@@ -237,17 +271,10 @@
             align-items: center;
             gap: 10px;
             flex: 1;
-            padding-right: 10px;
-        }
-
-        .doc-icon {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
         }
 
         .doc-name {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #444;
         }
@@ -255,55 +282,30 @@
         .doc-actions {
             display: flex;
             gap: 8px;
-            flex-shrink: 0;
         }
 
         .btn-action {
             border: none;
-            padding: 8px 16px;
+            padding: 8px 14px;
             font-weight: bold;
             color: var(--white);
             cursor: pointer;
             border-radius: 4px;
-            font-size: 0.85rem;
-            transition: opacity 0.2s;
+            font-size: 0.8rem;
         }
 
-        .btn-action:hover {
-            opacity: 0.9;
-        }
+        .btn-open { background-color: var(--primary-green); }
+        .btn-copy { background-color: var(--orange-action); }
 
-        .btn-open {
-            background-color: var(--primary-green);
-        }
-
-        .btn-copy {
-            background-color: var(--orange-action);
-        }
-
-        /* --- ESTADO INTERNO DE SELEÇÃO (DASHBOARD) --- */
-        /* Garantindo a consistência visual para itens selecionados */
-        .project-item.selected {
-            border: 2px solid #007236 !important;
-            background-color: #f0f0f0 !important;
-        }
-
-        /* Centralizador do texto padrão quando nada está carregado */
         .placeholder-text {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            color: #999;
             text-align: center;
-            padding: 20px;
-            gap: 15px;
-        }
-
-        .placeholder-text img {
-            width: 40px;
-            opacity: 0.5;
+            color: #999;
+            gap: 10px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -330,13 +332,13 @@
         
         <div class="sidebar-left" id="sidebar-residenciais">
             <div class="status-loading" id="status-loading">Carregando residenciais...</div>
-            </div>
+        </div>
 
         <div class="map-content">
-            <div class="map-header">Selecione uma região no mapa</div>
+            <div class="map-header" id="map-header-title">Selecione uma região no mapa</div>
             <div class="map-wrapper" id="map-container">
-                <div class="placeholder-text">
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="#ccc"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <div class="placeholder-text" id="map-placeholder">
+                    <svg viewBox="0 0 24 24" width="60" height="60" fill="#ccc"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                     <span>O mapa ou indicador regional será carregado nesta área.</span>
                 </div>
             </div>
@@ -344,11 +346,9 @@
 
         <div class="sidebar-right">
             <div class="section-title">Documentos Gerais</div>
-            <div class="doc-list" id="documentos-lista">
-                
+            <div class="doc-list">
                 <div class="doc-card">
                     <div class="doc-info">
-                        <svg class="doc-icon" viewBox="0 0 24 24" fill="#666"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                         <span class="doc-name">Solicitação de documentos Renda Formal</span>
                     </div>
                     <div class="doc-actions">
@@ -356,10 +356,8 @@
                         <button class="btn-action btn-copy" onclick="copyLink('formal')">Copiar</button>
                     </div>
                 </div>
-
                 <div class="doc-card">
                     <div class="doc-info">
-                        <svg class="doc-icon" viewBox="0 0 24 24" fill="#666"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                         <span class="doc-name">Solicitação de documentos Renda Informal</span>
                     </div>
                     <div class="doc-actions">
@@ -367,10 +365,8 @@
                         <button class="btn-action btn-copy" onclick="copyLink('informal')">Copiar</button>
                     </div>
                 </div>
-
                 <div class="doc-card">
                     <div class="doc-info">
-                        <svg class="doc-icon" viewBox="0 0 24 24" fill="#666"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                         <span class="doc-name">Autorização de Pesquisa Cadastral</span>
                     </div>
                     <div class="doc-actions">
@@ -378,14 +374,17 @@
                         <button class="btn-action btn-copy" onclick="copyLink('pesquisa')">Copiar</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
     </div>
 
     <script>
-        // Lógica de abertura e fechamento do Menu Documentos (Flutuante)
+        // --- COLOQUE A URL EXECUTÁVEL DO SEU WEB APP DO GOOGLE APPS SCRIPT AQUI ---
+        // Exemplo: https://script.google.com/macros/s/AKfycb...X/exec
+        const CONFIG_API_URL = "SUA_URL_DO_WEB_APP_AQUI"; 
+
+        // Gerenciamento do Menu Dropdown
         const btnDocumentos = document.getElementById('btn-documentos');
         const menuDocumentos = document.getElementById('menu-documentos');
 
@@ -394,38 +393,108 @@
             menuDocumentos.classList.toggle('active');
         });
 
-        // Fecha o menu flutuante se clicar fora dele
         document.addEventListener('click', (e) => {
             if (!menuDocumentos.contains(e.target) && e.target !== btnDocumentos) {
                 menuDocumentos.classList.remove('active');
             }
         });
 
-        // Funções Dummy para os botões da barra lateral direita
+        // Simulação de ações dos botões fixos da direita
         function openDoc(type) {
-            console.log("Abrindo documento do tipo: " + type);
-            // Insira aqui o link correspondente para o Google Drive ou arquivo
+            alert("Abrindo link do documento cadastrado para: " + type);
         }
 
         function copyLink(type) {
-            console.log("Link copiado para o tipo: " + type);
-            // Insira aqui a lógica de Clipboard API para copiar o link correspondente
-            alert("Link copiado com sucesso!");
+            alert("Link copiado para a área de transferência!");
         }
 
-        // --- DICA PARA O CARREGAMENTO DOS DADOS (Google Apps Script / API) ---
-        // Se você usa o google.script.run para buscar os dados da planilha,
-        // certifique-se de que a chamada está ativa e populando o 'sidebar-residenciais'.
-        // Exemplo:
-        /*
-        window.addEventListener('load', () => {
-            google.script.run.withSuccessHandler(showResidenciais).getPlanilhaDados();
+        // --- MOTOR DE CARREGAMENTO DO DASHBOARD ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (CONFIG_API_URL === "SUA_URL_DO_WEB_APP_AQUI") {
+                console.warn("Aviso: Configure a URL do seu Web App para carregar os dados reais da Planilha.");
+                gerarDadosDemonstrativos(); // Carrega mock visual se não configurado
+            } else {
+                carregarDadosDoDashboard();
+            }
         });
-        function showResidenciais(dados) {
-            document.getElementById('status-loading').style.display = 'none';
-            // lógica para renderizar...
+
+        async function carregarDadosDoDashboard() {
+            try {
+                const response = await fetch(CONFIG_API_URL);
+                if (!response.ok) throw new Error("Erro na requisição da API");
+                
+                const dados = await response.json();
+                renderizarDashboard(dados);
+            } catch (error) {
+                console.error("Falha ao obter dados:", error);
+                document.getElementById('status-loading').innerText = "Erro ao carregar dados.";
+            }
         }
-        */
+
+        function renderizarDashboard(dados) {
+            // Oculta indicador de loading
+            document.getElementById('status-loading').style.display = 'none';
+            const sidebar = document.getElementById('sidebar-residenciais');
+
+            // Renderiza os botões de residenciais na esquerda
+            dados.residenciais.forEach(proj => {
+                const btn = document.createElement('button');
+                btn.className = 'project-item';
+                btn.innerText = proj.nome;
+                btn.addEventListener('click', () => {
+                    // Remove seleção anterior e destaca o botão atual com borda verde e fundo cinza claro
+                    document.querySelectorAll('.project-item').forEach(i => i.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    
+                    document.getElementById('map-header-title').innerText = proj.nome;
+                    // Lógica para dar zoom ou focar no SVG se necessário
+                });
+                sidebar.appendChild(btn);
+            });
+
+            // Renderiza o mapa SVG dinamicamente no container central se ele vier na API
+            if (dados.svgMapa) {
+                document.getElementById('map-container').innerHTML = dados.svgMapa;
+                adicionarEventosAoMapa();
+            }
+        }
+
+        function adicionarEventosAoMapa() {
+            // Adiciona interatividade aos caminhos/regiões do mapa carregado
+            const caminhos = document.querySelectorAll('.map-path');
+            caminhos.forEach(path => {
+                path.addEventListener('click', function() {
+                    caminhados.forEach(p => p.classList.remove('active-region'));
+                    this.classList.add('active-region');
+                    // Filtra os residenciais baseado na região clicada
+                });
+            });
+        }
+
+        // Gera itens para que a tela não fique vazia enquanto você vincula sua URL
+        function gerarDadosDemonstrativos() {
+            document.getElementById('status-loading').style.display = 'none';
+            const sidebar = document.getElementById('sidebar-residenciais');
+            
+            const listaExemplo = [
+                { nome: "Residencial Nascente Do Jequitibá" },
+                { nome: "Residencial Parque das Flores" },
+                { nome: "Residencial Vila Verde" },
+                { nome: "Residencial Cantos da Cidade" }
+            ];
+
+            listaExemplo.forEach(proj => {
+                const btn = document.createElement('button');
+                btn.className = 'project-item';
+                btn.innerText = proj.nome;
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.project-item').forEach(i => i.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    document.getElementById('map-header-title').innerText = proj.nome;
+                });
+                sidebar.appendChild(btn);
+            });
+        }
     </script>
 </body>
 </html>
