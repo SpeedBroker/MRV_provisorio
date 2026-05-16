@@ -467,7 +467,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
 
 /* ==========================================================================
-   BLOCO 08: RETORNO SEGURO - DOCUMENTOS
+   BLOCO 08: LÓGICA DE DOCUMENTOS (VERSÃO INTEGRADA, SEGURA E ALINHADA)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const btnDocumentos = document.getElementById("btn-documentos");
@@ -475,64 +475,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnDocumentos && fichaTecnica) {
         btnDocumentos.onclick = async () => {
-            // 1. Reset visual imediato
-            fichaTecnica.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>' + 
-                                   '<p style="padding:20px; font-size:0.8rem;">Conectando...</p>';
-            
+            // 1. Limpa o painel e exibe a mensagem de carregamento
+            fichaTecnica.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
+            fichaTecnica.innerHTML += '<p style="padding:20px; color:#666; font-size:0.7rem;">Buscando arquivos...</p>';
+
             const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
             const GID_DOCS = "122737037"; 
             const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_DOCS}&v=${new Date().getTime()}`;
 
             try {
-                const resp = await fetch(URL_DOCS);
-                if (!resp.ok) throw new Error("Falha na resposta da planilha");
-                const csv = await resp.text();
+                const r = await fetch(URL_DOCS);
+                if (!r.ok) throw new Error("Falha na resposta do servidor");
+                const csv = await r.text();
                 
-                // Limpa e prepara a lista
+                // Reinicia o topo do painel
                 fichaTecnica.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
-                let htmlLista = '<div style="margin-top:10px; padding:5px; background: var(--cinza-claro); min-height:100vh;">';
+                
+                // Container principal utilizando a variável de cor cinza do seu desktop.css
+                let htmlFinal = '<div id="container-docs-gerais" style="margin-top: 10px; padding: 0 5px; min-height: 100vh; background-color: var(--cinza-claro); position: relative;">';
 
-                // Processa as linhas (pula o cabeçalho)
                 const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 10).slice(1);
 
-                linhas.forEach(linha => {
-                    let partes = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Split seguro para CSV
-                    if (partes.length >= 2) {
-                        let titulo = partes[0].replace(/"/g, "").trim();
-                        let link = partes[partes.length - 1].replace(/"/g, "").trim();
+                linhas.forEach((linha) => {
+                    let textoLimpo = linha.replace(/"/g, "").trim();
+                    let posHttp = textoLimpo.indexOf("http");
+                    
+                    if (posHttp !== -1) {
+                        let link = textoLimpo.substring(posHttp).trim();
+                        let titulo = textoLimpo.substring(0, posHttp).replace(/,$/, "").trim();
                         
-                        if (link.startsWith("http")) {
-                            htmlLista += `
-                                <div style="position:relative; background:white; border-radius:8px; padding:10px; margin-bottom:15px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; overflow:visible;">
-                                    <div style="display:flex; align-items:center;">
-                                        <span style="position:absolute; top:-10px; left:10px; background:white; border:1px solid #ccc; padding:2px; border-radius:4px; z-index:10; font-size:1rem;">📄</span>
-                                        <span style="margin-left:30px; font-size:0.75rem; font-weight:bold; color:#333;">${titulo}</span>
-                                    </div>
-                                    <div style="display:flex; gap:5px;">
-                                        <a href="${link}" target="_blank" style="background:#00713d; color:white; padding:5px 10px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold;">Abrir</a>
-                                        <button onclick="navigator.clipboard.writeText('${link}')" style="background:#f37021; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:0.7rem; font-weight:bold;">Copiar</button>
-                                    </div>
-                                </div>`;
-                        }
+                        // Executa a sua função original que mantém o alinhamento perfeito do card
+                        htmlFinal += criarCardMaterial(titulo || "Documento de Apoio", link, '📄');
                     }
                 });
 
-                htmlLista += '</div>';
-                fichaTecnica.innerHTML += htmlLista;
+                htmlFinal += '</div>';
+                fichaTecnica.innerHTML += htmlFinal;
 
-            } catch (err) {
-                console.error("Erro Documentos:", err);
-                fichaTecnica.innerHTML = `<div style="padding:20px; color:red;">Erro ao carregar: ${err.message}</div>`;
+                // --- AJUSTE VISUAL (Mantém o alinhamento e força a miniatura por cima) ---
+                setTimeout(() => {
+                    // Garante que os itens do card permitam a flutuação externa do ícone
+                    const cards = fichaTecnica.querySelectorAll('.card-material-item');
+                    cards.forEach(card => {
+                        card.style.setProperty('overflow', 'visible', 'important');
+                        card.style.setProperty('position', 'relative', 'important');
+                    });
+
+                    // Força o ícone (card-icon) para a camada superior com leve ajuste na altura
+                    const icones = fichaTecnica.querySelectorAll('.card-icon');
+                    icones.forEach(icon => {
+                        icon.style.setProperty('position', 'relative', 'important');
+                        icon.style.setProperty('z-index', '999', 'important');
+                        icon.style.setProperty('margin-top', '-5px', 'important');
+                        icon.style.setProperty('transform', 'scale(1.2)', 'important');
+                    });
+
+                    // Certifica que o wrapper de conteúdo respeite a nova camada do ícone
+                    const leftWrappers = fichaTecnica.querySelectorAll('.card-material-left');
+                    leftWrappers.forEach(div => {
+                        div.style.setProperty('overflow', 'visible', 'important');
+                        div.style.setProperty('z-index', '998', 'important');
+                    });
+                }, 50);
+
+            } catch (e) {
+                console.error("Erro no Bloco 08:", e);
+                fichaTecnica.innerHTML = '<div class="vitrine-topo">DOCUMENTOS GERAIS</div>';
+                fichaTecnica.innerHTML += '<p style="color:red; padding:20px;">Erro ao processar: ' + e.message + '</p>';
             }
         };
     }
-});
 
-// Modal Sobre - Versão Isolada
-document.addEventListener('DOMContentLoaded', () => {
+    // Lógica do Modal Sobre (Unificada internamente para total segurança de inicialização)
     const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-    if(btn && modal) btn.onclick = () => { modal.style.display = "block"; };
-    if(span && modal) span.onclick = () => { modal.style.display = "none"; };
+    const btnSobre = document.getElementById("btn-sobre");
+    const spanClose = document.querySelector(".modal-close");
+    
+    if (btnSobre && modal) {
+        btnSobre.onclick = () => { modal.style.display = "block"; };
+    }
+    if (spanClose && modal) {
+        spanClose.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
 });
