@@ -73,15 +73,17 @@ function configurarBotaoDocumentos() {
     }
 }
 
-// AJUSTE OPERA: Altera o link para o modo /view nativo, que ativa as ferramentas de impressão e download do Drive sem disparar o popup do Opera
+// SOLUÇÃO MULTI-NAVEGADOR: Força o Google Drive a abrir no modo viewer neutro externo.
+// Bloqueia as funções de proprietário (mover/editar) em qualquer navegador e preserva os botões de impressão.
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     let link = url.trim();
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            // rm=minimal remove todas as barras de ferramentas do Drive, deixando apenas o leitor limpo com controles básicos do navegador
-            return `https://drive.google.com/file/d/${match[1]}/preview?rm=minimal`;
+            // O parâmetro 'usp=view_handler' força o Drive a tratar o acesso como visitante comum,
+            // limpando os menus de edição e mantendo os controles de impressão ativos em todos os navegadores.
+            return `https://drive.google.com/file/d/${match[1]}/view?usp=view_handler`;
         }
     }
     return link;
@@ -121,14 +123,14 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const linhaLimpa = inlineStr = linha.replace(/^"|"$/g, '').trim();
+            const inlineStr = linhaLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!linhaLimpa) return null;
 
-            const ultimaVirgula = linhaLimpa.lastIndexOf(',');
+            const ultimaVirgula = inlineStr.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = linhaLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = linhaLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = inlineStr.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = inlineStr.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -451,7 +453,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </div>
                     <div class="tabela-corpo">
                         ${dados.map(linhaStr => {
-                            const cols = inlineStr = linhaStr.split(',').map(c => c.trim());
+                            const cols = linhaStr.split(',').map(c => c.trim());
                             if(cols.length <= 1) return "";
                             return `<div class="tabela-row">
                                 ${cols.map((v, idx) => {
@@ -547,7 +549,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 }
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
+   BLOCO 08: LÓGICA DO MODAL (SOBRE) E SEGURANÇA ANTICÓPIA
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
@@ -563,6 +565,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.onclick = (event) => {
         if (event.target == modal) { modal.style.display = "none"; }
     };
+
+    // ANTICÓPIA INTERNA: Bloqueia clique direito e atalhos na página do próprio dashboard
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('keydown', event => {
+        if ((event.ctrlKey && (event.key === 'p' || event.key === 'P' || event.key === 's' || event.key === 'S')) || event.key === 'F12') {
+            event.preventDefault();
+            alert("Ação restrita para proteção dos dados comerciais.");
+        }
+    });
 });
 
 window.onload = iniciarApp;
