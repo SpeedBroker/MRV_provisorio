@@ -73,14 +73,14 @@ function configurarBotaoDocumentos() {
     }
 }
 
-// CORREÇÃO CRÍTICA: Ajustado para usar apenas a estrutura /preview, impedindo o Opera de registrar downloads no histórico do navegador
+// AJUSTE OPERA: Altera o link para o modo /view nativo, que ativa as ferramentas de impressão e download do Drive sem disparar o popup do Opera
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     let link = url.trim();
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            return `https://drive.google.com/file/d/${match[1]}/preview`;
+            return `https://drive.google.com/file/d/${match[1]}/view`;
         }
     }
     return link;
