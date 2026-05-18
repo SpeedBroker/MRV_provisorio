@@ -80,8 +80,8 @@ function formatarLinkSeguro(url) {
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            // Utiliza o visualizador gview oficial para isolar completamente o documento das funções de gestão do Drive
-            return `https://docs.google.com/gview?embedded=true&url=https://drive.google.com/uc?id=${match[1]}&export=download`;
+            // rm=minimal remove todas as barras de ferramentas do Drive, deixando apenas o leitor limpo com controles básicos do navegador
+            return `https://drive.google.com/file/d/${match[1]}/preview?rm=minimal`;
         }
     }
     return link;
