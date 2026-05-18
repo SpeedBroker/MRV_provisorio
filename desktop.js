@@ -79,7 +79,6 @@ function formatarLinkSeguro(url) {
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            // Habilita preenchimento e impressão nativa do navegador para PDFs abertos em nova aba
             if (link.toLowerCase().includes('.pdf') || link.includes('open?id=') || link.includes('file/d/')) {
                 return `https://drive.google.com/uc?export=view&id=${match[1]}`;
             }
@@ -333,8 +332,7 @@ function gerarListaLateral() {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
         const classeZona = detectarClasseZona(item.zona); 
         
-        // CORREÇÃO: Garante cor escura para o título do separador para não sumir no fundo claro
-        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" style="${item.tipo === 'N' ? 'color: #333 !important;' : ''}" onclick="navegarVitrine('${item.nome}')">
+        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" style="${item.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${item.nome}')">
                     <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
                 </div>`;
     }).join('');
@@ -343,6 +341,7 @@ function gerarListaLateral() {
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
+// CORREÇÃO: Removido o <iframe> de preview para evitar os downloads fantasmas automáticos ao passar o mouse
 const criarCardMaterial = (titulo, url, icone) => {
     if (!url || url === "" || url === "---") return "";
     const linkSeguro = formatarLinkSeguro(url);
@@ -353,12 +352,7 @@ const criarCardMaterial = (titulo, url, icone) => {
             <span class="card-text">${titulo}</span>
         </div>
         <div class="card-material-right">
-            <div class="btn-com-preview">
-                <a href="${linkSeguro}" target="_blank" class="card-btn-abrir">Abrir</a>
-                <div class="preview-container">
-                    <iframe src="${linkSeguro}"></iframe>
-                </div>
-            </div>
+            <a href="${linkSeguro}" target="_blank" class="card-btn-abrir">Abrir</a>
             <button onclick="copiarLink('${url}')" class="card-btn-copiar">Copiar</button>
         </div>
     </div>`;
@@ -380,7 +374,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // CORREÇÃO: Corrigido template literal do Maps eliminando os caracteres incorretos que quebravam o JS
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -388,7 +381,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
-            return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%;" onclick="navegarVitrine('${i.nome}')">
+            return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%; ${i.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${i.nome}')">
                 <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
             </button>`}).join('')}</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">`;
     }
@@ -470,7 +463,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            // CORREÇÃO: Corrigido template literal do estande eliminando os caracteres incorretos que quebravam o JS
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
