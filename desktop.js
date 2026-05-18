@@ -73,18 +73,15 @@ function configurarBotaoDocumentos() {
     }
 }
 
-// SOLUÇÃO DEFINITIVA MULTI-NAVEGADOR (ISOLAMENTO TOTAL)
-// O formato /preview com rm=minimal remove completamente a barra do Drive, a árvore de pastas lateral,
-// a opção de renomear e mover, mas preserva os controlos de impressão e download em qualquer navegador.
+// FORMATADOR DE LINK OTIMIZADO PARA HISTÓRICO E VISUALIZAÇÃO LIMPA
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     let link = url.trim();
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            // 'rm=minimal' remove toda a interface de navegação e edição estrutural do Drive,
-            // blindando contra alterações e ocultando caminhos de pastas secundárias.
-            return `https://drive.google.com/file/d/${match[1]}/preview?rm=minimal`;
+            // Utiliza o visualizador SDK estável que previne os loops de histórico de conta
+            return `https://drive.google.com/file/d/${match[1]}/view?usp=drivesdk`;
         }
     }
     return link;
@@ -124,7 +121,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
+            const linhaLimpa = inlineStr = linha.replace(/^"|"$/g, '').trim();
             if (!linhaLimpa) return null;
 
             const ultimaVirgula = linhaLimpa.lastIndexOf(',');
@@ -550,7 +547,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 }
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE) E SEGURANÇA ANTICÓPIA
+   BLOCO 08: LÓGICA DO MODAL (SOBRE)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modal-sobre");
@@ -566,15 +563,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.onclick = (event) => {
         if (event.target == modal) { modal.style.display = "none"; }
     };
-
-    // ANTICÓPIA INTERNA: Bloqueia clique direito e atalhos na página do próprio dashboard
-    document.addEventListener('contextmenu', event => event.preventDefault());
-    document.addEventListener('keydown', event => {
-        if ((event.ctrlKey && (event.key === 'p' || event.key === 'P' || event.key === 's' || event.key === 'S')) || event.key === 'F12') {
-            event.preventDefault();
-            alert("Ação restrita para proteção dos dados comerciais.");
-        }
-    });
 });
 
 window.onload = iniciarApp;
