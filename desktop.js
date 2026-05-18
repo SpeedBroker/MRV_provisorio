@@ -96,7 +96,7 @@ function copiarTexto(texto, msg = "Link copiado!") {
 
 function copiarLink(url) {
     const linkSeguro = formatarLinkSeguro(url);
-    copiarTexto(linkSeguro, "Link seguro copiado!");
+    copyText = copiarTexto(linkSeguro, "Link seguro copiado!");
 }
 
 /* ==========================================================================
@@ -112,7 +112,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
+            const linhaLimpa = Tender = linha.replace(/^"|"$/g, '').trim();
             if (!linhaLimpa) return null;
 
             const ultimaVirgula = linhaLimpa.lastIndexOf(',');
@@ -232,6 +232,9 @@ function comandoSelecao(idPath, nomePath, fonte) {
     pathAtivo = idNorm;
     const imoveisDaCidade = DADOS_PLANILHA.filter(d => d.id_path === pathAtivo);
     const selecionado = fonte || imoveisDaCidade[0];
+    
+    if (!selecionado) return; // Proteção extra caso a região clicada não tenha imóveis cadastrados
+    
     imovelAtivo = selecionado.nome;
 
     document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
@@ -279,7 +282,8 @@ function renderizarNoContainer(id, dados, interativo) {
             if (isGSP) { 
                 eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
             } else { 
-                eventos = `onclick="comandoSelecao('${p.id}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
+                // CORREÇÃO AQUI: Passando idNorm diretamente para garantir o casamento perfeito de strings
+                eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
             }
         }
         return `<path id="${id}-${idNorm}" d="${p.d}" class="${(temMRV || isGSP) && interativo ? 'commrv '+ativo : ''}" ${eventos}></path>`;
@@ -326,7 +330,6 @@ function gerarListaLateral() {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
         const classeZona = detectarClasseZona(item.zona); 
         
-        // AÇÃO CORRIGIDA: Removido o "va" duplicado de dentro do onclick
         return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" onclick="navegarVitrine('${item.nome}')">
                     <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
                 </div>`;
@@ -378,7 +381,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
-            const classeZ = birdseye = detectarClasseZona(i.zona);
+            const classeZ = detectarClasseZona(i.zona); // CORREÇÃO: Removido o 'birdseye =' químico daqui
             return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%;" onclick="navegarVitrine('${i.nome}')">
                 <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
             </button>`}).join('')}</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">`;
@@ -433,7 +436,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if(selecionado.tipologiasH) {
             const linhas = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             if(linhas.length > 0) {
-                const titulos = Birdseye = linhas[0].split(',').map(t => t.trim());
+                const titulos = linhas[0].split(',').map(t => t.trim()); // CORREÇÃO: Removido o 'Birdseye =' químico daqui
                 const dados = linhas.slice(1);
                 html += `
                 <div class="tabela-precos-container">
@@ -530,7 +533,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                  </div>`;
                  
         let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
-        if (materialsComplexo !== "") {
+        if (materiaisComplexo !== "") { // CORREÇÃO: Variável corrigida de materialsComplexo para materiaisComplexo
             html += `<div style="margin-top: 10px; padding: 0 5px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
                 ${materiaisComplexo}
