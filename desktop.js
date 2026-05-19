@@ -68,6 +68,9 @@ function configurarBotaoDocumentos() {
 
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
+                
+                // Ativa a lógica do hover nas miniaturas recém-criadas
+                inicializarHoverMiniaturas();
             }
         });
     }
@@ -107,6 +110,72 @@ function formatarLinkPreview(url) {
     return link;
 }
 
+// LÓGICA DO HOVER DA MINIATURA
+function inicializarHoverMiniaturas() {
+    const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
+    
+    botoesAbrir.forEach(botao => {
+        const urlPreview = botao.getAttribute('data-preview');
+        if (!urlPreview) return;
+
+        botao.addEventListener('mouseenter', (e) => {
+            // Remove qualquer preview existente para evitar duplicados
+            const antigo = document.getElementById('preview-flutuante-drive');
+            if (antigo) antigo.remove();
+
+            // Cria o container do preview flutuante
+            const previewDiv = document.createElement('div');
+            previewDiv.id = 'preview-flutuante-drive';
+            previewDiv.style.position = 'fixed';
+            previewDiv.style.width = '320px';
+            previewDiv.style.height = '220px';
+            previewDiv.style.backgroundColor = '#fff';
+            previewDiv.style.border = '1px solid #ccc';
+            previewDiv.style.boxShadow = '0px 4px 15px rgba(0,0,0,0.2)';
+            previewDiv.style.borderRadius = '8px';
+            previewDiv.style.overflow = 'hidden';
+            previewDiv.style.zIndex = '99999';
+            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
+
+            // Insere o iframe com o link leve de preview
+            previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
+            document.body.appendChild(previewDiv);
+
+            // Posiciona perto do botão do mouse
+            posicionarPreview(e, previewDiv);
+        });
+
+        botao.addEventListener('mousemove', (e) => {
+            const previewDiv = document.getElementById('preview-flutuante-drive');
+            if (previewDiv) {
+                posicionarPreview(e, previewDiv);
+            }
+        });
+
+        botao.addEventListener('mouseleave', () => {
+            const previewDiv = document.getElementById('preview-flutuante-drive');
+            if (previewDiv) previewDiv.remove();
+        });
+    });
+}
+
+function posicionarPreview(e, elemento) {
+    let top = e.clientY + 15;
+    let left = e.clientX + 15;
+
+    // Ajusta se passar da borda direita da tela
+    if (left + 340 > window.innerWidth) {
+        left = e.clientX - 340;
+    }
+    // Ajusta se passar da borda de baixo da tela
+    if (top + 240 > window.innerHeight) {
+        top = e.clientY - 240;
+    }
+
+    elemento.style.top = `${top}px`;
+    elemento.style.left = `${left}px`;
+}
+
 function copiarTexto(texto, msg = "Link copiado!") {
     if (!texto || texto === "") return;
     navigator.clipboard.writeText(texto).then(() => {
@@ -141,14 +210,14 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
-            if (!linhaLimpa) return null;
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            if (!inlineLimpa) return null;
 
-            const ultimaVirgula = linhaLimpa.lastIndexOf(',');
+            const ultimaVirgula = inlineLimpa.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = linhaLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = linhaLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = inlineLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = inlineLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -370,7 +439,6 @@ function gerarListaLateral() {
 const criarCardMaterial = (titulo, url, icone) => {
     if (!url || url === "" || url === "---") return "";
     
-    // Diferenciação dos links de acordo com a usabilidade
     const linkSeguroAbrir = formatarLinkSeguro(url);
     const linkMiniaturaHover = formatarLinkPreview(url);
 
@@ -481,10 +549,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </div>
                     <div class="tabela-corpo">
                         ${dados.map(linhaStr => {
-                            const cols = linhaStr.split(',').map(c => c.trim());
-                            if(cols.length <= 1) return "";
+                            const cols = inlineStr => linhaStr.split(',').map(c => c.trim());
+                            const colsArr = cols();
+                            if(colsArr.length <= 1) return "";
                             return `<div class="tabela-row">
-                                ${cols.map((v, idx) => {
+                                ${colsArr.map((v, idx) => {
                                     const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
                                     return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
                                 }).join('')}
@@ -574,6 +643,9 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
     }
     painel.innerHTML = html;
+
+    // Ativa a lógica do hover nas miniaturas recém-criadas
+    inicializarHoverMiniaturas();
 }
 
 /* ==========================================================================
