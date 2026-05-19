@@ -81,8 +81,8 @@ function formatarLinkSeguro(url) {
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            // Monta o link de download direto do arquivo da API do Drive
-            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+            // Retorna o preview puro do arquivo, que mantém a barra de ferramentas nativa do Drive (impressão/download) mas esconde a árvore de pastas lateral
+            return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
     return link;
