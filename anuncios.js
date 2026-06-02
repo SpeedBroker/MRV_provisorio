@@ -3,15 +3,14 @@
 // ==========================================================================
 
 function abrirModuloAnuncio() {
-    // Busca dinamicamente qual imóvel está selecionado na memória do seu desktop.js
-    // Substitua 'imovelAtivo' pela exata variável global que guarda o objeto do imóvel atual
-    const residencialAtivo = window.imovelAtivo; 
+    // Busca dinamicamente o OBJETO completo do imóvel que injetamos no escopo global do desktop.js
+    const residencialAtivo = window.imovelObjetoAtivo; 
 
-    // Se o corretor não tiver clicado em nenhum residencial ainda, usamos um padrão amigável para demonstração
-    const nomeImovel = residencialAtivo && residencialAtivo.nome ? residencialAtivo.nome : "Residencial MRV Selecionado";
+    // Tratamento seguro: se o corretor não tiver clicado em nada, adota termos padrão
+    const nomeImovel = residencialAtivo && residencialAtivo.nome ? `Residencial ${residencialAtivo.nome}` : "Residencial MRV Selecionado";
     const regiaoImovel = residencialAtivo && residencialAtivo.regiao ? residencialAtivo.regiao : "São Paulo e Região";
 
-    // Geração automática da Copy (Texto de Vendas) baseada no imóvel
+    // Geração automática da Copy (Texto de Vendas) baseada no imóvel correto
     const textoAnuncioSugerido = `🏢 Oportunidade Única na MRV! \n\nVenha morar no ${nomeImovel} em ${regiaoImovel}. Conforto, segurança e condições especiais de financiamento que cabem no seu bolso.\n\nClique em 'Saiba Mais' e fale direto comigo pelo WhatsApp! 📲`;
 
     // Renderiza o Modal Flutuante na Interface
@@ -55,13 +54,11 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
             <strong style="color: #333; font-size: 0.95rem;">${nome}</strong>
         </div>
 
-        <!-- Campo de Texto do Anúncio -->
         <div style="margin-bottom: 15px;">
             <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Legenda do Anúncio (Copywriting):</label>
             <textarea id="txt-anuncio-copy" style="width: 100%; height: 110px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; resize: none; line-height: 1.4;">${textoCopy}</textarea>
         </div>
 
-        <!-- Linha Dupla: Orçamento e Raio de Alcance -->
         <div style="display: flex; gap: 15px; margin-bottom: 20px;">
             <div style="flex: 1;">
                 <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Orçamento (Verba Diária):</label>
@@ -84,7 +81,6 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
             </div>
         </div>
 
-        <!-- Botões de Ação -->
         <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #eee; padding-top: 15px;">
             <button id="btn-anuncio-cancelar" style="background: #e4e6eb; color: #4b4f56; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">Cancelar</button>
             <button id="btn-anuncio-disparar" style="background: #f37021; color: #ffffff; border: none; padding: 10px 22px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(243,112,33,0.3);">🚀 Publicar Campanha</button>
