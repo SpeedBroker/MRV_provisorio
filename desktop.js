@@ -31,6 +31,7 @@ async function iniciarApp() {
     try { 
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
+        configurarBotaoAnuncio();
     } catch (err) { 
         console.error(err); 
     }
@@ -71,6 +72,22 @@ function configurarBotaoDocumentos() {
                 
                 // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
+            }
+        });
+    }
+}
+
+// Vincula o botão de Anúncio à função global existente em 'anuncios.js'
+function configurarBotaoAnuncio() {
+    const btnAnuncio = document.getElementById('btn-anuncio');
+    if (btnAnuncio) {
+        btnAnuncio.addEventListener('click', () => {
+            // Verifica se a função vinda do script isolado anúncios.js está disponível
+            if (typeof abrirModuloAnuncio === 'function') {
+                abrirModuloAnuncio();
+            } else {
+                console.error("Módulo anúncios.js não foi carregado corretamente ou está ausente.");
+                alert("O módulo de anúncios está sendo inicializado. Certifique-se de que o arquivo 'anuncios.js' existe.");
             }
         });
     }
@@ -378,7 +395,7 @@ function renderizarNoContainer(id, dados, interativo) {
         
         if (interativo) {
             if (isGSP) { 
-                eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
+                eventons = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
             } else { 
                 eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
             }
