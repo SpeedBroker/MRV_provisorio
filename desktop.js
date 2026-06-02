@@ -87,7 +87,7 @@ function configurarBotaoAnuncio() {
                 abrirModuloAnuncio();
             } else {
                 console.error("Módulo anúncios.js não foi carregado corretamente ou está ausente.");
-                alert("O módulo de anúncios está sendo inicializado. Certifique-se de que o arquivo 'anuncios.js' existe.");
+                alert("O módulo de anúncios não pôde ser iniciado. Certifique-se de que o arquivo 'anuncios.js' está carregado na página.");
             }
         });
     }
@@ -227,7 +227,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -395,7 +395,7 @@ function renderizarNoContainer(id, dados, interativo) {
         
         if (interativo) {
             if (isGSP) { 
-                eventons = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
+                eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
             } else { 
                 eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
             }
