@@ -493,6 +493,9 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
+    // ATUALIZAÇÃO CRÍTICA: Guarda o objeto do imóvel selecionado no escopo global para o modulo de anúncios usar
+    window.imovelObjetoAtivo = selecionado;
+    
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -652,7 +655,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                  </div>`;
                  
         let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
-        if (materiaisComplexo !== "") { 
+        if (materialsComplexo !== "") { 
             html += `<div style="margin-top: 10px; padding: 0 5px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
                 ${materiaisComplexo}
