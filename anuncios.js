@@ -54,11 +54,13 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
             <strong style="color: #333; font-size: 0.95rem;">${nome}</strong>
         </div>
 
+        <!-- Campo de Texto do Anúncio (Ajustado para melhor encaixe do texto) -->
         <div style="margin-bottom: 15px;">
             <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Legenda do Anúncio (Copywriting):</label>
-            <textarea id="txt-anuncio-copy" style="width: 100%; height: 110px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; resize: none; line-height: 1.4;">${textoCopy}</textarea>
+            <textarea id="txt-anuncio-copy" style="width: 100%; height: 115px; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem; resize: none; line-height: 1.45; font-family: inherit;">${textoCopy}</textarea>
         </div>
 
+        <!-- Linha Dupla: Orçamento e Raio de Alcance -->
         <div style="display: flex; gap: 15px; margin-bottom: 20px;">
             <div style="flex: 1;">
                 <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Orçamento (Verba Diária):</label>
@@ -81,6 +83,7 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
             </div>
         </div>
 
+        <!-- Botões de Ação -->
         <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #eee; padding-top: 15px;">
             <button id="btn-anuncio-cancelar" style="background: #e4e6eb; color: #4b4f56; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">Cancelar</button>
             <button id="btn-anuncio-disparar" style="background: #f37021; color: #ffffff; border: none; padding: 10px 22px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(243,112,33,0.3);">🚀 Publicar Campanha</button>
@@ -90,14 +93,11 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
     backgroundModal.appendChild(corpoModal);
     document.body.appendChild(backgroundModal);
 
-    // --- Listeners de Eventos (Lógica dos cliques internos do Modal) ---
-    
-    // Fechar ao clicar no X ou no botão Cancelar
+    // --- Listeners de Eventos ---
     const fecharModal = () => backgroundModal.remove();
     document.getElementById('fechar-modal-anuncio').addEventListener('click', fecharModal);
     document.getElementById('btn-anuncio-cancelar').addEventListener('click', fecharModal);
 
-    // Evento do botão de Disparar o Anúncio
     document.getElementById('btn-anuncio-disparar').addEventListener('click', () => {
         const verbaEscolhida = document.getElementById('select-anuncio-verba').value;
         const raioEscolhido = document.getElementById('select-anuncio-raio').value;
@@ -111,13 +111,3 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
         fecharModal();
     });
 }
-
-// Animação CSS simples injetada via JS para o modal surgir de forma suave
-const estiloAnimacao = document.createElement('style');
-estiloAnimacao.innerHTML = `
-    @keyframes modalFadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-`;
-document.head.appendChild(estiloAnimacao);
