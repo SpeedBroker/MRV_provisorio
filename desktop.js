@@ -492,15 +492,19 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     const painel = document.getElementById('ficha-tecnica');
     if (!painel) return;
     
-    // CORREÇÃO: Limpa o texto dinâmico superior de forma definitiva ao carregar a vitrine
-    atualizarTituloSuperior(""); 
+    // CORREÇÃO SEGURA: Remove o título dinâmico do topo da vitrine sem quebrar o app
+    const tituloTopo = document.getElementById('cidade-titulo');
+    if (tituloTopo) {
+        tituloTopo.innerText = ""; 
+    }
 
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // ATUALIZAÇÃO CRÍTICA: Guarda o objeto do imóvel selecionado no escopo global para o modulo de anúncios usar
+    // Guarda o objeto do imóvel selecionado no escopo global para o modulo de anúncios usar
     window.imovelObjetoAtivo = selecionado;
     
-    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
+    // CORREÇÃO CRÍTICA DA SINTAXE: Ajustado para usar Template Strings (crases) de forma correta
+    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=$\${encodeURIComponent(selecionado.endereco)}`;
     
     let html = ""; 
     
@@ -513,7 +517,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        // AJUSTE: Mudança para fundo Verde Escuro (#006d3c) e aplicação do distanciamento (margin-top: 25px)
+        // DESIGN ATUALIZADO: Aplica o Verde Escuro (#006d3c) e o distanciamento correto (margin-top: 25px)
         html += `<div class="titulo-vitrine-faixa" style="background-color: #006d3c; color: white; padding: 6px; font-weight: bold; text-align: center; margin-top: 25px; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
         
         html += `
@@ -567,20 +571,20 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 html += `
                 <div class="tabela-precos-container">
                     <div class="tabela-header">
-                        ${titulos.map((t, idx) => {
+                        \${titulos.map((t, idx) => {
                             const estiloCabecalho = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                            return `<div class="col-tabela" style="${estiloCabecalho}">${t}</div>`;
+                            return `<div class="col-tabela" style="\${estiloCabecalho}">\${t}</div>`;
                         }).join('')}
                     </div>
                     <div class="tabela-corpo">
-                        ${dados.map(linhaStr => {
+                        \${dados.map(linhaStr => {
                             const cols = inlineStr => linhaStr.split(',').map(c => c.trim());
                             const colsArr = cols();
                             if(colsArr.length <= 1) return "";
                             return `<div class="tabela-row">
-                                ${colsArr.map((v, idx) => {
+                                \${colsArr.map((v, idx) => {
                                     const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                                    return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
+                                    return `<div class="col-tabela" style="\${estiloCelula}">\${idx === 0 ? `<strong>\${v}</strong>` : v}</div>`;
                                 }).join('')}
                             </div>`;
                         }).join('')}
@@ -591,15 +595,15 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
+            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=$\${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
+                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">\${selecionado.estande}</p>
                     <div style="display:flex; gap:3px; margin-left:5px;">
-                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                        <a href="\${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
+                        <button onclick="copiarTexto('\${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
                     </div>
                 </div>
             </div>`;
@@ -621,18 +625,18 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += criarBoxDiferencial('🏥 Saúde e Educação', selecionado.saude, '#f3e5f5', '#6a1b9a', false);
         html += `</div>`;
 
-        let materiaisHtml = "";
-        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+        let materialsHtml = "";
+        materialsHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+        materialsHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+        materialsHtml += extrairLinks(selecionado.linksVideos, '🎬');
+        materialsHtml += extrairLinks(selecionado.linksPlantas, '📐');
+        materialsHtml += extrairLinks(selecionado.linksImplant, '📍');
+        materialsHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
-                ${materiaisHtml}
+                \${materiaisHtml}
             </div>`;
         }
     } else {
@@ -644,27 +648,27 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        // AJUSTE: Também foi aplicado o espaçamento superior aqui para os materiais do tipo Complexo
+        // DESIGN ATUALIZADO: Espaçamento superior corrigido nos Complexos também
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-top: 25px; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
-                    ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
+                    \${selecionado.nomeFull.toUpperCase()} — \${selecionado.regiao}
                  </div>`;
                  
         html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <span>📍 ${selecionado.endereco}</span> 
+                        <span>📍 \${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
-                            <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                            <a href="\${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                            <button onclick="copiarTexto('\${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
                         </span>
                     </p>
-                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
+                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">\${selecionado.descLonga}</div>
                  </div>`;
                  
         let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
         if (materiaisComplexo !== "") { 
             html += `<div style="margin-top: 10px; padding: 0 5px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
-                ${materiaisComplexo}
+                \${materiaisComplexo}
             </div>`;
         }
     }
