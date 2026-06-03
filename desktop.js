@@ -227,7 +227,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -313,7 +313,7 @@ async function carregarPlanilha() {
 }
 
 /* ==========================================================================
-   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
+   BROCO 04: LÓGICA DO MAPA E SELEÇÃO
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
@@ -498,7 +498,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
+    let html = ""; // CAIXA VERDE REMOVIDA DAQUI COM SUCESSO! O conteúdo agora começa direto nas estruturas abaixo.
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
@@ -655,7 +655,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                  </div>`;
                  
         let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
-        if (materialsComplexo !== "") { 
+        if (materiaisComplexo !== "") { 
             html += `<div style="margin-top: 10px; padding: 0 5px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
                 ${materiaisComplexo}
@@ -667,24 +667,3 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     // Ativa a lógica do hover nas miniaturas recém-criadas
     inicializarHoverMiniaturas();
 }
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
-window.onload = iniciarApp;
