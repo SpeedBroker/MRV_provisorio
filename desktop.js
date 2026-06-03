@@ -454,7 +454,7 @@ function gerarListaLateral() {
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
 const criarCardMaterial = (titulo, url, icone) => {
-    if (!url || url === "" || url === "---") return "";
+    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
     
     const linkSeguroAbrir = formatarLinkSeguro(url);
     const linkMiniaturaHover = formatarLinkPreview(url);
@@ -491,6 +491,10 @@ const extrairLinks = (campo, icone) => {
 function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     const painel = document.getElementById('ficha-tecnica');
     if (!painel) return;
+    
+    // CORREÇÃO: Limpa o texto dinâmico superior de forma definitiva ao carregar a vitrine
+    atualizarTituloSuperior(""); 
+
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
     // ATUALIZAÇÃO CRÍTICA: Guarda o objeto do imóvel selecionado no escopo global para o modulo de anúncios usar
@@ -498,7 +502,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = ""; // CAIXA VERDE REMOVIDA DAQUI COM SUCESSO! O conteúdo agora começa direto nas estruturas abaixo.
+    let html = ""; 
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
@@ -509,7 +513,8 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
+        // AJUSTE: Mudança para fundo Verde Escuro (#006d3c) e aplicação do distanciamento (margin-top: 25px)
+        html += `<div class="titulo-vitrine-faixa" style="background-color: #006d3c; color: white; padding: 6px; font-weight: bold; text-align: center; margin-top: 25px; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
         
         html += `
         <div style="padding: 2px 0 5px 0;">
@@ -639,7 +644,8 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+        // AJUSTE: Também foi aplicado o espaçamento superior aqui para os materiais do tipo Complexo
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-top: 25px; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
