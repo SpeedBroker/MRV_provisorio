@@ -139,10 +139,6 @@ body {
 .separador-complexo-btn.btn-zn { background-color: #ffd700 !important; } 
 .separador-complexo-btn.btn-zs { background-color: #ff33aa !important; }
 
-/* Nota: No caso da ZL (Zona Leste), como o fundo corporativo é um azul marinho muito escuro (#003399), 
-   abri uma única exceção acima para ele continuar com a fonte branca, caso contrário a leitura ficaria impossível. 
-   Os demais (Oeste, Norte e Sul) ficam 100% com a fonte preta no fundo colorido! */
-
 /* ==========================================================================
    5. CENTRO (MAPAS E TÍTULOS)
    ========================================================================== */
@@ -218,7 +214,28 @@ path.commrv:hover, path.ativo {
     flex-shrink: 0; 
 }
 
-/* 6.1 - CABEÇALHO DO IMÓVEL (PROTEÇÃO) */
+/* REMOVIDO: .vitrine-topo (Faixa Verde Dinâmica Redundante) */
+
+/* Ajuste no título da faixa para iniciar o topo da vitrine com respiro ideal */
+.titulo-vitrine-faixa { 
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: center !important; 
+    width: 100% !important; 
+    height: 38px !important; /* Leve aumento para dar mais imponência ao nome principal */
+    font-weight: bold !important; 
+    font-size: 0.95rem !important; /* Aumentado sutilmente para destacar o nome do residencial */
+    border-radius: 4px; 
+    text-transform: uppercase; 
+    color: #fff; 
+    margin-top: 2px; /* Garante alinhamento limpo no topo */
+    margin-bottom: 10px; 
+}
+
+.faixa-laranja { background: var(--mrv-laranja) !important; }
+.faixa-preta { background: var(--mrv-preto) !important; }
+
+/* Cabeçalho do Imóvel e Tabelas Internas */
 .sidebar-dir table:first-of-type b, 
 .sidebar-dir table:first-of-type span,
 .sidebar-dir table:first-of-type td {
@@ -242,35 +259,6 @@ path.commrv:hover, path.ativo {
     display: inline-block;
     margin-bottom: 3px;
 }
-
-.vitrine-topo { 
-    background: var(--mrv-verde); 
-    color: white; 
-    padding: 8px; 
-    text-align: center; 
-    font-weight: bold; 
-    border-radius: 4px; 
-    margin-bottom: 8px; 
-    font-size: 0.85rem; 
-    text-transform: uppercase; 
-}
-
-.titulo-vitrine-faixa { 
-    display: flex !important; 
-    align-items: center !important; 
-    justify-content: center !important; 
-    width: 100% !important; 
-    height: 34px !important; 
-    font-weight: bold !important; 
-    font-size: 0.85rem !important; 
-    border-radius: 4px; 
-    text-transform: uppercase; 
-    color: #fff; 
-    margin-bottom: 8px; 
-}
-
-.faixa-laranja { background: var(--mrv-laranja) !important; }
-.faixa-preta { background: var(--mrv-preto) !important; }
 
 /* ==========================================================================
    7. TABELAS DE PREÇOS (MANTIDO COMPACTO)
