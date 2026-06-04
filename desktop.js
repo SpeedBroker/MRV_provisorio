@@ -437,7 +437,7 @@ function gerarListaLateral() {
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
 const criarCardMaterial = (titulo, url, icone) => {
-    if (!url || url === "" || url === "---") return "";
+    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
     
     const linkSeguroAbrir = formatarLinkSeguro(url);
     const linkMiniaturaHover = formatarLinkPreview(url);
@@ -478,7 +478,8 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
+    // Título superior "MRV EM..." removido daqui conforme solicitado
+    let html = ""; 
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
