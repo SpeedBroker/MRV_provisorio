@@ -503,20 +503,16 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     let html = "";
     
-    // Constrói os botões superiores se houver outros residenciais/complexos
     if(outros.length > 0) {
-        // AJUSTE: margin-bottom levemente ajustada para harmonizar com o espaçamento da linha
         html += `<div style="margin-bottom:4px;">${outros.map(i => {
-            const classeZ = detectarClasseZona(i.zona); 
+            const classeZ = toggleClassZona(i.zona); 
             return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%; ${i.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${i.nome}')">
                 <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
             </button>`}).join('')}</div>
-            
             <hr style="border:0; border-top:1px solid #eee; margin: 12px 0;">`;
     }
 
     if (selecionado.tipo === 'R') {
-        // MUDANÇA: background-color alterado de var(--mrv-laranja) para var(--mrv-verde) para ficar igual ao topo antigo
         html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
         
         html += `
@@ -537,37 +533,21 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
         }
         
-        // --- NOVOS CAMPOS EM LINHA INTEIRA (DESTAQUE) ---
-        
-        // Limitador ocupando a linha inteira
+        // Limitador ocupando a linha inteira com destaque cinza escuro
         const limitadorValor = selecionado.limitador ? selecionado.limitador.toString().trim() : "---";
         html += `
-        <div style="width: 100%; padding: 5px 8px; border-bottom: 1px solid #ddd; background: #fff; text-align: center; box-sizing: border-box;">
-            <strong style="font-size: 0.7rem; color: #e31010; font-weight: bold; text-transform: uppercase;">LIMITADOR: ${limitadorValor}</strong>
+        <div style="width: 100%; padding: 6px 8px; border-bottom: 1px solid #ddd; background: #444444; text-align: center; box-sizing: border-box;">
+            <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">LIMITADOR: ${limitadorValor}</strong>
         </div>`;
 
-        // Casa Paulista ocupando a linha inteira (Lendo o seu texto exato da planilha)
+        // Casa Paulista ocupando a linha inteira com destaque cinza escuro (Lendo seu texto direto)
         const cpValor = selecionado.casa_paulista ? selecionado.casa_paulista.toString().trim() : "---";
         html += `
-        <div style="width: 100%; padding: 5px 8px; border-bottom: 1px solid #ddd; background: #fff; text-align: center; box-sizing: border-box;">
-            <strong style="font-size: 0.7rem; color: var(--mrv-verde); font-weight: bold; text-transform: uppercase;">${cpValor}</strong>
+        <div style="width: 100%; padding: 6px 8px; border-bottom: 1px solid #ddd; background: #444444; text-align: center; box-sizing: border-box;">
+            <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${cpValor}</strong>
         </div>`;
         
-        // --- FIM DOS DESTAQUES EM LINHA INTEIRA ---
-
-        // Função interna para as colunas remanescentes
-        const inlineInfo = (l1, v1, l2, v2, border) => `
-            <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l1}</label>
-                    <strong style="font-size: 0.65rem; color: #333;">${v1}</strong>
-                </div>
-                <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l2}</label>
-                    <strong style="font-size: 0.65rem; color: #333;">${v2}</strong>
-                </div>
-            </div>`;
-
+        // LINHA TRIPLA INFERIOR COM ALTURAS IGUALADAS
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
         let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
@@ -577,10 +557,25 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             if (!isNaN(nEst) && nEst < 6) corEstoque = "var(--vermelho-mrv)";
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
+        const obraValor = (selecionado.obra || 0) + '%';
 
-        // Mantém provisoriamente os dados restantes organizados
-        html += inlineInfo('Entrega', selecionado.entrega, 'Obra', (selecionado.obra || 0) + '%', true);
-        html += inlineInfo('Estoque', valorEstoqueColorido, 'Status', 'ATIVO', false);        html += `</div>`;
+        html += `
+        <div style="display: flex; width: 100%; background: #ffffff; box-sizing: border-box;">
+            <div style="flex: 1; height: 32px; padding: 0 6px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
+                <strong style="font-size: 0.65rem; color: #333;">${selecionado.entrega || "---"}</strong>
+            </div>
+            <div style="flex: 1; height: 32px; padding: 0 6px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
+                <strong style="font-size: 0.65rem; color: #333;">${obraValor}</strong>
+            </div>
+            <div style="flex: 1; height: 32px; padding: 0 6px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
+                <strong style="font-size: 0.65rem;">${valorEstoqueColorido}</strong>
+            </div>
+        </div>`;
+        
+        html += `</div>`; // FIM DO BOX DA FICHA TÉCNICA
 
         if(selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
@@ -667,7 +662,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        // MUDANÇA: Caso exiba a ficha de um Complexo inteiro, a faixa dele também respeita o respiro
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
