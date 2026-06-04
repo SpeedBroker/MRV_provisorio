@@ -530,11 +530,32 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
+        // INÍCIO DO BOX DA FICHA TÉCNICA
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
+        
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
         }
         
+        // --- NOVOS CAMPOS EM LINHA INTEIRA (DESTAQUE) ---
+        
+        // Limitador ocupando a linha inteira
+        const limitadorValor = selecionado.limitador ? selecionado.limitador.toString().trim() : "---";
+        html += `
+        <div style="width: 100%; padding: 5px 8px; border-bottom: 1px solid #ddd; background: #fff; text-align: center; box-sizing: border-box;">
+            <strong style="font-size: 0.7rem; color: #e31010; font-weight: bold; text-transform: uppercase;">LIMITADOR: ${limitadorValor}</strong>
+        </div>`;
+
+        // Casa Paulista ocupando a linha inteira (Lendo o seu texto exato da planilha)
+        const cpValor = selecionado.casa_paulista ? selecionado.casa_paulista.toString().trim() : "---";
+        html += `
+        <div style="width: 100%; padding: 5px 8px; border-bottom: 1px solid #ddd; background: #fff; text-align: center; box-sizing: border-box;">
+            <strong style="font-size: 0.7rem; color: var(--mrv-verde); font-weight: bold; text-transform: uppercase;">${cpValor}</strong>
+        </div>`;
+        
+        // --- FIM DOS DESTAQUES EM LINHA INTEIRA ---
+
+        // Função interna para as colunas remanescentes
         const inlineInfo = (l1, v1, l2, v2, border) => `
             <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
                 <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
@@ -557,10 +578,9 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
+        // Mantém provisoriamente os dados restantes organizados
         html += inlineInfo('Entrega', selecionado.entrega, 'Obra', (selecionado.obra || 0) + '%', true);
-        html += inlineInfo('Plantas', selecionado.p_de + ' - ' + selecionado.p_ate, 'Estoque', valorEstoqueColorido, true);
-        html += inlineInfo('Limitador', selecionado.limitador, 'C. Paulista', selecionado.casa_paulista, false);
-        html += `</div>`;
+        html += inlineInfo('Estoque', valorEstoqueColorido, 'Status', 'ATIVO', false);        html += `</div>`;
 
         if(selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
