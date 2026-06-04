@@ -455,7 +455,6 @@ function gerarListaLateral() {
 
 
 
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -526,28 +525,32 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // INÍCIO DO BOX DA FICHA TÉCNICA
-        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
+        // CONTÊINER ÚNICO DA VITRINE (Sem margens internas nos blocos filhos para eles se unirem)
+        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px; display: flex; flex-direction: column;">`;
         
+        // 1. LINHA DA CAMPANHA (Agora padronizada em cinza escuro e branco)
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
+            html += `
+            <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
+                <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${selecionado.campanha}</strong>
+            </div>`;
         }
         
-        // Limitador ocupando a linha inteira com destaque cinza escuro
+        // 2. LINHA DO LIMITADOR
         const limitadorValor = selecionado.limitador ? selecionado.limitador.toString().trim() : "---";
         html += `
-        <div style="width: 100%; padding: 6px 8px; border-bottom: 1px solid #ddd; background: #444444; text-align: center; box-sizing: border-box;">
-            <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">LIMITADOR: ${limitadorValor}</strong>
-        </div>`;
+            <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
+                <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">LIMITADOR: ${limitadorValor}</strong>
+            </div>`;
 
-        // Casa Paulista ocupando a linha inteira com destaque cinza escuro (Lendo seu texto direto)
+        // 3. LINHA DA CASA PAULISTA
         const cpValor = selecionado.casa_paulista ? selecionado.casa_paulista.toString().trim() : "---";
         html += `
-        <div style="width: 100%; padding: 6px 8px; border-bottom: 1px solid #ddd; background: #444444; text-align: center; box-sizing: border-box;">
-            <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${cpValor}</strong>
-        </div>`;
+            <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
+                <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${cpValor}</strong>
+            </div>`;
         
-        // LINHA TRIPLA INFERIOR COM ALTURAS IGUALADAS
+        // 4. LINHA TRIPLA INFERIOR (FONTES AMPLIADAS E FUNDO BRANCO)
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
         let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
@@ -560,22 +563,29 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         const obraValor = (selecionado.obra || 0) + '%';
 
         html += `
-        <div style="display: flex; width: 100%; background: #ffffff; box-sizing: border-box;">
-            <div style="flex: 1; height: 32px; padding: 0 6px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
-                <strong style="font-size: 0.65rem; color: #333;">${selecionado.entrega || "---"}</strong>
+        <div style="display: flex; width: 100%; background: #ffffff; box-sizing: border-box; border-bottom: 1px solid #ddd;">
+            <div style="flex: 1; height: 32px; padding: 0 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
+                <strong style="font-size: 0.75rem; color: #333;">${selecionado.entrega || "---"}</strong>
             </div>
-            <div style="flex: 1; height: 32px; padding: 0 6px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
-                <strong style="font-size: 0.65rem; color: #333;">${obraValor}</strong>
+            <div style="flex: 1; height: 32px; padding: 0 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
+                <strong style="font-size: 0.75rem; color: #333;">${obraValor}</strong>
             </div>
-            <div style="flex: 1; height: 32px; padding: 0 6px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
-                <strong style="font-size: 0.65rem;">${valorEstoqueColorido}</strong>
+            <div style="flex: 1; height: 32px; padding: 0 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
+                <strong style="font-size: 0.75rem;">${valorEstoqueColorido}</strong>
             </div>
         </div>`;
         
-        html += `</div>`; // FIM DO BOX DA FICHA TÉCNICA
+        // 5. LINHA DE PREÇO INTEIRAMENTE LARANJA E ENCOSTANDO NO BLOCO ACIMA
+        const precoValor = selecionado.preco ? selecionado.preco : "CONSULTAR";
+        html += `
+        <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #f37021; box-sizing: border-box; padding: 0 8px;">
+            <strong style="font-size: 0.85rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">À PARTIR DE: ${precoValor}</strong>
+        </div>`;
+        
+        html += `</div>`; // FIM DO BOX COMPACTO DA FICHA TÉCNICA
 
         if(selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
@@ -689,6 +699,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
     inicializarHoverMiniaturas();
 }
+
 
 /* ==========================================================================
    BLOCO 08: LÓGICA DO MODAL (SOBRE)
