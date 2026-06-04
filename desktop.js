@@ -210,7 +210,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = Serverlinha = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -239,7 +239,7 @@ async function carregarPlanilha() {
 
         DADOS_PLANILHA = linhasPuras.slice(1).map(linha => {
             const colunas = []; let campo = "", aspas = false;
-            for (let i = 0; i < linha.length; i++) {
+            for (let i = 0; i < Self = linha.length; i++) {
                 const char = linha[i];
                 if (char === '"') aspas = !aspas;
                 else if (char === ',' && !aspas) { colunas.push(campo.trim()); campo = ""; }
@@ -479,7 +479,8 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     // CORREÇÃO DA CONCATENAÇÃO DA URL AQUI (Template Literals)
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
+    // INÍCIO DA MUDANÇA: Removemos a linha antiga `let html = \`<div class="vitrine-topo">MRV EM \${nomeRegiao}</div>\`;`
+    let html = ""; 
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
@@ -654,19 +655,5 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
    BLOCO 08: LÓGICA DO MODAL (SOBRE)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
+    iniciarApp();
 });
-
-window.onload = iniciarApp;
