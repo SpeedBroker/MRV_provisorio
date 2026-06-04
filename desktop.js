@@ -454,7 +454,7 @@ function gerarListaLateral() {
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
 const criarCardMaterial = (titulo, url, icone) => {
-    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
+    if (!url || url === "" || url === "---") return "";
     
     const linkSeguroAbrir = formatarLinkSeguro(url);
     const linkMiniaturaHover = formatarLinkPreview(url);
@@ -491,22 +491,15 @@ const extrairLinks = (campo, icone) => {
 function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     const painel = document.getElementById('ficha-tecnica');
     if (!painel) return;
-    
-    // CORREÇÃO SEGURA: Remove o título dinâmico do topo da vitrine sem quebrar o app
-    const tituloTopo = document.getElementById('cidade-titulo');
-    if (tituloTopo) {
-        tituloTopo.innerText = ""; 
-    }
-
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // Guarda o objeto do imóvel selecionado no escopo global para o modulo de anúncios usar
+    // Guarda o objeto ativo globalmente para o módulo de anúncios
     window.imovelObjetoAtivo = selecionado;
     
-    // CORREÇÃO CRÍTICA DA SINTAXE: Ajustado para usar Template Strings (crases) de forma correta
-    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=$\${encodeURIComponent(selecionado.endereco)}`;
+    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = ""; 
+    // FAIXA SUPERIOR VERDE: Estilo fixo e elegante para a chamada da região
+    let html = `<div class="vitrine-topo" style="background-color: #006d3c; color: white; padding: 8px; font-weight: bold; text-align: center; border-radius: 4px; margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase;">MRV EM ${nomeRegiao}</div>`;
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
@@ -517,8 +510,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        // DESIGN ATUALIZADO: Aplica o Verde Escuro (#006d3c) e o distanciamento correto (margin-top: 25px)
-        html += `<div class="titulo-vitrine-faixa" style="background-color: #006d3c; color: white; padding: 6px; font-weight: bold; text-align: center; margin-top: 25px; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
         
         html += `
         <div style="padding: 2px 0 5px 0;">
@@ -571,20 +563,20 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 html += `
                 <div class="tabela-precos-container">
                     <div class="tabela-header">
-                        \${titulos.map((t, idx) => {
+                        ${titulos.map((t, idx) => {
                             const estiloCabecalho = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                            return `<div class="col-tabela" style="\${estiloCabecalho}">\${t}</div>`;
+                            return `<div class="col-tabela" style="${estiloCabecalho}">${t}</div>`;
                         }).join('')}
                     </div>
                     <div class="tabela-corpo">
-                        \${dados.map(linhaStr => {
+                        ${dados.map(linhaStr => {
                             const cols = inlineStr => linhaStr.split(',').map(c => c.trim());
                             const colsArr = cols();
                             if(colsArr.length <= 1) return "";
                             return `<div class="tabela-row">
-                                \${colsArr.map((v, idx) => {
+                                ${colsArr.map((v, idx) => {
                                     const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                                    return `<div class="col-tabela" style="\${estiloCelula}">\${idx === 0 ? `<strong>\${v}</strong>` : v}</div>`;
+                                    return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
                                 }).join('')}
                             </div>`;
                         }).join('')}
@@ -595,15 +587,15 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=$\${encodeURIComponent(selecionado.estande)}`;
+            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">\${selecionado.estande}</p>
+                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
                     <div style="display:flex; gap:3px; margin-left:5px;">
-                        <a href="\${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('\${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
+                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
                     </div>
                 </div>
             </div>`;
@@ -625,18 +617,18 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += criarBoxDiferencial('🏥 Saúde e Educação', selecionado.saude, '#f3e5f5', '#6a1b9a', false);
         html += `</div>`;
 
-        let materialsHtml = "";
-        materialsHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materialsHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materialsHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materialsHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materialsHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materialsHtml += extrairLinks(selecionado.linksDiversos, '✨');
+        let materiaisHtml = "";
+        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
-                \${materiaisHtml}
+                ${materiaisHtml}
             </div>`;
         }
     } else {
@@ -648,27 +640,26 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        // DESIGN ATUALIZADO: Espaçamento superior corrigido nos Complexos também
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-top: 25px; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
-                    \${selecionado.nomeFull.toUpperCase()} — \${selecionado.regiao}
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+                    ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
         html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <span>📍 \${selecionado.endereco}</span> 
+                        <span>📍 ${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
-                            <a href="\${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('\${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                            <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
                         </span>
                     </p>
-                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">\${selecionado.descLonga}</div>
+                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
                  </div>`;
                  
         let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
         if (materiaisComplexo !== "") { 
             html += `<div style="margin-top: 10px; padding: 0 5px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
-                \${materiaisComplexo}
+                ${materiaisComplexo}
             </div>`;
         }
     }
@@ -677,3 +668,24 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     // Ativa a lógica do hover nas miniaturas recém-criadas
     inicializarHoverMiniaturas();
 }
+
+/* ==========================================================================
+   BLOCO 08: LÓGICA DO MODAL (SOBRE)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
+
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
+    }
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
+});
+
+window.onload = iniciarApp;
