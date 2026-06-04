@@ -501,19 +501,23 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    // PERFEITO: Começa sem nenhuma caixa ou título verde inserido, subindo todo o layout
     let html = "";
     
+    // Constrói os botões superiores se houver outros residenciais/complexos
     if(outros.length > 0) {
-        html += `<div style="margin-bottom:6px;">${outros.map(i => {
+        // AJUSTE: margin-bottom levemente ajustada para harmonizar com o espaçamento da linha
+        html += `<div style="margin-bottom:4px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
             return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%; ${i.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${i.nome}')">
                 <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
-            </button>`}).join('')}</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">`;
+            </button>`}).join('')}</div>
+            
+            <hr style="border:0; border-top:1px solid #eee; margin: 12px 0;">`;
     }
 
     if (selecionado.tipo === 'R') {
-        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
+        // MUDANÇA: background-color alterado de var(--mrv-laranja) para var(--mrv-verde) para ficar igual ao topo antigo
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
         
         html += `
         <div style="padding: 2px 0 5px 0;">
@@ -626,7 +630,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨'); // CORRIGIDO: de materialsHtml para materiaisHtml
+        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
@@ -643,6 +647,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
+        // MUDANÇA: Caso exiba a ficha de um Complexo inteiro, a faixa dele também respeita o respiro
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
@@ -653,7 +658,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                         <span style="display:flex; gap:3px;">
                             <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
                             <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
-                        </span> // CORRIGIDO: de copyTexto para copiarTexto
+                        </span>
                     </p>
                     <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
                  </div>`;
@@ -668,7 +673,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
     painel.innerHTML = html;
 
-    // Ativa a lógica do hover nas miniaturas recém-criadas
     inicializarHoverMiniaturas();
 }
 
