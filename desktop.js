@@ -525,32 +525,33 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // CONTÊINER ÚNICO DA VITRINE (Sem margens internas nos blocos filhos para eles se unirem)
-        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px; display: flex; flex-direction: column;">`;
+        // CONTÊINER ÚNICO DA VITRINE - BLOCO DE 5 LINHAS UNIFICADO
+        html += `<div style="background: #ffffff; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px; display: flex; flex-direction: column;">`;
         
-        // 1. LINHA DA CAMPANHA (Agora padronizada em cinza escuro e branco)
-        if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
+        // 1. LINHA DA CAMPANHA (Cinza escuro)
+        const campanhaValor = (selecionado.campanha && selecionado.campanha !== "---") ? selecionado.campanha.toString().trim() : "";
+        if(campanhaValor !== "") {
             html += `
             <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
-                <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${selecionado.campanha}</strong>
+                <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${campanhaValor}</strong>
             </div>`;
         }
         
-        // 2. LINHA DO LIMITADOR
+        // 2. LINHA DO LIMITADOR (Cinza escuro)
         const limitadorValor = selecionado.limitador ? selecionado.limitador.toString().trim() : "---";
         html += `
             <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
                 <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">LIMITADOR: ${limitadorValor}</strong>
             </div>`;
 
-        // 3. LINHA DA CASA PAULISTA
+        // 3. LINHA DA CASA PAULISTA (Cinza escuro)
         const cpValor = selecionado.casa_paulista ? selecionado.casa_paulista.toString().trim() : "---";
         html += `
             <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
                 <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${cpValor}</strong>
             </div>`;
         
-        // 4. LINHA TRIPLA INFERIOR (FONTES AMPLIADAS E FUNDO BRANCO)
+        // 4. LINHA TRIPLA (Entrega, Obra, Estoque) - Fundo Branco e Fontes Maiores
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
         let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
@@ -578,14 +579,16 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
         
-        // 5. LINHA DE PREÇO INTEIRAMENTE LARANJA E ENCOSTANDO NO BLOCO ACIMA
-        const precoValor = selecionado.preco ? selecionado.preco : "CONSULTAR";
+        // 5. LINHA DE PREÇO DINÂMICA (Laranja total, puxando o valor da planilha)
+        let precoExibido = (selecionado.preco && selecionado.preco.toString().trim() !== "" && selecionado.preco !== "---") ? selecionado.preco : "CONSULTAR";
+        let textoPrecoCompleto = precoExibido.toString().toUpperCase().includes("A PARTIR") ? precoExibido : `À PARTIR DE: ${precoExibido}`;
+        
         html += `
         <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #f37021; box-sizing: border-box; padding: 0 8px;">
-            <strong style="font-size: 0.85rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">À PARTIR DE: ${precoValor}</strong>
+            <strong style="font-size: 0.85rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${textoPrecoCompleto}</strong>
         </div>`;
         
-        html += `</div>`; // FIM DO BOX COMPACTO DA FICHA TÉCNICA
+        html += `</div>`; // FIM DO CONTÊINER ÚNICO
 
         if(selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
