@@ -450,6 +450,12 @@ function gerarListaLateral() {
     }).join('');
 }
 
+
+
+
+
+
+
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -498,11 +504,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    // FAIXA SUPERIOR VERDE: Estilo fixo e elegante para a chamada da região
-    let html = `<div class="vitrine-topo" style="background-color: #006d3c; color: white; padding: 8px; font-weight: bold; text-align: center; border-radius: 4px; margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase;">MRV EM ${nomeRegiao}</div>`;
+    // SOLUÇÃO: O HTML começa vazio (sem a div "vitrine-topo"), fazendo tudo subir para o topo
+    let html = ""; 
     
     if(outros.length > 0) {
-        html += `<div style="margin-bottom:6px;">${outros.map(i => {
+        html += `<div style="margin-bottom:6px; margin-top:0px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
             return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%; ${i.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${i.nome}')">
                 <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
@@ -510,7 +516,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
+        // Se não houver botões de "outros" no topo, removemos a margem superior da faixa laranja para colar no teto
+        const margemSuperiorLaranja = (outros.length > 0) ? "5px" : "0px";
+        
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-top: ${margemSuperiorLaranja}; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
         
         html += `
         <div style="padding: 2px 0 5px 0;">
@@ -623,7 +632,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+        materialsHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
@@ -640,7 +649,9 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+        const margemSuperiorComplexo = (outros.length > 0) ? "5px" : "0px";
+
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-top: ${margemSuperiorComplexo}; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
@@ -649,7 +660,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                         <span>📍 ${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
                             <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                            <button onclick="copyTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
                         </span>
                     </p>
                     <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
