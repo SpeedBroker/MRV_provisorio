@@ -70,19 +70,16 @@ function configurarBotaoDocumentos() {
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
                 
-                // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
             }
         });
     }
 }
 
-// Vincula o botão de Anúncio à função global existente em 'anuncios.js'
 function configurarBotaoAnuncio() {
     const btnAnuncio = document.getElementById('btn-anuncio');
     if (btnAnuncio) {
         btnAnuncio.addEventListener('click', () => {
-            // Verifica se a função vinda do script isolado anúncios.js está disponível
             if (typeof abrirModuloAnuncio === 'function') {
                 abrirModuloAnuncio();
             } else {
@@ -93,7 +90,6 @@ function configurarBotaoAnuncio() {
     }
 }
 
-// Retorna o link oficial de visualização, garantindo botões de impressão e download
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -103,14 +99,12 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
     return link;
 }
 
-// Retorna o link específico para a miniatura em hover
 function formatarLinkPreview(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -120,14 +114,12 @@ function formatarLinkPreview(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Retorna o link ideal e leve para renderizar dentro da miniatura
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
     return link;
 }
 
-// LÓGICA DO HOVER DA MINIATURA
 function inicializarHoverMiniaturas() {
     const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
     
@@ -136,11 +128,9 @@ function inicializarHoverMiniaturas() {
         if (!urlPreview) return;
 
         botao.addEventListener('mouseenter', (e) => {
-            // Remove qualquer preview existente para evitar duplicados
             const antigo = document.getElementById('preview-flutuante-drive');
             if (antigo) antigo.remove();
 
-            // Cria o container do preview flutuante
             const previewDiv = document.createElement('div');
             previewDiv.id = 'preview-flutuante-drive';
             previewDiv.style.position = 'fixed';
@@ -152,13 +142,11 @@ function inicializarHoverMiniaturas() {
             previewDiv.style.borderRadius = '8px';
             previewDiv.style.overflow = 'hidden';
             previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
+            previewDiv.style.pointerEvents = 'none';
 
-            // Insere o iframe com o link leve de preview
             previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
             document.body.appendChild(previewDiv);
 
-            // Posiciona perto do botão do mouse
             posicionarPreview(e, previewDiv);
         });
 
@@ -180,11 +168,9 @@ function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
 
-    // Ajusta se passar da borda direita da tela
     if (left + 340 > window.innerWidth) {
         left = e.clientX - 340;
     }
-    // Ajusta se passar da borda de baixo da tela
     if (top + 240 > window.innerHeight) {
         top = e.clientY - 240;
     }
@@ -194,7 +180,7 @@ function posicionarPreview(e, elemento) {
 }
 
 function copiarTexto(texto, msg = "Link copiado!") {
-    if (!texto || texto === "") return;
+    if (!texto || text === "") return;
     navigator.clipboard.writeText(texto).then(() => {
         alert(msg);
     }).catch(err => {
@@ -285,7 +271,7 @@ async function carregarPlanilha() {
                 obra: colunas[COL.OBRA] || "0",
                 tipologiasH: colunas[COL.TIPOLOGIAS] || "", 
                 regiao: colunas[COL.REGIAO] || "---",
-                p_de: colunas[COL.P_DE] || "---",
+                preco: colunas[COL.P_DE] || "---",
                 p_ate: colunas[COL.P_ATE] || "---",
                 limitador: colunas[COL.LIMITADOR] || "---",
                 casa_paulista: colunas[COL.CASA_PAULISTA] || "---",
@@ -313,7 +299,7 @@ async function carregarPlanilha() {
 }
 
 /* ==========================================================================
-   BROCO 04: LÓGICA DO MAPA E SELEÇÃO
+   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
@@ -451,9 +437,6 @@ function gerarListaLateral() {
 }
 
 
-
-
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -503,7 +486,14 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:4px;">${outros.map(i => {
-            const classeZ = toggleClassZona(i.zona); 
+            let classeZ = "";
+            if(i.zona) {
+                const z = i.zona.toUpperCase().trim();
+                if (z.includes("ZO")) classeZ = "btn-zo";
+                else if (z.includes("ZL")) classeZ = "btn-zl";
+                else if (z.includes("ZN")) classeZ = "btn-zn";
+                else if (z.includes("ZS")) classeZ = "btn-zs";
+            }
             return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%; ${i.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${i.nome}')">
                 <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
             </button>`}).join('')}</div>
@@ -524,7 +514,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // CONTÊINER ÚNICO UNIFICADO (BLOCOS DE MESMA ALTURA ENCOSTANDO)
+        // CONTÊINER ÚNICO UNIFICADO (5 LINHAS PERFEITAS)
         html += `<div style="background: #ffffff; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px; display: flex; flex-direction: column;">`;
         
         // 1. LINHA DA CAMPANHA (Fundo Cinza Escuro)
@@ -550,7 +540,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${cpValor}</strong>
             </div>`;
         
-        // 4. LINHA TRIPLA (Entrega, Obra, Estoque) - Fundo Branco e Fontes Alinhadas
+        // 4. LINHA TRIPLA (Entrega, Obra, Estoque)
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
         let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
@@ -578,7 +568,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
         
-        // 5. LINHA DE PREÇO REAL (Totalmente Laranja, sem sub-tarjas e com dados da tabela)
+        // 5. LINHA DE PREÇO REAL INTEGRADO (Laranja Dinâmico)
         let precoReal = (selecionado.preco && selecionado.preco.toString().trim() !== "" && selecionado.preco !== "---") ? selecionado.preco : "CONSULTAR";
         let labelPreco = precoReal.toString().toUpperCase().includes("A PARTIR") ? precoReal : `À PARTIR DE: ${precoReal}`;
         
@@ -604,8 +594,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </div>
                     <div class="tabela-corpo">
                         ${dados.map(linhaStr => {
-                            const cols = inlineStr => linhaStr.split(',').map(c => c.trim());
-                            const colsArr = cols();
+                            const colsArr = linhaStr.split(',').map(c => c.trim());
                             if(colsArr.length <= 1) return "";
                             return `<div class="tabela-row">
                                 ${colsArr.map((v, idx) => {
@@ -667,12 +656,15 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
     } else {
         let corComplexo = "#333";
-        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
-        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
-        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
-        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
+        if (selecionado.zona) {
+            const z = selecionado.zona.toUpperCase().trim();
+            if (z.includes("ZO")) corComplexo = "#ff9d42"; 
+            else if (z.includes("ZL")) corComplexo = "#003399";
+            else if (z.includes("ZN")) corComplexo = "#ffd700";
+            else if (z.includes("ZS")) corComplexo = "#ff33aa";
+        }
 
-        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
+        let corTexto = (selecionado.zona && selecionado.zona.toUpperCase().includes('ZN')) ? "#333" : "white";
 
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
@@ -698,27 +690,5 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
     }
     painel.innerHTML = html;
-
     inicializarHoverMiniaturas();
 }
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
-window.onload = iniciarApp;
