@@ -454,7 +454,6 @@ function gerarListaLateral() {
 
 
 
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -525,10 +524,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // CONTÊINER ÚNICO DA VITRINE - BLOCO DE 5 LINHAS UNIFICADO
+        // CONTÊINER ÚNICO UNIFICADO (BLOCOS DE MESMA ALTURA ENCOSTANDO)
         html += `<div style="background: #ffffff; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px; display: flex; flex-direction: column;">`;
         
-        // 1. LINHA DA CAMPANHA (Cinza escuro)
+        // 1. LINHA DA CAMPANHA (Fundo Cinza Escuro)
         const campanhaValor = (selecionado.campanha && selecionado.campanha !== "---") ? selecionado.campanha.toString().trim() : "";
         if(campanhaValor !== "") {
             html += `
@@ -537,21 +536,21 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>`;
         }
         
-        // 2. LINHA DO LIMITADOR (Cinza escuro)
+        // 2. LINHA DO LIMITADOR (Fundo Cinza Escuro)
         const limitadorValor = selecionado.limitador ? selecionado.limitador.toString().trim() : "---";
         html += `
             <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
                 <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">LIMITADOR: ${limitadorValor}</strong>
             </div>`;
 
-        // 3. LINHA DA CASA PAULISTA (Cinza escuro)
+        // 3. LINHA DA CASA PAULISTA (Fundo Cinza Escuro)
         const cpValor = selecionado.casa_paulista ? selecionado.casa_paulista.toString().trim() : "---";
         html += `
             <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #444444; border-bottom: 1px solid #ddd; box-sizing: border-box; padding: 0 8px;">
                 <strong style="font-size: 0.72rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${cpValor}</strong>
             </div>`;
         
-        // 4. LINHA TRIPLA (Entrega, Obra, Estoque) - Fundo Branco e Fontes Maiores
+        // 4. LINHA TRIPLA (Entrega, Obra, Estoque) - Fundo Branco e Fontes Alinhadas
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
         let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
@@ -579,13 +578,13 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
         
-        // 5. LINHA DE PREÇO DINÂMICA (Laranja total, puxando o valor da planilha)
-        let precoExibido = (selecionado.preco && selecionado.preco.toString().trim() !== "" && selecionado.preco !== "---") ? selecionado.preco : "CONSULTAR";
-        let textoPrecoCompleto = precoExibido.toString().toUpperCase().includes("A PARTIR") ? precoExibido : `À PARTIR DE: ${precoExibido}`;
+        // 5. LINHA DE PREÇO REAL (Totalmente Laranja, sem sub-tarjas e com dados da tabela)
+        let precoReal = (selecionado.preco && selecionado.preco.toString().trim() !== "" && selecionado.preco !== "---") ? selecionado.preco : "CONSULTAR";
+        let labelPreco = precoReal.toString().toUpperCase().includes("A PARTIR") ? precoReal : `À PARTIR DE: ${precoReal}`;
         
         html += `
         <div style="width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; background: #f37021; box-sizing: border-box; padding: 0 8px;">
-            <strong style="font-size: 0.85rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${textoPrecoCompleto}</strong>
+            <strong style="font-size: 0.85rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">${labelPreco}</strong>
         </div>`;
         
         html += `</div>`; // FIM DO CONTÊINER ÚNICO
@@ -702,7 +701,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
     inicializarHoverMiniaturas();
 }
-
 
 /* ==========================================================================
    BLOCO 08: LÓGICA DO MODAL (SOBRE)
