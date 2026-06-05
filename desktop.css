@@ -458,3 +458,127 @@ path.commrv:hover, path.ativo {
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #999; }
+
+/* ==========================================================================
+   11. BLOCO DE DETALHES DO RESIDENCIAL (PADRONIZADO)
+   ========================================================================== */
+.detalhes-residencial-container {
+    width: 100%;
+    margin: 10px auto;
+    border: 1px solid var(--cinza-divisor);
+    border-radius: 4px;
+    overflow: hidden;
+    box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+.detalhes-residencial-container .header-residencial {
+    background-color: var(--mrv-verde);
+    color: #ffffff;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.detalhes-residencial-container .sub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    font-size: 0.75rem;
+    color: #555;
+}
+
+.detalhes-residencial-container .sub-header .btn-links-fnd {
+    display: flex;
+    gap: 4px;
+}
+
+.detalhes-residencial-container .sub-header .btn-links-fnd a {
+    color: white !important;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.65rem;
+}
+
+.detalhes-residencial-container .faixa-isencao {
+    background-color: #fff5f5;
+    color: var(--vermelho-mrv);
+    text-align: center;
+    padding: 6px;
+    font-size: 0.72rem;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+
+/* Grid layout que equaliza as alturas perfeitamente */
+.detalhes-residencial-container .grid-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 0.75rem; /* Fonte unificada e padronizada */
+    color: #333;
+}
+
+/* Células base do grid */
+.detalhes-residencial-container .grid-cell {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* Divisores internos do grid 50/50 */
+.detalhes-residencial-container .border-right {
+    border-right: 1px solid #eee;
+}
+
+/* Label Verde padrão */
+.detalhes-residencial-container .grid-cell .label {
+    color: var(--mrv-verde);
+    font-weight: bold;
+}
+
+/* Valor em negrito */
+.detalhes-residencial-container .grid-cell .valor {
+    font-weight: bold;
+}
+
+/* Regra crucial: Ocupar a linha inteira */
+.detalhes-residencial-container .full-width {
+    grid-column: span 2;
+}
+
+/* Bloco Inferior de Preço */
+.detalhes-residencial-container .container-preco {
+    display: flex;
+    align-items: center;
+    background-color: var(--cinza-claro);
+    padding: 8px 12px;
+    box-sizing: border-box;
+}
+
+.detalhes-residencial-container .container-preco .preco-label {
+    flex: 1;
+    font-size: 0.75rem; /* Acompanha o padrão */
+    font-weight: bold;
+    color: #333;
+}
+
+.detalhes-residencial-container .container-preco .preco-botao {
+    flex: 2; 
+    background-color: var(--mrv-laranja); 
+    color: white; 
+    text-align: center; 
+    padding: 8px; 
+    font-size: 0.85rem; /* EXCEÇÃO: 1 ponto maior que os demais de 0.75rem */
+    font-weight: bold; 
+    border-radius: 4px;
+}
