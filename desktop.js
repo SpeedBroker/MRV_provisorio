@@ -556,36 +556,30 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         
         html += `</div>`;
 
-        if(selecionado.tipologiasH) {
+
+       // Extrai dinamicamente o preço real de dentro da string tipologiasH
+        let precoReal = "CONSULTAR";
+        if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
-            if(lines.length > 0) {
-                const titulos = lines[0].split(',').map(t => t.trim()); 
-                const dados = lines.slice(1);
-                html += `
-                <div class="tabela-precos-container">
-                    <div class="tabela-header">
-                        ${titulos.map((t, idx) => {
-                            const estiloCabecalho = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                            return `<div class="col-tabela" style="${estiloCabecalho}">${t}</div>`;
-                        }).join('')}
-                    </div>
-                    <div class="tabela-corpo">
-                        ${dados.map(linhaStr => {
-                            const cols = inlineStr => linhaStr.split(',').map(c => c.trim());
-                            const colsArr = cols();
-                            if(colsArr.length <= 1) return "";
-                            return `<div class="tabela-row">
-                                ${colsArr.map((v, idx) => {
-                                    const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                                    return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
-                                }).join('')}
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </div>`;
+            if (lines.length > 1) {
+                // Pega a primeira linha de dados (ex: "À partir de:,R$ 937.490,,")
+                const colsArr = lines[1].split(',').map(c => c.trim());
+                // A segunda coluna (index 1) contém o valor "R$ 937.490"
+                if (colsArr[1] && colsArr[1] !== "") {
+                    precoReal = colsArr[1];
+                }
             }
         }
 
+        // Linha 3: Bloco de Preço Unificado Laranja com o valor real carregado da tabela
+        html += `
+        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            À PARTIR DE: ${precoReal}
+        </div>`;
+        
+        html += `</div>`;
+
+       
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
