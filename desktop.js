@@ -536,7 +536,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         // Linha 2: Limitador e Casa Paulista
         html += `
-        <div style="display: flex; width: 100%;">
+        <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd;">
             <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
                 <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Limitador</label>
                 <strong style="font-size: 0.65rem; color: #333;">${selecionado.limitador}</strong>
@@ -545,6 +545,13 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">C. Paulista</label>
                 <strong style="font-size: 0.65rem; color: #333;">${selecionado.casa_paulista}</strong>
             </div>
+        </div>`;
+
+        // Linha 3: Bloco de Preço Unificado Laranja (Elimina a tarja antiga e junta tudo)
+        const precoTexto = selecionado.preco ? (typeof selecionado.preco === 'number' ? 'R$ ' + selecionado.preco.toLocaleString('pt-BR') : selecionado.preco) : "CONSULTAR";
+        html += `
+        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            À PARTIR DE: ${precoTexto}
         </div>`;
         
         html += `</div>`;
