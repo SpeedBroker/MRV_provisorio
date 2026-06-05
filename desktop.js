@@ -517,7 +517,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        // Renderiza Entrega, Obra e Estoque em uma única linha com 3 colunas iguais
+        // Linha 1: Entrega, Obra e Estoque
         html += `
         <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd;">
             <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
@@ -534,7 +534,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Renderiza Limitador e Casa Paulista na linha de baixo
+        // Linha 2: Limitador e Casa Paulista
         html += `
         <div style="display: flex; width: 100%;">
             <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
@@ -546,6 +546,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <strong style="font-size: 0.65rem; color: #333;">${selecionado.casa_paulista}</strong>
             </div>
         </div>`;
+        
         html += `</div>`;
 
         if(selecionado.tipologiasH) {
