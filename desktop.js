@@ -507,18 +507,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
         }
         
-        const inlineInfo = (l1, v1, l2, v2, border) => `
-            <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l1}</label>
-                    <strong style="font-size: 0.65rem; color: #333;">${v1}</strong>
-                </div>
-                <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l2}</label>
-                    <strong style="font-size: 0.65rem; color: #333;">${v2}</strong>
-                </div>
-            </div>`;
-
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
         let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
@@ -529,9 +517,35 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        html += inlineInfo('Entrega', selecionado.entrega, 'Obra', (selecionado.obra || 0) + '%', true);
-        html += inlineInfo('Plantas', selecionado.p_de + ' - ' + selecionado.p_ate, 'Estoque', valorEstoqueColorido, true);
-        html += inlineInfo('Limitador', selecionado.limitador, 'C. Paulista', selecionado.casa_paulista, false);
+        // Renderiza Entrega, Obra e Estoque em uma única linha com 3 colunas iguais
+        html += `
+        <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd;">
+            <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
+                <strong style="font-size: 0.65rem; color: #333;">${selecionado.entrega}</strong>
+            </div>
+            <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
+                <strong style="font-size: 0.65rem; color: #333;">${selecionado.obra || 0}%</strong>
+            </div>
+            <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
+                <strong style="font-size: 0.65rem;">${valorEstoqueColorido}</strong>
+            </div>
+        </div>`;
+
+        // Renderiza Limitador e Casa Paulista na linha de baixo
+        html += `
+        <div style="display: flex; width: 100%;">
+            <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Limitador</label>
+                <strong style="font-size: 0.65rem; color: #333;">${selecionado.limitador}</strong>
+            </div>
+            <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
+                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">C. Paulista</label>
+                <strong style="font-size: 0.65rem; color: #333;">${selecionado.casa_paulista}</strong>
+            </div>
+        </div>`;
         html += `</div>`;
 
         if(selecionado.tipologiasH) {
