@@ -557,21 +557,21 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `</div>`;
 
 
-       // Extrai dinamicamente o preço real de dentro da string tipologiasH
+      // Extrai dinamicamente o preço real lendo a string tipologiasH sem duplicar a estrutura
         let precoReal = "CONSULTAR";
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
-            if (lines.length > 1) {
-                // Pega a primeira linha de dados (ex: "À partir de:,R$ 937.490,,")
-                const colsArr = lines[1].split(',').map(c => c.trim());
-                // A segunda coluna (index 1) contém o valor "R$ 937.490"
-                if (colsArr[1] && colsArr[1] !== "") {
-                    precoReal = colsArr[1];
+            
+            // Varre as linhas para encontrar onde está o preço real cadastrado
+            lines.forEach(linhaStr => {
+                const colsArr = linhaStr.split(',').map(c => c.trim());
+                if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
+                    precoReal = colsArr[1]; // Captura o valor (ex: R$ 259.277)
                 }
-            }
+            });
         }
 
-        // Linha 3: Bloco de Preço Unificado Laranja com o valor real carregado da tabela
+        // Linha 3: Bloco de Preço Unificado Laranja com o valor real capturado e SEM DUPLICAR
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
             À PARTIR DE: ${precoReal}
