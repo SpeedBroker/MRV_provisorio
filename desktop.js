@@ -478,7 +478,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    // Título superior "MRV EM..." removido daqui conforme solicitado
     let html = ""; 
     
     if(outros.length > 0) {
@@ -502,6 +501,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
+        // Início da Caixa Cinza Unificada
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
@@ -547,39 +547,28 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Linha 3: Bloco de Preço Unificado Laranja (Elimina a tarja antiga e junta tudo)
-        const precoTexto = selecionado.preco ? (typeof selecionado.preco === 'number' ? 'R$ ' + selecionado.preco.toLocaleString('pt-BR') : selecionado.preco) : "CONSULTAR";
-        html += `
-        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-            À PARTIR DE: ${precoTexto}
-        </div>`;
-        
-        html += `</div>`;
-
-
-      // Extrai dinamicamente o preço real lendo a string tipologiasH sem duplicar a estrutura
+        // Lógica dos bastidores para varrer a string e capturar o valor real da tabela
         let precoReal = "CONSULTAR";
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
-            
-            // Varre as linhas para encontrar onde está o preço real cadastrado
             lines.forEach(linhaStr => {
                 const colsArr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
-                    precoReal = colsArr[1]; // Captura o valor (ex: R$ 259.277)
+                    precoReal = colsArr[1];
                 }
             });
         }
 
-        // Linha 3: Bloco de Preço Unificado Laranja com o valor real capturado e SEM DUPLICAR
+        // Linha 3: Faixa Laranja Única com o valor correto carregado da tabela
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
             À PARTIR DE: ${precoReal}
         </div>`;
         
+        // Fecha perfeitamente a caixa cinza unificada uma única vez
         html += `</div>`;
-
        
+        // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
@@ -613,12 +602,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `</div>`;
 
         let materiaisHtml = "";
-        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+         materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+         materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+         materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
@@ -659,9 +648,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
     }
     painel.innerHTML = html;
-
-    // Ativa a lógica do hover nas miniaturas recém-criadas
-    inicializarHoverMiniaturas();
 }
 
 /* ==========================================================================
