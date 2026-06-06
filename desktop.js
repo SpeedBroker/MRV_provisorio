@@ -437,7 +437,6 @@ function gerarListaLateral() {
 
 
 
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -506,55 +505,53 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Início da Caixa Cinza Unificada
+        // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#333";
+        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
-            corEstoque = "#999";
+            corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "var(--vermelho-mrv)";
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
         // ==========================================
-        // Linha 2: Limitador ocupando a linha inteira
+        // Linha 2: Limitador ocupando a linha inteira (Sem título, Texto Centralizado, Fundo Escuro)
         // ==========================================
         html += `
-        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%; height: 32px;">
-            <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">Limitador</label>
-            <strong style="font-size: 0.75rem; color: #333; text-align: right; word-break: break-word;">${selecionado.limitador}</strong>
+        <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
+            <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
         </div>`;
 
         // ==========================================
-        // Linha 3: Casa Paulista ocupando a linha inteira
+        // Linha 3: Casa Paulista ocupando a linha inteira (Sem título, Texto Centralizado, Fundo Escuro)
         // ==========================================
         html += `
-        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%; height: 32px;">
-            <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">C. Paulista</label>
-            <strong style="font-size: 0.75rem; color: #333; text-align: right; word-break: break-word;">${selecionado.casa_paulista}</strong>
+        <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
+            <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
         </div>`;
 
         // ==========================================
-        // Linha 4: Entrega, Obra e Estoque
+        // Linha 4: Entrega, Obra e Estoque (Fundo Escuro e Fontes Claras)
         // ==========================================
         html += `
-        <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd; box-sizing: border-box; height: 32px;">
-            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
-                <strong style="font-size: 0.75rem; color: #333;">${selecionado.entrega}</strong>
+        <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
+            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Entrega</label>
+                <strong style="font-size: 0.75rem; color: #ffffff;">${selecionado.entrega}</strong>
             </div>
-            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
-                <strong style="font-size: 0.75rem; color: #333;">${selecionado.obra || 0}%</strong>
+            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Obra</label>
+                <strong style="font-size: 0.75rem; color: #ffffff;">${selecionado.obra || 0}%</strong>
             </div>
             <div style="flex: 1; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
+                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Estoque</label>
                 <strong style="font-size: 0.75rem;">${valorEstoqueColorido}</strong>
             </div>
         </div>`;
@@ -564,21 +561,20 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             lines.forEach(linhaStr => {
-                const colsArr = linhaStr.split(',').map(c => c.trim());
+                const colsArr = dynamicPreco = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
-                    coordsReal = colsArr[1]; // Ajuste de redundância caso use outra var interna
                     precoReal = colsArr[1];
                 }
             });
         }
 
-        // Linha final: Faixa Laranja Única com o valor correto carregado da tabela
+        // Linha final: Faixa Laranja com o valor do imóvel
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
             À PARTIR DE: ${precoReal}
         </div>`;
         
-        // Fecha perfeitamente a caixa cinza unificada uma única vez
+        // Fecha a caixa unificada cinza/escura
         html += `</div>`;
        
         // Blocos de Diferenciais e Informações Complementares
@@ -662,6 +658,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
     painel.innerHTML = html;
 }
+
 
 /* ==========================================================================
    BLOCO 08: LÓGICA DO MODAL (SOBRE)
