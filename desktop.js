@@ -498,10 +498,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         <div style="padding: 2px 0 5px 0;">
             <div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
                 <span style="flex:1;">📍 ${selecionado.endereco}</span>
-                <div style="display:flex; gap:3px; margin-left:5px;">
-                    <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                    <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
-                </div>
+
+               <div style="display:flex; gap:3px; margin-left:5px;">
+                   <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                   <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
+               </div>       
+
             </div>
         </div>`;
 
@@ -586,10 +588,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
-<div style="display:flex; gap:3px; margin-left:5px;">
-    <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-    <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
-</div>
+
+               <div style="display:flex; gap:3px; margin-left:5px;">
+                   <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
+                   <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
+               </div>
+
                 </div>
             </div>`;
         }
@@ -643,10 +647,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                         <span>📍 ${selecionado.endereco}</span> 
+
                         <span style="display:flex; gap:3px;">
                             <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
                         </span>
+                        
                     </p>
                     <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
                  </div>`;
@@ -661,6 +667,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
     painel.innerHTML = html;
 }
+
+
+
+
+
 
 
 /* ==========================================================================
