@@ -437,6 +437,7 @@ function gerarListaLateral() {
 
 
 
+
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -498,12 +499,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         <div style="padding: 2px 0 5px 0;">
             <div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
                 <span style="flex:1;">📍 ${selecionado.endereco}</span>
-
-               <div style="display:flex; gap:3px; margin-left:5px;">
-                   <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                   <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-               </div>       
-
+                <div style="display:flex; gap:3px; margin-left:5px;">
+                    <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                    <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
+                </div>
             </div>
         </div>`;
 
@@ -523,25 +522,19 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        // ==========================================
-        // Linha 2: Limitador ocupando a linha inteira (Sem título, Texto Centralizado, Fundo Escuro)
-        // ==========================================
+        // Linha 2: Limitador ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
         </div>`;
 
-        // ==========================================
-        // Linha 3: Casa Paulista ocupando a linha inteira (Sem título, Texto Centralizado, Fundo Escuro)
-        // ==========================================
+        // Linha 3: Casa Paulista ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
         </div>`;
 
-        // ==========================================
-        // Linha 4: Entrega, Obra e Estoque (Fundo Escuro e Fontes Claras)
-        // ==========================================
+        // Linha 4: Entrega, Obra e Estoque
         html += `
         <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
             <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
@@ -558,12 +551,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Lógica dos bastidores para varrer a string e capturar o valor real da tabela
         let precoReal = "CONSULTAR";
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             lines.forEach(linhaStr => {
-                const colsArr = dynamicPreco = linhaStr.split(',').map(c => c.trim());
+                const colsArr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
                     precoReal = colsArr[1];
                 }
@@ -576,7 +568,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             À PARTIR DE: ${precoReal}
         </div>`;
         
-        // Fecha a caixa unificada cinza/escura
         html += `</div>`;
        
         // Blocos de Diferenciais e Informações Complementares
@@ -588,12 +579,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
-
-               <div style="display:flex; gap:3px; margin-left:5px;">
-                   <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                   <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-               </div>
-
+                    <div style="display:flex; gap:3px; margin-left:5px;">
+                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
+                        <button onclick="copiarTexto('${urlMapsEstande}', 'Link do estande copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
+                    </div>
                 </div>
             </div>`;
         }
@@ -602,10 +591,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             if(!texto || texto === "---" || texto === "") return "";
             return `
             <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <!-- Título ligeiramente menor e mais discreto -->
                 <label style="display:block; font-size:0.52rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
-                
-                <!-- Texto descritivo em um tamanho intermediário e confortável -->
                 <p style="margin:0; font-size:0.65rem; color:#444; line-height:1.3;">${texto}</p>
             </div>`;
         };
@@ -647,12 +633,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                         <span>📍 ${selecionado.endereco}</span> 
-
                         <span style="display:flex; gap:3px;">
                             <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
+                            <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
                         </span>
-                        
                     </p>
                     <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
                  </div>`;
@@ -668,7 +652,40 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     painel.innerHTML = html;
 }
 
+// Nova função global de cópia sem o uso de alert() do navegador
+function copiarTexto(texto, mensagemSucesso) {
+    if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
+        const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
+        if(textoInvalido) texto = decodeURIComponent(textoInvalido);
+    }
 
+    navigator.clipboard.writeText(texto).then(() => {
+        const textoMensagem = mensagemSucesso || "Link copiado com sucesso!";
+        
+        const toastAntigo = document.querySelector('.toast-notificacao');
+        if (toastAntigo) toastAntigo.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-notificacao';
+        toast.innerHTML = `✅ ${textoMensagem}`;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('mostrar');
+        }, 50);
+
+        setTimeout(() => {
+            toast.classList.remove('mostrar');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 2500);
+
+    }).catch(err => {
+        console.error('Erro ao copiar link: ', err);
+    });
+}
 
 
 
