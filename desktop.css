@@ -257,7 +257,7 @@ path.commrv:hover, path.ativo {
 
 /* Controla o título menor (tag label) */
 .sidebar-dir div[style*="border-left"] label {
-    font-size: 0.52rem !important; 
+    font-size: 0.75rem !important; 
     font-weight: bold !important;
     display: block !important;
     margin-bottom: 2px !important;
