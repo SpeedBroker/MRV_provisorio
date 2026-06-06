@@ -3,12 +3,17 @@
 // ==========================================================================
 
 function abrirModuloAnuncio() {
-    // Busca dinamicamente o OBJETO completo do imóvel que injetamos no escopo global do desktop.js
-    const residencialAtivo = window.imovelObjetoAtivo; 
+    let nomeImovel = "Residencial MRV Selecionado";
+    let regiaoImovel = "São Paulo e Região";
 
-    // Tratamento seguro: se o corretor não tiver clicado em nada, adota termos padrão
-    const nomeImovel = residencialAtivo && residencialAtivo.nome ? `Residencial ${residencialAtivo.nome}` : "Residencial MRV Selecionado";
-    const regiaoImovel = residencialAtivo && residencialAtivo.regiao ? residencialAtivo.regiao : "São Paulo e Região";
+    // Busca dinamicamente os dados da tela usando a ponte segura com o Bloco 09 do desktop.js
+    if (typeof window.obterDadosImovelAtual === 'function') {
+        const dadosTela = window.obterDadosImovelAtual();
+        if (dadosTela) {
+            nomeImovel = dadosTela.nome;
+            regiaoImovel = dadosTela.regiao;
+        }
+    }
 
     // Geração automática da Copy (Texto de Vendas) baseada no imóvel correto
     const textoAnuncioSugerido = `🏢 Oportunidade Única na MRV!\n\nVenha morar no ${nomeImovel} em ${regiaoImovel}. Conforto, segurança e condições especiais de financiamento que cabem no seu bolso.\n\nClique em 'Saiba Mais' e fale direto comigo pelo WhatsApp! 📲`;
