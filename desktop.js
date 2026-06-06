@@ -687,10 +687,6 @@ function copiarTexto(texto, mensagemSucesso) {
     });
 }
 
-
-
-
-
 /* ==========================================================================
    BLOCO 08: LÓGICA DO MODAL (SOBRE)
    ========================================================================== */
@@ -711,3 +707,50 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.onload = iniciarApp;
+
+/* ==========================================================================
+   BLOCO 09: MÓDULO AUXILIAR DE INTEGRAÇÃO COM ANÚNCIOS (BLINDADO)
+   ========================================================================== */
+function capturarDadosVitrineParaAnuncio() {
+    // 1. Busca o elemento de faixa de título criado pelo Bloco 07 dentro da ficha técnica
+    const containerFicha = document.getElementById('ficha-tecnica');
+    if (!containerFicha) return null;
+
+    const elementoFaixa = containerFicha.querySelector('.titulo-vitrine-faixa');
+    
+    // 2. Se nenhuma vitrine de residencial estiver aberta ainda na tela
+    if (!elementoFaixa) {
+        return {
+            nome: "Residencial MRV Selecionado",
+            regiao: "São Paulo e Região"
+        };
+    }
+
+    // 3. Extrai o texto da faixa (Ex: "RES. PICO DOS MARINS — SP 2")
+    const textoCompleto = elementoFaixa.textContent || "";
+    
+    // Split pelo travessão "—" ou hífen "-" para separar o nome da região
+    const partes = textoCompleto.split(/[—\-]/);
+    
+    let nomeExtraido = "Residencial MRV";
+    let regiaoExtraida = "São Paulo e Região";
+
+    if (partes.length > 0) {
+        // Remove a palavra "RES. " do início e limpa os espaços
+        nomeExtraido = partes[0].replace(/RES\.\s+/i, '').trim();
+        // Converte para o padrão de letras maiúsculas e minúsculas corretas (Ex: Pico Dos Marins)
+        nomeExtraido = nomeExtraido.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+    }
+    
+    if (partes.length > 1) {
+        regiaoExtraida = partes[1].trim();
+    }
+
+    return {
+        nome: "Residencial " + nomeExtraido,
+        regiao: regiaoExtraida
+    };
+}
+
+// Expõe a função de captura globalmente para que o anuncios.js possa chamá-la com segurança
+window.obterDadosImovelAtual = capturarDadosVitrineParaAnuncio;
