@@ -6,12 +6,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <link rel="stylesheet" href="desktop.css">
+    <style>
+        /* ==========================================================================
+           CONSOLIDAÇÃO DO CABEÇALHO E CENTRALIZAÇÃO DOS BOTÕES
+           ========================================================================== */
+        
+        div.header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            position: relative !important;
+            padding: 0 20px !important;
+            box-sizing: border-box !important;
+        }
+
+        .titulo-mrv-centro {
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            white-space: nowrap !important;
+            text-align: center !important;
+            font-size: 1.2rem !important;
+            color: #ffffff !important;
+            z-index: 1 !important;
+        }
+
+        .container-botoes-mrv {
+            display: flex !important;
+            gap: 12px !important;
+            margin-left: auto !important;
+            align-items: center !important;
+            height: 100% !important;
+            z-index: 10 !important;
+        }
+
+        button#btn-documentos, 
+        button#btn-sobre,
+        button#btn-anuncio {
+            all: unset !important;
+            box-sizing: border-box !important;
+            background-color: #febd11 !important;
+            color: #004d24 !important;
+            border-radius: 4px !important;
+            
+            /* Altura calibrada com sucesso */
+            height: 34px !important;
+            padding: 0 18px !important;
+            
+            font-weight: bold !important;
+            font-size: 0.8rem !important;
+            text-transform: uppercase !important;
+            cursor: pointer !important;
+            text-align: center !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            transition: background-color 0.2s ease, transform 0.1s ease !important;
+        }
+
+        button#btn-documentos:hover, 
+        button#btn-sobre:hover {
+            background-color: #e0a60f !important;
+        }
+
+        /* ESTILO EXCLUSIVO DO BOTÃO DE ANÚNCIO PARA DESTACAR NA REUNIÃO */
+        button#btn-anuncio {
+            background-color: #f37021 !important; /* Laranja MRV vibrante */
+            color: #ffffff !important;
+        }
+
+        button#btn-anuncio:hover {
+            background-color: #dca206 !important; /* Muda para dourado no hover */
+        }
+    </style>
 </head>
 <body>
 
     <div class="header">
-        RESIDENCIAIS MRV EM SÃO PAULO - mai/26
-        <button id="btn-sobre">Sobre</button>
+        <div class="titulo-mrv-centro">
+            RESIDENCIAIS MRV EM SÃO PAULO - MAI/26
+        </div>
+        
+        <div class="container-botoes-mrv">
+            <button id="btn-anuncio">🚀 Anúncio Clique-Único (Breve)</button>
+            <button id="btn-documentos">Documentos</button>
+            <button id="btn-sobre">Sobre</button>
+        </div>
     </div>
 
     <div class="wrapper">
@@ -46,11 +132,11 @@
                 
                 <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
                     <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
-                        As informações podem estar desatualizadas e até erradas, então caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
+                        As informações podem estar desatualizadas e até erradas, caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
                     </p>
                 </div>
 
-                <a href="https://wa.me/5511999999999?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
+                <a href="https://wa.me/5511992617026?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
                     <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
                 </a>
             </div>
