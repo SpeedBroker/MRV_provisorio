@@ -534,17 +534,18 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Linha 2: Limitador e Casa Paulista
+// Linha 2: Limitador ocupando a linha inteira (Segunda linha da tabela)
         html += `
-        <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd;">
-            <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Limitador</label>
-                <strong style="font-size: 0.65rem; color: #333;">${selecionado.limitador}</strong>
-            </div>
-            <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">C. Paulista</label>
-                <strong style="font-size: 0.65rem; color: #333;">${selecionado.casa_paulista}</strong>
-            </div>
+        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%;">
+            <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">Limitador</label>
+            <strong style="font-size: 0.65rem; color: #333; text-align: right; word-break: break-word;">${selecionado.limitador}</strong>
+        </div>`;
+
+        // Linha 3: Casa Paulista ocupando a linha inteira (Terceira linha da tabela)
+        html += `
+        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%;">
+            <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">C. Paulista</label>
+            <strong style="font-size: 0.65rem; color: #333; text-align: right; word-break: break-word;">${selecionado.casa_paulista}</strong>
         </div>`;
 
         // Lógica dos bastidores para varrer a string e capturar o valor real da tabela
