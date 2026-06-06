@@ -11,7 +11,7 @@ function abrirModuloAnuncio() {
     const regiaoImovel = residencialAtivo && residencialAtivo.regiao ? residencialAtivo.regiao : "São Paulo e Região";
 
     // Geração automática da Copy (Texto de Vendas) baseada no imóvel correto
-    const textoAnuncioSugerido = `🏢 Oportunidade Única na MRV! \n\nVenha morar no ${nomeImovel} em ${regiaoImovel}. Conforto, segurança e condições especiais de financiamento que cabem no seu bolso.\n\nClique em 'Saiba Mais' e fale direto comigo pelo WhatsApp! 📲`;
+    const textoAnuncioSugerido = `🏢 Oportunidade Única na MRV!\n\nVenha morar no ${nomeImovel} em ${regiaoImovel}. Conforto, segurança e condições especiais de financiamento que cabem no seu bolso.\n\nClique em 'Saiba Mais' e fale direto comigo pelo WhatsApp! 📲`;
 
     // Renderiza o Modal Flutuante na Interface
     criarEstruturaModalAnuncio(nomeImovel, textoAnuncioSugerido);
@@ -54,7 +54,7 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
             <strong style="color: #333; font-size: 0.95rem;">${nome}</strong>
         </div>
 
-        <!-- Campo de Texto do Anúncio (Ajustado para melhor encaixe do texto) -->
+        <!-- Campo de Texto do Anúncio -->
         <div style="margin-bottom: 15px;">
             <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Legenda do Anúncio (Copywriting):</label>
             <textarea id="txt-anuncio-copy" style="width: 100%; height: 115px; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem; resize: none; line-height: 1.45; font-family: inherit;">${textoCopy}</textarea>
@@ -93,7 +93,7 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
     backgroundModal.appendChild(corpoModal);
     document.body.appendChild(backgroundModal);
 
-    // --- Listeners de Eventos ---
+    // --- Listeners de Eventos Internos do Modal ---
     const fecharModal = () => backgroundModal.remove();
     document.getElementById('fechar-modal-anuncio').addEventListener('click', fecharModal);
     document.getElementById('btn-anuncio-cancelar').addEventListener('click', fecharModal);
@@ -111,3 +111,14 @@ function criarEstruturaModalAnuncio(nome, textoCopy) {
         fecharModal();
     });
 }
+
+// --- Vinculação Inicial com o Botão do Painel de Controle ---
+document.addEventListener("DOMContentLoaded", () => {
+    const btnAnuncioElemento = document.getElementById('btn-anuncio');
+    if (btnAnuncioElemento) {
+        // Altera o texto removendo o "(Breve)" para indicar que a ferramenta está ativa no protótipo
+        btnAnuncioElemento.innerHTML = "🚀 Anúncio Clique-Único";
+        // Vincula a ação de clique para abrir o modal
+        btnAnuncioElemento.addEventListener('click', abrirModuloAnuncio);
+    }
+});
