@@ -586,10 +586,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
-                    <div style="display:flex; gap:3px; margin-left:5px;">
-                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
-                    </div>
+<div style="display:flex; gap:3px; margin-left:5px;">
+    <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
+    <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+</div>
                 </div>
             </div>`;
         }
