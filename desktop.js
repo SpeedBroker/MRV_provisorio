@@ -598,8 +598,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             if(!texto || texto === "---" || texto === "") return "";
             return `
             <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <label style="display:block; font-size:0.55rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
-                <p style="margin:0; font-size:0.50rem; color:#444; line-height:1.3;">${texto}</p>
+                <!-- Título ligeiramente menor e mais discreto -->
+                <label style="display:block; font-size:0.52rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
+                
+                <!-- Texto descritivo em um tamanho intermediário e confortável -->
+                <p style="margin:0; font-size:0.65rem; color:#444; line-height:1.3;">${texto}</p>
             </div>`;
         };
         html += criarBoxDiferencial('💡 Observação Importante', selecionado.observacoes, '#fff9c4', '#fbc02d', true);
