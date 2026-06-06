@@ -433,6 +433,11 @@ function gerarListaLateral() {
     }).join('');
 }
 
+
+
+
+
+
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -504,7 +509,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         // Início da Caixa Cinza Unificada
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
+            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
@@ -517,35 +522,41 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        // Linha 1: Entrega, Obra e Estoque
+        // ==========================================
+        // Linha 2: Limitador ocupando a linha inteira
+        // ==========================================
         html += `
-        <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd;">
-            <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
-                <strong style="font-size: 0.65rem; color: #333;">${selecionado.entrega}</strong>
-            </div>
-            <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
-                <strong style="font-size: 0.65rem; color: #333;">${selecionado.obra || 0}%</strong>
-            </div>
-            <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
-                <strong style="font-size: 0.65rem;">${valorEstoqueColorido}</strong>
-            </div>
+        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%; height: 32px;">
+            <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">Limitador</label>
+            <strong style="font-size: 0.75rem; color: #333; text-align: right; word-break: break-word;">${selecionado.limitador}</strong>
         </div>`;
 
-// Linha 2: Limitador ocupando a linha inteira (Segunda linha da tabela)
+        // ==========================================
+        // Linha 3: Casa Paulista ocupando a linha inteira
+        // ==========================================
         html += `
-        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%;">
-            <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">Limitador</label>
-            <strong style="font-size: 0.65rem; color: #333; text-align: right; word-break: break-word;">${selecionado.limitador}</strong>
+        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%; height: 32px;">
+            <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">C. Paulista</label>
+            <strong style="font-size: 0.75rem; color: #333; text-align: right; word-break: break-word;">${selecionado.casa_paulista}</strong>
         </div>`;
 
-        // Linha 3: Casa Paulista ocupando a linha inteira (Terceira linha da tabela)
+        // ==========================================
+        // Linha 4: Entrega, Obra e Estoque
+        // ==========================================
         html += `
-        <div class="grid-cell full-width" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid #ddd; box-sizing: border-box; width: 100%;">
-            <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase; flex-shrink: 0; margin-right: 15px;">C. Paulista</label>
-            <strong style="font-size: 0.65rem; color: #333; text-align: right; word-break: break-word;">${selecionado.casa_paulista}</strong>
+        <div style="display: flex; width: 100%; border-bottom: 1px solid #ddd; box-sizing: border-box; height: 32px;">
+            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Entrega</label>
+                <strong style="font-size: 0.75rem; color: #333;">${selecionado.entrega}</strong>
+            </div>
+            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Obra</label>
+                <strong style="font-size: 0.75rem; color: #333;">${selecionado.obra || 0}%</strong>
+            </div>
+            <div style="flex: 1; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">Estoque</label>
+                <strong style="font-size: 0.75rem;">${valorEstoqueColorido}</strong>
+            </div>
         </div>`;
 
         // Lógica dos bastidores para varrer a string e capturar o valor real da tabela
@@ -555,14 +566,15 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             lines.forEach(linhaStr => {
                 const colsArr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
+                    coordsReal = colsArr[1]; // Ajuste de redundância caso use outra var interna
                     precoReal = colsArr[1];
                 }
             });
         }
 
-        // Linha 3: Faixa Laranja Única com o valor correto carregado da tabela
+        // Linha final: Faixa Laranja Única com o valor correto carregado da tabela
         html += `
-        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
             À PARTIR DE: ${precoReal}
         </div>`;
         
