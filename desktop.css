@@ -250,7 +250,7 @@ path.commrv:hover, path.ativo {
 /* Controla o texto da descrição (tags p e span) */
 .sidebar-dir div[style*="border-left"] p,
 .sidebar-dir div[style*="border-left"] span {
-    font-size: 0.65rem !important; 
+    font-size: 0.75rem !important; 
     color: #444 !important;
     margin: 0 !important;
 }
