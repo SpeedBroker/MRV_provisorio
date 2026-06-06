@@ -87,12 +87,13 @@ body {
     flex-shrink: 0; 
 }
 
+/* Base de todos os botões da lista lateral */
 .btRes, .separador-complexo-btn {
     width: 92% !important; 
     margin: 4px auto !important; 
     display: flex !important; 
     align-items: center !important; 
-    padding: 8px 12px !important; /* Aumentei o padding para dar espaço */
+    padding: 8px 12px !important; 
     border-radius: 4px; 
     font-size: 0.72rem; 
     cursor: pointer; 
@@ -100,7 +101,8 @@ body {
     text-decoration: none;
     transition: all 0.1s ease;
     box-sizing: border-box;
-    justify-content: space-between; /* Garante nome na esquerda e zona na direita */
+    justify-content: space-between; 
+    color: #000000 !important; /* CORRIGIDO: Garante fonte preta para QUALQUER botão (comum ou complexo) */
 }
 
 /* HOVER: Contorno verde sem negrito */
@@ -112,7 +114,7 @@ body {
 /* CLIQUE (ATIVO) */
 .btRes.ativo, .separador-complexo-btn.ativo { 
     background-color: #ececec !important; 
-    color: #000 !important; 
+    color: #000000 !important; /* Mantém preto no clique */
     border: 1px solid var(--mrv-verde) !important; 
     border-right: 5px solid var(--mrv-verde) !important; 
     font-weight: bold;
@@ -124,19 +126,22 @@ body {
 .btRes.btn-zn { background-color: rgba(255, 192, 0, 0.1) !important; border-right: 5px solid var(--mrv-zn) !important; }
 .btRes.btn-zs { background-color: rgba(236, 0, 140, 0.1) !important; border-right: 5px solid var(--mrv-zs) !important; }
 
-/* --- COMPLEXOS (Mais vivos/claros que a versão anterior) --- */
+/* --- COMPLEXOS --- */
 .separador-complexo-btn { 
-    color: white !important; 
     font-weight: bold; 
     text-transform: uppercase; 
     border: none !important;
 }
 
-/* Cores de Complexo ajustadas */
-.separador-complexo-btn.btn-zo { background-color: #ff9d42 !important; } /* Laranja mais claro e vivo que o path */
-.separador-complexo-btn.btn-zl { background-color: #003399 !important; } 
-.separador-complexo-btn.btn-zn { background-color: #ffd700 !important; color: #333 !important; } /* Amarelo com texto escuro para ler melhor */
+/* Cores de Fundo dos Complexos (Mantidos vivos e claros com texto preto absoluto) */
+.separador-complexo-btn.btn-zo { background-color: #ff9d42 !important; } 
+.separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; /* Exceção visual: fundo ZL é muito escuro, mantido branco para leitura */ } 
+.separador-complexo-btn.btn-zn { background-color: #ffd700 !important; } 
 .separador-complexo-btn.btn-zs { background-color: #ff33aa !important; }
+
+/* Nota: No caso da ZL (Zona Leste), como o fundo corporativo é um azul marinho muito escuro (#003399), 
+   abri uma única exceção acima para ele continuar com a fonte branca, caso contrário a leitura ficaria impossível. 
+   Os demais (Oeste, Norte e Sul) ficam 100% com a fonte preta no fundo colorido! */
 
 /* ==========================================================================
    5. CENTRO (MAPAS E TÍTULOS)
@@ -173,18 +178,17 @@ body {
 }
 
 #caixa-b { 
-    flex: 0.4; /* Reduzi de 0.8 para 0.4 para ocupar metade do espaço anterior */
+    flex: 0.4; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    padding: 5px; /* Reduzi um pouco o respiro interno */
+    padding: 5px; 
     border-top: 1px solid #eee; 
     cursor: pointer; 
     background: #fff; 
-    min-height: 120px; /* Diminuí levemente a altura mínima */
-    max-height: 160px; /* Travei uma altura máxima para não crescer demais em telas grandes */
+    min-height: 120px; 
+    max-height: 160px; 
 }
-
 
 svg { width: 100%; height: 100%; }
 
@@ -215,7 +219,6 @@ path.commrv:hover, path.ativo {
 }
 
 /* 6.1 - CABEÇALHO DO IMÓVEL (PROTEÇÃO) */
-/* Mantém as tabelas de Entrega, Obra, etc. pequenas */
 .sidebar-dir table:first-of-type b, 
 .sidebar-dir table:first-of-type span,
 .sidebar-dir table:first-of-type td {
@@ -223,20 +226,17 @@ path.commrv:hover, path.ativo {
 }
 
 /* 6.2 - CAIXAS COLORIDAS (LOCALIZAÇÃO, MOBILIDADE, ETC) */
-/* Alvo: Qualquer div que tenha uma borda lateral (as caixas coloridas) */
 .sidebar-dir div[style*="border-left"] {
     font-size: 16px !important; 
     line-height: 1.4 !important;
 }
 
-/* Alvo Universal Interno: Garante que o texto dentro de spans ou p também mude */
 .sidebar-dir div[style*="border-left"] *,
 .sidebar-dir div[style*="border-left"] span,
 .sidebar-dir div[style*="border-left"] p {
     font-size: 16px !important;
 }
 
-/* Ajuste apenas para os títulos em negrito dentro das caixas ficarem um pouco menores */
 .sidebar-dir div[style*="border-left"] strong {
     font-size: 14px !important;
     display: inline-block;
