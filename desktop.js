@@ -496,7 +496,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;        
         html += `
         <div style="padding: 2px 0 5px 0;">
-            <div style="font-size:0.65rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
                 <span style="flex:1;">📍 ${selecionado.endereco}</span>
                 <div style="display:flex; gap:3px; margin-left:5px;">
                     <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
@@ -508,7 +508,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
+            html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
