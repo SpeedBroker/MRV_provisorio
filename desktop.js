@@ -19,7 +19,7 @@ const COL = {
     COMERCIO: 23, SAUDE_EDUCACAO: 24,
     BOOK_CLIENTE: 25, BOOK_CORRETOR: 26,
     LINKS_VIDEOS: 27, LINKS_PLANTAS: 28,  
-    LINKS_IMPLANT: 29, LINKS_DIVERSOS: 30,f
+    LINKS_IMPLANT: 29, LINKS_DIVERSOS: 30,
     ESTANDE: 31 
 };
 
@@ -51,7 +51,7 @@ function configurarBotaoDocumentos() {
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
                 let htmlDocs = `
-
+                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
                     <div style="padding: 10px 0;">
                 `;
 
@@ -310,7 +310,6 @@ function detectarClasseZona(zona) {
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZS")) return "btn-zs";
-if (z.includes("GSP")) return "btn-gsp";
     return ""; 
 }
 
