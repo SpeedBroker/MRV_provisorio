@@ -310,6 +310,7 @@ function detectarClasseZona(zona) {
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZS")) return "btn-zs";
+if (z.includes("GSP")) return "btn-gsp";
     return ""; 
 }
 
