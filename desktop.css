@@ -17,12 +17,7 @@
     --mrv-zs: #ec008c; 
 }
 
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
 body { 
     display: flex; 
@@ -81,13 +76,12 @@ body {
 }
 
 /* ==========================================================================
-   4. SIDEBAR ESQUERDA (LISTA DE IMÓVEIS - SCROLL REATIVADO)
+   4. SIDEBAR ESQUERDA (LISTA DE IMÓVEIS)
    ========================================================================== */
 .sidebar-esq { 
     width: 280px; 
-    max-height: 100%;
     border-right: 1px solid #ddd; 
-    overflow-y: auto !important; 
+    overflow-y: auto; 
     padding: 10px 0; 
     background: #f8f9fa; 
     flex-shrink: 0; 
@@ -96,20 +90,19 @@ body {
 /* Base de todos os botões da lista lateral */
 .btRes, .separador-complexo-btn {
     width: 92% !important; 
-    margin: 6px auto !important; 
+    margin: 4px auto !important; 
     display: flex !important; 
     align-items: center !important; 
-    padding: 10px 12px !important; 
-    border-radius: 4px !important; 
-    font-size: 0.75rem !important; 
+    padding: 8px 12px !important; 
+    border-radius: 4px; 
+    font-size: 0.72rem; 
     cursor: pointer; 
-    border: 1px solid #ddd !important; 
+    border: 1px solid #ddd; 
     text-decoration: none;
     transition: all 0.1s ease;
     box-sizing: border-box;
     justify-content: space-between; 
-    color: #000000 !important;
-    font-weight: 500;
+    color: #000000 !important; /* CORRIGIDO: Garante fonte preta para QUALQUER botão (comum ou complexo) */
 }
 
 /* HOVER: Contorno verde sem negrito */
@@ -121,13 +114,13 @@ body {
 /* CLIQUE (ATIVO) */
 .btRes.ativo, .separador-complexo-btn.ativo { 
     background-color: #ececec !important; 
-    color: #000000 !important; 
+    color: #000000 !important; /* Mantém preto no clique */
     border: 1px solid var(--mrv-verde) !important; 
     border-right: 5px solid var(--mrv-verde) !important; 
-    font-weight: bold !important;
+    font-weight: bold;
 }
 
-/* --- RESIDENCIAIS (btRes) - Formatação de Cores Restaurada --- */
+/* --- RESIDENCIAIS (btRes) --- */
 .btRes.btn-zo { background-color: rgba(243, 112, 33, 0.1) !important; border-right: 5px solid var(--mrv-zo) !important; }
 .btRes.btn-zl { background-color: rgba(0, 32, 96, 0.1) !important; border-right: 5px solid var(--mrv-zl) !important; }
 .btRes.btn-zn { background-color: rgba(255, 192, 0, 0.1) !important; border-right: 5px solid var(--mrv-zn) !important; }
@@ -135,15 +128,16 @@ body {
 
 /* --- COMPLEXOS --- */
 .separador-complexo-btn { 
-    font-weight: bold !important; 
+    font-weight: bold; 
     text-transform: uppercase; 
+    border: none !important;
 }
 
-/* Cores de Fundo dos Complexos */
-.separador-complexo-btn.btn-zo { background-color: #ff9d42 !important; border: none !important; } 
-.separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; border: none !important; } 
-.separador-complexo-btn.btn-zn { background-color: #ffd700 !important; border: none !important; } 
-.separador-complexo-btn.btn-zs { background-color: #ff33aa !important; border: none !important; }
+/* Cores de Fundo dos Complexos (Mantidos vivos e claros com texto preto absoluto) */
+.separador-complexo-btn.btn-zo { background-color: #ff9d42 !important; } 
+.separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; /* Exceção visual: fundo ZL é muito escuro, mantido branco para leitura */ } 
+.separador-complexo-btn.btn-zn { background-color: #ffd700 !important; } 
+.separador-complexo-btn.btn-zs { background-color: #ff33aa !important; }
 
 /* ==========================================================================
    5. CENTRO (MAPAS E TÍTULOS)
@@ -220,34 +214,40 @@ path.commrv:hover, path.ativo {
     flex-shrink: 0; 
 }
 
+/* REMOVIDO: .vitrine-topo (Faixa Verde Dinâmica Redundante) */
+
+/* Ajuste no título da faixa para iniciar o topo da vitrine com respiro ideal */
 .titulo-vitrine-faixa { 
     display: flex !important; 
     align-items: center !important; 
     justify-content: center !important; 
     width: 100% !important; 
-    height: 38px !important; 
+    height: 38px !important; /* Leve aumento para dar mais imponência ao nome principal */
     font-weight: bold !important; 
-    font-size: 0.95rem !important; 
+    font-size: 0.95rem !important; /* Aumentado sutilmente para destacar o nome do residencial */
     border-radius: 4px; 
     text-transform: uppercase; 
     color: #fff; 
-    margin-top: 2px; 
+    margin-top: 2px; /* Garante alinhamento limpo no topo */
     margin-bottom: 10px; 
 }
 
 .faixa-laranja { background: var(--mrv-laranja) !important; }
 .faixa-preta { background: var(--mrv-preto) !important; }
 
+/* Cabeçalho do Imóvel e Tabelas Internas */
 .sidebar-dir table:first-of-type b, 
 .sidebar-dir table:first-of-type span,
 .sidebar-dir table:first-of-type td {
     font-size: 0.75rem !important;
 }
 
+/* 6.2 - CAIXAS COLORIDAS (LOCALIZAÇÃO, MOBILIDADE, ETC) */
 .sidebar-dir div[style*="border-left"] {
     line-height: 1.3 !important;
 }
 
+/* Controla o texto da descrição (tags p e span) */
 .sidebar-dir div[style*="border-left"] p,
 .sidebar-dir div[style*="border-left"] span {
     font-size: 0.75rem !important; 
@@ -255,6 +255,7 @@ path.commrv:hover, path.ativo {
     margin: 0 !important;
 }
 
+/* Controla o título menor (tag label) */
 .sidebar-dir div[style*="border-left"] label {
     font-size: 0.75rem !important; 
     font-weight: bold !important;
@@ -263,6 +264,7 @@ path.commrv:hover, path.ativo {
     text-transform: uppercase !important;
 }
 
+/* Controla os destaques em negrito se houver (tag strong) */
 .sidebar-dir div[style*="border-left"] strong {
     font-size: 0.65rem !important;
 }
@@ -392,7 +394,7 @@ path.commrv:hover, path.ativo {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 18px !important; 
+    height: 18px !important; /* Força altura perfeitamente igual */
     line-height: 18px !important;
     box-sizing: border-box !important;
 }
@@ -530,13 +532,15 @@ path.commrv:hover, path.ativo {
     border-bottom: 1px solid #eee;
 }
 
+/* Grid layout que equaliza as alturas perfeitamente */
 .detalhes-residencial-container .grid-info {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    font-size: 0.75rem; 
+    font-size: 0.75rem; /* Fonte unificada e padronizada */
     color: #333;
 }
 
+/* Células base do grid */
 .detalhes-residencial-container .grid-cell {
     padding: 10px 12px;
     border-bottom: 1px solid #eee;
@@ -546,23 +550,28 @@ path.commrv:hover, path.ativo {
     box-sizing: border-box;
 }
 
+/* Divisores internos do grid 50/50 */
 .detalhes-residencial-container .border-right {
     border-right: 1px solid #eee;
 }
 
+/* Label Verde padrão */
 .detalhes-residencial-container .grid-cell .label {
     color: var(--mrv-verde);
     font-weight: bold;
 }
 
+/* Valor em negrito */
 .detalhes-residencial-container .grid-cell .valor {
     font-weight: bold;
 }
 
+/* Regra crucial: Ocupar a linha inteira */
 .detalhes-residencial-container .full-width {
     grid-column: span 2;
 }
 
+/* Bloco Inferior de Preço */
 .detalhes-residencial-container .container-preco {
     display: flex;
     align-items: center;
@@ -573,7 +582,7 @@ path.commrv:hover, path.ativo {
 
 .detalhes-residencial-container .container-preco .preco-label {
     flex: 1;
-    font-size: 0.75rem; 
+    font-size: 0.75rem; /* Acompanha o padrão */
     font-weight: bold;
     color: #333;
 }
@@ -584,10 +593,13 @@ path.commrv:hover, path.ativo {
     color: white; 
     text-align: center; 
     padding: 8px; 
-    font-size: 0.85rem; 
+    font-size: 0.85rem; /* EXCEÇÃO: 1 ponto maior que os demais de 0.75rem */
     font-weight: bold; 
     border-radius: 4px;
 }
+
+
+
 
 /* ==========================================================================
    12. NOTIFICAÇÃO FLUTUANTE (TOAST COPIAR)
