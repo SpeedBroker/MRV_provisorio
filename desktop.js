@@ -32,7 +32,7 @@ async function iniciarApp() {
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
     } catch (err) { 
-        console.error("Erro na inicialização do App:", err); 
+        console.error(err); 
     }
 }
 
@@ -69,12 +69,14 @@ function configurarBotaoDocumentos() {
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
                 
+                // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
             }
         });
     }
 }
 
+// Retorna o link oficial de visualização, garantindo botões de impressão e download
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -84,12 +86,14 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
+            // Força o modo de visualização completo com todas as opções de menu (impressão activa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
     return link;
 }
 
+// Retorna o link específico para a miniatura em hover
 function formatarLinkPreview(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -99,12 +103,14 @@ function formatarLinkPreview(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
+            // Retorna o link ideal e leve para renderizar dentro da miniatura
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
     return link;
 }
 
+// LÓGICA DO HOVER DA MINIATURA
 function inicializarHoverMiniaturas() {
     const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
     
@@ -113,9 +119,11 @@ function inicializarHoverMiniaturas() {
         if (!urlPreview) return;
 
         botao.addEventListener('mouseenter', (e) => {
+            // Remove qualquer preview existente para evitar duplicados
             const antigo = document.getElementById('preview-flutuante-drive');
             if (antigo) antigo.remove();
 
+            // Cria o container do preview flutuante
             const previewDiv = document.createElement('div');
             previewDiv.id = 'preview-flutuante-drive';
             previewDiv.style.position = 'fixed';
@@ -127,11 +135,13 @@ function inicializarHoverMiniaturas() {
             previewDiv.style.borderRadius = '8px';
             previewDiv.style.overflow = 'hidden';
             previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none';
+            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
 
+            // Insere o iframe com o link leve de preview
             previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
             document.body.appendChild(previewDiv);
 
+            // Posiciona perto do botão do mouse
             posicionarPreview(e, previewDiv);
         });
 
@@ -153,15 +163,31 @@ function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
 
+    // Ajusta se passar da borda direita da tela
     if (left + 340 > window.innerWidth) {
         left = e.clientX - 340;
     }
+    // Ajusta se passar da borda de baixo da tela
     if (top + 240 > window.innerHeight) {
         top = e.clientY - 240;
     }
 
     elemento.style.top = `${top}px`;
     elemento.style.left = `${left}px`;
+}
+
+function copiarTextoRapido(texto, msg = "Link copiado!") {
+    if (!texto || texto === "") return;
+    navigator.clipboard.writeText(texto).then(() => {
+        alert(msg);
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+}
+
+function copiarLink(url) {
+    const linkSeguro = formatarLinkSeguro(url);
+    copiarTextoRapido(linkSeguro, "Link seguro copiado!");
 }
 
 function abrirDocumentoDireto(url) {
@@ -184,7 +210,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -221,12 +247,8 @@ async function carregarPlanilha() {
             }
             colunas.push(campo.trim());
 
-            const idPath = (colunas[COL.ID] || "").toLowerCase().replace(/\s/g, '');
-            
-            // TRAVA DE SEGURANÇA: Se o id_path for "vendido", ignora completamente a linha
-            if (idPath === "vendido") return null;
-
             const nomeImovel = colunas[COL.NOME] || "";
+            const idPath = (colunas[COL.ID] || "").toLowerCase().replace(/\s/g, '');
             const ordem = parseInt(colunas[COL.ORDEM]);
 
             if (!idPath || nomeImovel.length <= 1 || isNaN(ordem)) return null;
@@ -269,11 +291,8 @@ async function carregarPlanilha() {
         }).filter(i => i !== null);
 
         DADOS_PLANILHA.sort((a, b) => a.ordem - b.ordem);
-        desenharMapas(); 
-        gerarListaLateral();
-    } catch (e) { 
-        console.error("Erro ao processar dados da planilha:", e); 
-    }
+        desenharMapas(); gerarListaLateral();
+    } catch (e) { console.error(e); }
 }
 
 /* ==========================================================================
@@ -302,10 +321,8 @@ function navegarVitrine(nome) {
 
 function comandoSelecao(idPath, nomePath, fonte) {
     const idNorm = idPath.toLowerCase().replace(/\s/g, '');
-    
-    // Verificações de segurança adicionais para os objetos de mapa globais
-    const noGSP = (typeof MAPA_GSP !== 'undefined') && MAPA_GSP.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
-    const noInterior = (typeof MAPA_INTERIOR !== 'undefined') && MAPA_INTERIOR.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
+    const noGSP = MAPA_GSP.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
+    const noInterior = MAPA_INTERIOR.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
     
     if (noGSP && mapaAtivo !== 'GSP') trocarMapas(false);
     if (noInterior && mapaAtivo !== 'INTERIOR') trocarMapas(false);
@@ -323,12 +340,8 @@ function comandoSelecao(idPath, nomePath, fonte) {
     if (elMapa) elMapa.classList.add('ativo');
 
     gerarListaLateral();
-    
-    let nomeOficial = pathAtivo;
-    if (typeof MAPA_GSP !== 'undefined' && typeof MAPA_INTERIOR !== 'undefined') {
-        const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
-        nomeOficial = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || pathAtivo;
-    }
+    const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
+    const nomeOficial = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || pathAtivo;
     
     atualizarTituloSuperior(nomeOficial);
     montarVitrine(selecionado, imoveisDaCidade, nomeOficial);
@@ -338,7 +351,7 @@ function atualizarTituloSuperior(texto) {
     const titulo = document.getElementById('cidade-titulo');
     if (!titulo) return;
     if (texto) { titulo.innerText = `MRV EM ${texto.toUpperCase()}`; } 
-    else if (pathAtivo && typeof MAPA_GSP !== 'undefined' && typeof MAPA_INTERIOR !== 'undefined') {
+    else if (pathAtivo) {
         const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
         const nomeFixo = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || "";
         titulo.innerText = `MRV EM ${nomeFixo.toUpperCase()}`;
@@ -350,8 +363,7 @@ function atualizarTituloSuperior(texto) {
    ========================================================================== */
 function renderizarNoContainer(id, dados, interativo) {
     const container = document.getElementById(id);
-    if (!container || !dados || !dados.paths) return;
-    
+    if (!container) return;
     container.style.display = "flex"; 
     container.style.alignItems = "center";
     container.style.justifyContent = "center"; 
@@ -387,10 +399,6 @@ function renderizarNoContainer(id, dados, interativo) {
 }
 
 function desenharMapas() {
-    if (typeof MAPA_GSP === 'undefined' || typeof MAPA_INTERIOR === 'undefined') {
-        console.error("Erro: Objetos MAPA_GSP ou MAPA_INTERIOR não foram encontrados. Verifique se o arquivo de mapas está carregado no HTML.");
-        return;
-    }
     renderizarNoContainer('caixa-a', (mapaAtivo === 'GSP') ? MAPA_GSP : MAPA_INTERIOR, true);
     renderizarNoContainer('caixa-b', (mapaAtivo === 'GSP') ? MAPA_INTERIOR : MAPA_GSP, false);
     const cb = document.getElementById('caixa-b');
@@ -469,7 +477,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    const urlMapsResidencial = `https://maps.google.com/?q=${encodeURIComponent(selecionado.endereco)}`;
+    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = ""; 
     
@@ -500,7 +508,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff";
+        let corEstoque = "#ffffff"; 
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
@@ -555,7 +563,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
        
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://maps.google.com/?q=${encodeURIComponent(selecionado.estande)}`;
+            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
@@ -600,13 +608,13 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>`;
         }
     } else {
-        let colComplexo = "#333";
-        if (selecionado.zona === 'ZO') colComplexo = "#ff9d42"; 
-        else if (selecionado.zona === 'ZL') colComplexo = "#003399";
-        else if (selecionado.zona === 'ZN') colComplexo = "#ffd700";
-        else if (selecionado.zona === 'ZS') colComplexo = "#ff33aa";
+        let corComplexo = "#333";
+        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
+        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
+        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
+        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
 
-        let colTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
+        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${colComplexo}; color: ${colTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
@@ -634,6 +642,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     painel.innerHTML = html;
 }
 
+// CORREÇÃO CRÍTICA: Função fechada perfeitamente com o uso de toast e fallback para alert
 function copiarTexto(texto, mensagemSucesso) {
     if (!texto) return;
     navigator.clipboard.writeText(texto).then(() => {
