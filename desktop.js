@@ -176,20 +176,6 @@ function posicionarPreview(e, elemento) {
     elemento.style.left = `${left}px`;
 }
 
-function copiarTexto(texto, msg = "Link copiado!") {
-    if (!texto || texto === "") return;
-    navigator.clipboard.writeText(texto).then(() => {
-        alert(msg);
-    }).catch(err => {
-        console.error('Erro ao copiar: ', err);
-    });
-}
-
-function copiarLink(url) {
-    const linkSeguro = formatarLinkSeguro(url);
-    copiarTexto(linkSeguro, "Link seguro copiado!");
-}
-
 function abrirDocumentoDireto(url) {
     const linkSeguro = formatarLinkSeguro(url);
     if (linkSeguro) {
@@ -210,7 +196,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -247,8 +233,12 @@ async function carregarPlanilha() {
             }
             colunas.push(campo.trim());
 
-            const nomeImovel = colunas[COL.NOME] || "";
             const idPath = (colunas[COL.ID] || "").toLowerCase().replace(/\s/g, '');
+            
+            // TRAVA DE SEGURANÇA: Se o id_path for "vendido", ignora completamente a linha
+            if (idPath === "vendido") return null;
+
+            const nomeImovel = colunas[COL.NOME] || "";
             const ordem = parseInt(colunas[COL.ORDEM]);
 
             if (!idPath || nomeImovel.length <= 1 || isNaN(ordem)) return null;
@@ -434,10 +424,6 @@ function gerarListaLateral() {
 }
 
 
-
-
-
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -481,7 +467,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
+    const urlMapsResidencial = `https://maps.google.com/?q=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = ""; 
     
@@ -573,7 +559,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
+            const urlMapsEstande = `https://maps.google.com/?q=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
@@ -652,62 +638,19 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     painel.innerHTML = html;
 }
 
-// Nova função global de cópia sem o uso de alert() do navegador
+// Nova função global de cópia com suporte nativo a Toast e fallback de segurança
 function copiarTexto(texto, mensagemSucesso) {
-    if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
-        const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
-        if(textoInvalido) texto = decodeURIComponent(textoInvalido);
-    }
-
+    if (!texto) return;
     navigator.clipboard.writeText(texto).then(() => {
-        const textoMensagem = mensagemSucesso || "Link copiado com sucesso!";
-        
-        const toastAntigo = document.querySelector('.toast-notificacao');
-        if (toastAntigo) toastAntigo.remove();
-
-        const toast = document.createElement('div');
-        toast.className = 'toast-notificacao';
-        toast.innerHTML = `✅ ${textoMensagem}`;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
+        const toast = document.getElementById('toast-feedback');
+        if (toast) {
+            toast.innerText = mensagemSucesso || "Copiado com sucesso!";
             toast.classList.add('mostrar');
-        }, 50);
-
-        setTimeout(() => {
-            toast.classList.remove('mostrar');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }, 2500);
-
+            setTimeout(() => toast.classList.remove('mostrar'), 2500);
+        } else {
+            alert(mensagemSucesso || "Link copiado!");
+        }
     }).catch(err => {
-        console.error('Erro ao copiar link: ', err);
+        console.error('Erro ao copiar: ', err);
     });
 }
-
-
-
-
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
-window.onload = iniciarApp;
