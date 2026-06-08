@@ -15,13 +15,6 @@
     --mrv-zl: #002060; 
     --mrv-zn: #ffc000; 
     --mrv-zs: #ec008c; 
-
-    /* Novas Cores das Regiões (Grande SP e Interior) */
-    --mrv-gsp: #14b8a6;       /* Azul Esverdeado / Ciano */
-    --mrv-vale: #f59e0b;      /* Laranja Queimado / Âmbar */
-    --mrv-campinas: #8b5cf6;  /* Roxo */
-    --mrv-ribeirao: #ec4899;  /* Rosa / Magenta */
-    --mrv-outros: #6b7280;    /* Cinza Neutro */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -128,18 +121,11 @@ body {
 }
 
 /* --- RESIDENCIAIS (btRes) --- 
-    MODIFICAÇÃO: Tons escurecidos de 0.1 para 0.22 para dar mais destaque visual */
+   MODIFICAÇÃO: Tons escurecidos de 0.1 para 0.22 para dar mais destaque visual */
 .btRes.btn-zo { background-color: rgba(243, 112, 33, 0.22) !important; border-right: 5px solid var(--mrv-zo) !important; }
 .btRes.btn-zl { background-color: rgba(0, 32, 96, 0.22) !important; border-right: 5px solid var(--mrv-zl) !important; }
 .btRes.btn-zn { background-color: rgba(255, 192, 0, 0.22) !important; border-right: 5px solid var(--mrv-zn) !important; }
 .btRes.btn-zs { background-color: rgba(236, 0, 140, 0.22) !important; border-right: 5px solid var(--mrv-zs) !important; }
-
-/* Novas Regiões nos botões comuns (.btRes) com opacidade 0.22 e borda lateral combinando */
-.btRes.btn-gsp { background-color: rgba(20, 184, 166, 0.22) !important; border-right: 5px solid var(--mrv-gsp) !important; }
-.btRes.btn-vale { background-color: rgba(245, 158, 11, 0.22) !important; border-right: 5px solid var(--mrv-vale) !important; }
-.btRes.btn-campinas { background-color: rgba(139, 92, 246, 0.22) !important; border-right: 5px solid var(--mrv-campinas) !important; }
-.btRes.btn-ribeirao { background-color: rgba(236, 72, 153, 0.22) !important; border-right: 5px solid var(--mrv-ribeirao) !important; }
-.btRes.btn-outros { background-color: rgba(107, 114, 128, 0.22) !important; border-right: 5px solid var(--mrv-outros) !important; }
 
 /* --- COMPLEXOS --- */
 .separador-complexo-btn { 
@@ -153,13 +139,6 @@ body {
 .separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; /* Exceção visual: fundo ZL é muito escuro, mantido branco para leitura */ } 
 .separador-complexo-btn.btn-zn { background-color: #ffd700 !important; } 
 .separador-complexo-btn.btn-zs { background-color: #ff33aa !important; }
-
-/* Novas Regiões nos botões de Complexos com fundos vivos e sólidos */
-.separador-complexo-btn.btn-gsp { background-color: #2dd4bf !important; }
-.separador-complexo-btn.btn-vale { background-color: #fbbf24 !important; }
-.separador-complexo-btn.btn-campinas { background-color: #a78bfa !important; }
-.separador-complexo-btn.btn-ribeirao { background-color: #f472b6 !important; }
-.separador-complexo-btn.btn-outros { background-color: #9ca3af !important; }
 
 /* ==========================================================================
    5. CENTRO (MAPAS E TÍTULOS)
@@ -288,7 +267,7 @@ path.commrv:hover, path.ativo {
 .sidebar-dir div[style*="border-left"] strong {
     font-size: 0.65rem !important;
 }
-    
+   
 /* ==========================================================================
    7. TABELAS DE PREÇOS (MANTIDO COMPACTO)
    ========================================================================== */
