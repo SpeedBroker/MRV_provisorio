@@ -306,25 +306,11 @@ function obterHtmlZona(zona, tipo) {
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
-    
-    // 1. Zonas Tradicionais de SP Capital
     if (z.includes("ZO")) return "btn-zo";
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZS")) return "btn-zs";
-    
-    // 2. Regiões Metropolitanas e Cidades Satélites (Grande SP)
-    if (z.includes("GSP") || z.includes("GRANDE") || z.includes("GUARULHOS") || z.includes("ABC")) {
-        return "btn-gsp";
-    }
-    
-    // 3. Cidades do Interior e outras regiões expandidas
-    if (z.includes("INT") || z.includes("INTERIOR") || z.includes("CAMPINAS") || z.includes("MOGI")) {
-        return "btn-interior";
-    }
-    
-    // Fallback seguro caso não encontre correspondência
-    return "btn-outros"; 
+    return ""; 
 }
 
 function navegarVitrine(nome) { 
@@ -334,11 +320,7 @@ function navegarVitrine(nome) {
 }
 
 function comandoSelecao(idPath, nomePath, fonte) {
-    // Se o idPath estiver limpo ou vazio na planilha, ignora o clique
-    if (!idPath) return;
-    
     const idNorm = idPath.toLowerCase().replace(/\s/g, '');
-
     const noGSP = MAPA_GSP.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
     const noInterior = MAPA_INTERIOR.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
     
