@@ -214,7 +214,7 @@ async function carregarPlanilha() {
         DADOS_PLANILHA = linhasPuras.slice(1).map(linha => {
             const colunas = []; let campo = "", aspas = false;
             for (let i = 0; i < linha.length; i++) {
-                const char = linha[i];
+                const char = inlineChar = linha[i];
                 if (char === '"') aspas = !aspas;
                 else if (char === ',' && !aspas) { colunas.push(campo.trim()); campo = ""; }
                 else { campo += char; }
@@ -240,7 +240,7 @@ async function carregarPlanilha() {
                 zona: colunas[COL.ZONA] || "", 
                 nome: nomeImovel,
                 nomeFull: colunas[COL.NOME_FULL] || nomeImovel,
-                estoque: colunas[COL.ESTOQUE],
+                estoque: colunas[col.ESTOQUE] || colunas[6] || "",
                 endereco: colunas[COL.END] || "",
                 entrega: colunas[COL.ENTREGA] || "---",
                 obra: colunas[COL.OBRA] || "0",
@@ -458,7 +458,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
+    const urlMapsResidencial = `http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = ""; 
     
@@ -484,7 +484,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         </div>`;
 
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
-        if(selecionampanha = selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
+        if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
@@ -544,7 +544,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
        
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
+            const urlMapsEstande = `http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
                 <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
@@ -589,19 +589,19 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>`;
         }
     } else {
-        let corComplexo = "#333";
-        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
-        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
-        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
-        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
+        let colComplexo = "#333";
+        if (selecionado.zona === 'ZO') colComplexo = "#ff9d42"; 
+        else if (selecionado.zona === 'ZL') colComplexo = "#003399";
+        else if (selecionado.zona === 'ZN') colComplexo = "#ffd700";
+        else if (selecionado.zona === 'ZS') colComplexo = "#ff33aa";
 
-        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
+        let colTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${colComplexo}; color: ${colTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
-        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
+        html += `<div class="box-complexo-full" style="border: 1px solid ${colComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                         <span>📍 ${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
