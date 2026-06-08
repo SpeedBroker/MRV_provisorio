@@ -306,11 +306,20 @@ function obterHtmlZona(zona, tipo) {
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
+    
+    // Zonas tradicionais de SP Capital
     if (z.includes("ZO")) return "btn-zo";
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZS")) return "btn-zs";
-    return ""; 
+    
+    // 🔥 Novas Regiões (Grande SP e Interior)
+    if (z.includes("GSP") || z.includes("GRANDE")) return "btn-gsp";
+    if (z.includes("INT") || z.includes("INTERIOR")) return "btn-interior";
+    if (z.includes("CAMP") || z.includes("CAMPINAS")) return "btn-campinas";
+    
+    // Caso você use outra classificação na coluna Zona (ex: Baixada, Vale)
+    return "btn-outros"; 
 }
 
 function navegarVitrine(nome) { 
