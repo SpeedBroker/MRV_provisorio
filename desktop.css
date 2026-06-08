@@ -102,7 +102,7 @@ body {
     transition: all 0.1s ease;
     box-sizing: border-box;
     justify-content: space-between; 
-    color: #000000 !important; /* CORRIGIDO: Garante fonte preta para QUALQUER botão (comum ou complexo) */
+    color: #000000 !important; /* GARANTE: Fonte preta para QUALQUER botão (comum ou complexo) */
 }
 
 /* HOVER: Contorno verde sem negrito */
@@ -120,11 +120,12 @@ body {
     font-weight: bold;
 }
 
-/* --- RESIDENCIAIS (btRes) --- */
-.btRes.btn-zo { background-color: rgba(243, 112, 33, 0.1) !important; border-right: 5px solid var(--mrv-zo) !important; }
-.btRes.btn-zl { background-color: rgba(0, 32, 96, 0.1) !important; border-right: 5px solid var(--mrv-zl) !important; }
-.btRes.btn-zn { background-color: rgba(255, 192, 0, 0.1) !important; border-right: 5px solid var(--mrv-zn) !important; }
-.btRes.btn-zs { background-color: rgba(236, 0, 140, 0.1) !important; border-right: 5px solid var(--mrv-zs) !important; }
+/* --- RESIDENCIAIS (btRes) --- 
+   MODIFICAÇÃO: Tons escurecidos de 0.1 para 0.22 para dar mais destaque visual */
+.btRes.btn-zo { background-color: rgba(243, 112, 33, 0.22) !important; border-right: 5px solid var(--mrv-zo) !important; }
+.btRes.btn-zl { background-color: rgba(0, 32, 96, 0.22) !important; border-right: 5px solid var(--mrv-zl) !important; }
+.btRes.btn-zn { background-color: rgba(255, 192, 0, 0.22) !important; border-right: 5px solid var(--mrv-zn) !important; }
+.btRes.btn-zs { background-color: rgba(236, 0, 140, 0.22) !important; border-right: 5px solid var(--mrv-zs) !important; }
 
 /* --- COMPLEXOS --- */
 .separador-complexo-btn { 
@@ -214,21 +215,19 @@ path.commrv:hover, path.ativo {
     flex-shrink: 0; 
 }
 
-/* REMOVIDO: .vitrine-topo (Faixa Verde Dinâmica Redundante) */
-
 /* Ajuste no título da faixa para iniciar o topo da vitrine com respiro ideal */
 .titulo-vitrine-faixa { 
     display: flex !important; 
     align-items: center !important; 
     justify-content: center !important; 
     width: 100% !important; 
-    height: 38px !important; /* Leve aumento para dar mais imponência ao nome principal */
+    height: 38px !important; 
     font-weight: bold !important; 
-    font-size: 0.95rem !important; /* Aumentado sutilmente para destacar o nome do residencial */
+    font-size: 0.95rem !important; 
     border-radius: 4px; 
     text-transform: uppercase; 
     color: #fff; 
-    margin-top: 2px; /* Garante alinhamento limpo no topo */
+    margin-top: 2px; 
     margin-bottom: 10px; 
 }
 
@@ -394,7 +393,7 @@ path.commrv:hover, path.ativo {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 18px !important; /* Força altura perfeitamente igual */
+    height: 18px !important; 
     line-height: 18px !important;
     box-sizing: border-box !important;
 }
@@ -536,7 +535,7 @@ path.commrv:hover, path.ativo {
 .detalhes-residencial-container .grid-info {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    font-size: 0.75rem; /* Fonte unificada e padronizada */
+    font-size: 0.75rem; 
     color: #333;
 }
 
@@ -582,7 +581,7 @@ path.commrv:hover, path.ativo {
 
 .detalhes-residencial-container .container-preco .preco-label {
     flex: 1;
-    font-size: 0.75rem; /* Acompanha o padrão */
+    font-size: 0.75rem; 
     font-weight: bold;
     color: #333;
 }
@@ -593,13 +592,10 @@ path.commrv:hover, path.ativo {
     color: white; 
     text-align: center; 
     padding: 8px; 
-    font-size: 0.85rem; /* EXCEÇÃO: 1 ponto maior que os demais de 0.75rem */
+    font-size: 0.85rem; 
     font-weight: bold; 
     border-radius: 4px;
 }
-
-
-
 
 /* ==========================================================================
    12. NOTIFICAÇÃO FLUTUANTE (TOAST COPIAR)
