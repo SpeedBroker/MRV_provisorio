@@ -176,15 +176,6 @@ function posicionarPreview(e, elemento) {
     elemento.style.left = `${left}px`;
 }
 
-function copiarTexto(texto, msg = "Link copiado!") {
-    if (!texto || texto === "") return;
-    navigator.clipboard.writeText(texto).then(() => {
-        alert(msg);
-    }).catch(err => {
-        console.error('Erro ao copiar: ', err);
-    });
-}
-
 function copiarLink(url) {
     const linkSeguro = formatarLinkSeguro(url);
     copiarTexto(linkSeguro, "Link seguro copiado!");
@@ -210,7 +201,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = inlineLinpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -306,10 +297,18 @@ function obterHtmlZona(zona, tipo) {
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
-    if (z.includes("ZO")) return "btn-zo";
-    if (z.includes("ZL")) return "btn-zl";
-    if (z.includes("ZN")) return "btn-zn";
-    if (z.includes("ZS")) return "btn-zs";
+    
+    // Zonas de São Paulo capital
+    if (z.includes("ZO")) return "zo-cor";
+    if (z.includes("ZL")) return "zl-cor";
+    if (z.includes("ZN")) return "zn-cor";
+    if (z.includes("ZS")) return "zs-cor";
+    
+    // Novas regiões do Interior / Grande SP
+    if (z === 'GRP') return 'grp-cor';
+    if (z === 'VALE') return 'vale-cor';
+    if (z === 'CAMPINAS' || z === 'REG. CAMPINAS') return 'campinas-cor';
+    
     return ""; 
 }
 
@@ -434,10 +433,6 @@ function gerarListaLateral() {
 }
 
 
-
-
-
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -513,12 +508,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
+        let corEstoque = "#ffffff"; 
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; 
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
@@ -652,7 +647,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     painel.innerHTML = html;
 }
 
-// Nova função global de cópia sem o uso de alert() do navegador
+// Função global de cópia integrada com o Toast moderno
 function copiarTexto(texto, mensagemSucesso) {
     if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
         const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
@@ -686,71 +681,3 @@ function copiarTexto(texto, mensagemSucesso) {
         console.error('Erro ao copiar link: ', err);
     });
 }
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
-window.onload = iniciarApp;
-
-/* ==========================================================================
-   BLOCO 09: MÓDULO AUXILIAR DE INTEGRAÇÃO COM ANÚNCIOS (BLINDADO)
-   ========================================================================== */
-function capturarDadosVitrineParaAnuncio() {
-    // 1. Busca o elemento de faixa de título criado pelo Bloco 07 dentro da ficha técnica
-    const containerFicha = document.getElementById('ficha-tecnica');
-    if (!containerFicha) return null;
-
-    const elementoFaixa = containerFicha.querySelector('.titulo-vitrine-faixa');
-    
-    // 2. Se nenhuma vitrine de residencial estiver aberta ainda na tela
-    if (!elementoFaixa) {
-        return {
-            nome: "Residencial MRV Selecionado",
-            regiao: "São Paulo e Região"
-        };
-    }
-
-    // 3. Extrai o texto da faixa (Ex: "RES. PICO DOS MARINS — SP 2")
-    const textoCompleto = elementoFaixa.textContent || "";
-    
-    // Split pelo travessão "—" ou hífen "-" para separar o nome da região
-    const partes = textoCompleto.split(/[—\-]/);
-    
-    let nomeExtraido = "Residencial MRV";
-    let regiaoExtraida = "São Paulo e Região";
-
-    if (partes.length > 0) {
-        // Remove a palavra "RES. " do início e limpa os espaços
-        nomeExtraido = partes[0].replace(/RES\.\s+/i, '').trim();
-        // Converte para o padrão de letras maiúsculas e minúsculas corretas (Ex: Pico Dos Marins)
-        nomeExtraido = nomeExtraido.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
-    }
-    
-    if (partes.length > 1) {
-        regiaoExtraida = partes[1].trim();
-    }
-
-    return {
-        nome: "Residencial " + nomeExtraido,
-        regiao: regiaoExtraida
-    };
-}
-
-// Expõe a função de captura globalmente para que o anuncios.js possa chamá-la com segurança
-window.obterDadosImovelAtual = capturarDadosVitrineParaAnuncio;
