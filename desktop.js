@@ -86,7 +86,7 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
+            // Força o modo de visualização completo com todas as opções de menu (impressão activa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
@@ -176,7 +176,7 @@ function posicionarPreview(e, elemento) {
     elemento.style.left = `${left}px`;
 }
 
-function copiarTexto(texto, msg = "Link copiado!") {
+function copiarTextoRapido(texto, msg = "Link copiado!") {
     if (!texto || texto === "") return;
     navigator.clipboard.writeText(texto).then(() => {
         alert(msg);
@@ -187,7 +187,7 @@ function copiarTexto(texto, msg = "Link copiado!") {
 
 function copiarLink(url) {
     const linkSeguro = formatarLinkSeguro(url);
-    copiarTexto(linkSeguro, "Link seguro copiado!");
+    copiarTextoRapido(linkSeguro, "Link seguro copiado!");
 }
 
 function abrirDocumentoDireto(url) {
@@ -210,7 +210,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -262,7 +262,7 @@ async function carregarPlanilha() {
                 zona: colunas[COL.ZONA] || "", 
                 nome: nomeImovel,
                 nomeFull: colunas[COL.NOME_FULL] || nomeImovel,
-                estoque: colunas[COL.ESTOQUE],
+                estoque: colunas[COL.ESTOQUE] || "",
                 endereco: colunas[COL.END] || "",
                 entrega: colunas[COL.ENTREGA] || "---",
                 obra: colunas[COL.OBRA] || "0",
@@ -434,10 +434,6 @@ function gerarListaLateral() {
 }
 
 
-
-
-
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -506,35 +502,31 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
+        let corEstoque = "#ffffff"; 
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; 
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        // Linha 2: Limitador ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
         </div>`;
 
-        // Linha 3: Casa Paulista ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
         </div>`;
 
-        // Linha 4: Entrega, Obra e Estoque
         html += `
         <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
             <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
@@ -562,7 +554,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             });
         }
 
-        // Linha final: Faixa Laranja com o valor do imóvel
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
             À PARTIR DE: ${precoReal}
@@ -570,7 +561,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         
         html += `</div>`;
        
-        // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
@@ -604,12 +594,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `</div>`;
 
         let materiaisHtml = "";
-         materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-         materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-         materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
@@ -626,11 +616,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${colComplexo}; color: ${colTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
-        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
+        html += `<div class="box-complexo-full" style="border: 1px solid ${colComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                         <span>📍 ${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
@@ -652,62 +642,19 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     painel.innerHTML = html;
 }
 
-// Nova função global de cópia sem o uso de alert() do navegador
+// CORREÇÃO CRÍTICA: Função fechada perfeitamente com o uso de toast e fallback para alert
 function copiarTexto(texto, mensagemSucesso) {
-    if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
-        const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
-        if(textoInvalido) texto = decodeURIComponent(textoInvalido);
-    }
-
+    if (!texto) return;
     navigator.clipboard.writeText(texto).then(() => {
-        const textoMensagem = mensagemSucesso || "Link copiado com sucesso!";
-        
-        const toastAntigo = document.querySelector('.toast-notificacao');
-        if (toastAntigo) toastAntigo.remove();
-
-        const toast = document.createElement('div');
-        toast.className = 'toast-notificacao';
-        toast.innerHTML = `✅ ${textoMensagem}`;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
+        const toast = document.getElementById('toast-feedback');
+        if (toast) {
+            toast.innerText = mensagemSucesso || "Copiado com sucesso!";
             toast.classList.add('mostrar');
-        }, 50);
-
-        setTimeout(() => {
-            toast.classList.remove('mostrar');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }, 2500);
-
+            setTimeout(() => toast.classList.remove('mostrar'), 2500);
+        } else {
+            alert(mensagemSucesso || "Link copiado!");
+        }
     }).catch(err => {
-        console.error('Erro ao copiar link: ', err);
+        console.error('Erro ao copiar: ', err);
     });
 }
-
-
-
-
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
-window.onload = iniciarApp;
