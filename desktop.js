@@ -210,7 +210,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -251,7 +251,8 @@ async function carregarPlanilha() {
             const idPath = (colunas[COL.ID] || "").toLowerCase().replace(/\s/g, '');
             const ordem = parseInt(colunas[COL.ORDEM]);
 
-            if (!idPath || nomeImovel.length <= 1 || isNaN(ordem)) return null;
+            // 🔥 ALTERAÇÃO AQUI: Se for "vendido" ou inválido, ignora completamente
+            if (!idPath || idPath === "vendido" || nomeImovel.length <= 1 || isNaN(ordem)) return null;
 
             const cat = (colunas[COL.CATEGORIA] || "").toUpperCase();
             
@@ -321,6 +322,10 @@ function navegarVitrine(nome) {
 
 function comandoSelecao(idPath, nomePath, fonte) {
     const idNorm = idPath.toLowerCase().replace(/\s/g, '');
+    
+    // 🔥 ALTERAÇÃO AQUI: Trava de segurança para não processar nada vendido
+    if (idNorm === "vendido") return;
+
     const noGSP = MAPA_GSP.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
     const noInterior = MAPA_INTERIOR.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
     
