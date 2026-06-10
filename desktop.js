@@ -51,7 +51,6 @@ function configurarBotaoDocumentos() {
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
                 let htmlDocs = `
-                    
                     <div style="padding: 10px 0;">
                 `;
 
@@ -69,14 +68,12 @@ function configurarBotaoDocumentos() {
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
                 
-                // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
             }
         });
     }
 }
 
-// Retorna o link oficial de visualização, garantindo botões de impressão e download
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -86,14 +83,12 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão activa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
     return link;
 }
 
-// Retorna o link específico para a miniatura em hover
 function formatarLinkPreview(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -103,14 +98,12 @@ function formatarLinkPreview(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Retorna o link ideal e leve para renderizar dentro da miniatura
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
     return link;
 }
 
-// LÓGICA DO HOVER DA MINIATURA
 function inicializarHoverMiniaturas() {
     const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
     
@@ -119,11 +112,9 @@ function inicializarHoverMiniaturas() {
         if (!urlPreview) return;
 
         botao.addEventListener('mouseenter', (e) => {
-            // Remove qualquer preview existente para evitar duplicados
             const antigo = document.getElementById('preview-flutuante-drive');
             if (antigo) antigo.remove();
 
-            // Cria o container do preview flutuante
             const previewDiv = document.createElement('div');
             previewDiv.id = 'preview-flutuante-drive';
             previewDiv.style.position = 'fixed';
@@ -135,13 +126,11 @@ function inicializarHoverMiniaturas() {
             previewDiv.style.borderRadius = '8px';
             previewDiv.style.overflow = 'hidden';
             previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
+            previewDiv.style.pointerEvents = 'none';
 
-            // Insere o iframe com o link leve de preview
             previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
             document.body.appendChild(previewDiv);
 
-            // Posiciona perto do botão do mouse
             posicionarPreview(e, previewDiv);
         });
 
@@ -163,11 +152,9 @@ function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
 
-    // Ajusta se passar da borda direita da tela
     if (left + 340 > window.innerWidth) {
         left = e.clientX - 340;
     }
-    // Ajusta se passar da borda de baixo da tela
     if (top + 240 > window.innerHeight) {
         top = e.clientY - 240;
     }
@@ -210,7 +197,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = inlineStr = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -300,23 +287,18 @@ async function carregarPlanilha() {
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
-    // CORREÇÃO: Removido o .toUpperCase() para preservar a escrita mista da planilha (ex: RegVale)
+    // Preserva letras maiúsculas e minúsculas originais (ex: RegVale)
     return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona}</span>`;
 }
 
 function detectarClasseZona(zona) {
     if (!zona) return "";
-    
-    // Transforma em maiúsculo apenas internamente para o IF detectar a classe CSS correta
     const z = zona.toUpperCase().trim();
     
-    // 1. ZONAS TRADICIONAIS DA CAPITAL
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZO")) return "btn-zo";
     if (z.includes("ZS")) return "btn-zs";
-    
-    // 2. NOVOS TERMOS SIMPLIFICADOS DO INTERIOR E GRANDE SP
     if (z.includes("GSP")) return "btn-gsp";
     if (z.includes("CAMPINAS")) return "btn-campinas";
     if (z.includes("RIB")) return "btn-ribeirao";
@@ -439,7 +421,6 @@ function gerarListaLateral() {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
         const classeZona = detectarClasseZona(item.zona); 
         
-        // CORREÇÃO: Preserva a caixa mista original do nome e da zona
         return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" style="${item.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${item.nome}')">
                     <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
                 </div>`;
@@ -489,7 +470,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // CORREÇÃO: URL padrão e limpa do Google Maps para evitar erros de navegação e quebras de clique
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = ""; 
@@ -503,7 +483,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        // CORREÇÃO: Removido o .toUpperCase() do nome do imóvel
         html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome} — ${selecionado.regiao}</div>`;        
         html += `
         <div style="padding: 2px 0 5px 0;">
@@ -561,7 +540,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             lines.forEach(linhaStr => {
-                // CORREÇÃO: Consertado o erro fatal de sintaxe na quebra de linha por vírgula
                 const colsArr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
                     precoReal = colsArr[1];
@@ -609,14 +587,15 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `</div>`;
 
         let materiaisHtml = "";
-         materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-         materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-         materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
-        if (materialsHtml !== "") {
+        // CORREÇÃO: Variável corrigida de "materialsHtml" para "materiaisHtml"
+        if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
                 ${materiaisHtml}
@@ -634,7 +613,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        // CORREÇÃO: Removido o .toUpperCase() para respeitar a escrita original vinda da planilha
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull} — ${selecionado.regiao}
                  </div>`;
