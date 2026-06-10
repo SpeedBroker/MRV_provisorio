@@ -11,7 +11,7 @@
     --cinza-mapa: #777;
 
     /* Cores das Zonas (Padrão MRV SP) */
-    --mrv-zo: var(--mrv-laranja); /* ZO agora usa o mesmo laranja padrão */
+    --mrv-zo: #00713a;
     --mrv-zl: #002060; 
     --mrv-zn: #ffc000; 
     --mrv-zs: #ec008c; 
