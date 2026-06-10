@@ -129,7 +129,7 @@ body {
 
 /* --- RESIDENCIAIS (btRes) --- 
    MODIFICAÇÃO: Tons escurecidos de 0.1 para 0.22 para dar mais destaque visual */
-.btRes.btn-zo { background-color: rgba(243, 112, 33, 0.22) !important; border-right: 5px solid var(--mrv-zo) !important; }
+.btRes.btn-zo { background-color: rgba(37, 218, 86, 0.22) !important; border-right: 5px solid var(--mrv-zo) !important; }
 .btRes.btn-zl { background-color: rgba(0, 32, 96, 0.22) !important; border-right: 5px solid var(--mrv-zl) !important; }
 .btRes.btn-zn { background-color: rgba(255, 192, 0, 0.22) !important; border-right: 5px solid var(--mrv-zn) !important; }
 .btRes.btn-zs { background-color: rgba(236, 0, 140, 0.22) !important; border-right: 5px solid var(--mrv-zs) !important; }
