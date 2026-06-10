@@ -86,7 +86,7 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
+            // Força o modo de visualização completo com todas as opções de menu (impressão activa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
@@ -417,6 +417,7 @@ function desenharMapas() {
     if (cb) cb.onclick = () => trocarMapas(true);
 }
 
+/* Corrigido o bug de zerar a lista ao trocar de mapa clicando na caixa menor */
 function trocarMapas(completo) { 
     mapaAtivo = (mapaAtivo === 'GSP') ? 'INTERIOR' : 'GSP'; 
     if (completo) { 
@@ -430,7 +431,7 @@ function trocarMapas(completo) {
 }
 
 /* ==========================================================================
-   BLOCO 06: LISTA LATERAL
+   BLOCO 06: LISTA LATERAL (CORRIGIDO PARA ADICIONAR AS CLASSES DE ZONA)
    ========================================================================== */
 function gerarListaLateral() {
     const container = document.getElementById('lista-imoveis');
@@ -444,11 +445,6 @@ function gerarListaLateral() {
                 </div>`;
     }).join('');
 }
-
-
-
-
-
 
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
@@ -497,6 +493,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     let html = ""; 
     
+    // CORRIGIDO: Injetando a classeZona nos botões de sub-navegação da vitrine
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
@@ -567,7 +564,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             lines.forEach(linhaStr => {
-                const colsArr = linhaStr.split(',').map(c => c.trim());
+                const colsArr = inlineStr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
                     precoReal = colsArr[1];
                 }
@@ -629,6 +626,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 ${materiaisHtml}
             </div>`;
         }
+        
+        /* Inicializa o hover logo após atualizar o HTML da vitrine */
+        setTimeout(inicializarHoverMiniaturas, 50);
+
     } else {
         let corComplexo = "#333";
         if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
@@ -660,66 +661,13 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 ${materiaisComplexo}
             </div>`;
         }
+        
+        /* Inicializa o hover logo após atualizar o HTML da vitrine */
+        setTimeout(inicializarHoverMiniaturas, 50);
     }
+    
     painel.innerHTML = html;
 }
 
-// Nova função global de cópia sem o uso de alert() do navegador
-function copiarTexto(texto, mensagemSucesso) {
-    if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
-        const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
-        if(textoInvalido) texto = decodeURIComponent(textoInvalido);
-    }
-
-    navigator.clipboard.writeText(texto).then(() => {
-        const textoMensagem = mensagemSucesso || "Link copiado com sucesso!";
-        
-        const toastAntigo = document.querySelector('.toast-notificacao');
-        if (toastAntigo) toastAntigo.remove();
-
-        const toast = document.createElement('div');
-        toast.className = 'toast-notificacao';
-        toast.innerHTML = `✅ ${textoMensagem}`;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('mostrar');
-        }, 50);
-
-        setTimeout(() => {
-            toast.classList.remove('mostrar');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }, 2500);
-
-    }).catch(err => {
-        console.error('Erro ao copiar link: ', err);
-    });
-}
-
-
-
-
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
+// Vincula a inicialização geral ao carregar a janela
 window.onload = iniciarApp;
