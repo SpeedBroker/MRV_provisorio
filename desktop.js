@@ -296,7 +296,7 @@ async function carregarPlanilha() {
 }
 
 /* ==========================================================================
-   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO (MODIFICADO)
+   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
@@ -306,7 +306,7 @@ function obterHtmlZona(zona, tipo) {
 function detectarClasseZona(zona) {
     if (!zona) return "";
     
-    // Deixamos uma versão em maiúsculo APENAS para a checagem lógica interna
+    // Transforma tudo em maiúsculo e limpa espaços para garantir a leitura
     const z = zona.toUpperCase().trim();
     
     // 1. ZONAS TRADICIONAIS DA CAPITAL (Pega "ZN", "Sete Sois - ZN", etc.)
@@ -440,7 +440,6 @@ function gerarListaLateral() {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
         const classeZona = detectarClasseZona(item.zona); 
         
-        // CORREÇÃO: Mantemos 'item.nome' original, sem forçar maiúsculas
         return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" style="${item.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${item.nome}')">
                     <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
                 </div>`;
@@ -450,6 +449,41 @@ function gerarListaLateral() {
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
+const criarCardMaterial = (titulo, url, icone) => {
+    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
+    
+    const linkSeguroAbrir = formatarLinkSeguro(url);
+    const linkMiniaturaHover = formatarLinkPreview(url);
+
+    return `
+    <div class="card-material-item">
+        <div class="card-material-left">
+            <span class="card-icon">${icone}</span>
+            <span class="card-text">${titulo}</span>
+        </div>
+        <div class="card-material-right" style="position: relative;">
+            <button onclick="window.open('${linkSeguroAbrir}', '_blank')" 
+                    class="card-btn-abrir" 
+                    style="cursor: pointer; border: none;"
+                    data-preview="${linkMiniaturaHover}">
+                Abrir
+            </button>
+            <button onclick="copiarTexto('${linkSeguroAbrir}', 'Link seguro copiado!')" class="card-btn-copiar">Copiar</button>
+        </div>
+    </div>`;
+};
+
+const extrairLinks = (campo, icone) => {
+    if(!campo || campo === "---") return "";
+    let htmlTemp = "";
+    const grupos = campo.split(';').map(g => g.trim()).filter(g => g !== "");
+    grupos.forEach(g => {
+        const partes = g.split(',').map(p => p.trim());
+        if(partes.length >= 2) htmlTemp += criarCardMaterial(partes[0], partes[1], icone);
+    });
+    return htmlTemp;
+};
+
 function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     const painel = document.getElementById('ficha-tecnica');
     if (!painel) return;
@@ -459,6 +493,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     let html = ""; 
     
+    // CORRIGIDO: Injetando a classeZona nos botões de sub-navegação da vitrine
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
@@ -468,8 +503,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        // CORREÇÃO: Removido o .toUpperCase() de 'selecionado.nome' para preservar 'RegVale', 'RegCampinas', etc.
-        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome} — ${selecionado.regiao}</div>`;        
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;        
         html += `
         <div style="padding: 2px 0 5px 0;">
             <div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
@@ -481,31 +515,35 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
+        // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff";
+        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252";
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
+        // Linha 2: Limitador ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
         </div>`;
 
+        // Linha 3: Casa Paulista ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
         </div>`;
 
+        // Linha 4: Entrega, Obra e Estoque
         html += `
         <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
             <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
@@ -526,13 +564,14 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             lines.forEach(linhaStr => {
-                const colsArr = linhaStr.split(',').map(c => c.trim());
+                const colsArr = inlineStr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
                     precoReal = colsArr[1];
                 }
             });
         }
 
+        // Linha final: Faixa Laranja com o valor do imóvel
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
             À PARTIR DE: ${precoReal}
@@ -540,6 +579,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         
         html += `</div>`;
        
+        // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
@@ -587,6 +627,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>`;
         }
         
+        /* Inicializa o hover logo após atualizar o HTML da vitrine */
         setTimeout(inicializarHoverMiniaturas, 50);
 
     } else {
@@ -598,9 +639,8 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        // CORREÇÃO: Removido o .toUpperCase() de 'selecionado.nomeFull' para respeitar a caixa mista
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
-                    ${selecionado.nomeFull} — ${selecionado.regiao}
+                    ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
         html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
@@ -613,8 +653,21 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </p>
                     <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
                  </div>`;
+                 
+        let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
+        if (materiaisComplexo !== "") { 
+            html += `<div style="margin-top: 10px; padding: 0 5px;">
+                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
+                ${materiaisComplexo}
+            </div>`;
+        }
+        
+        /* Inicializa o hover logo após atualizar o HTML da vitrine */
+        setTimeout(inicializarHoverMiniaturas, 50);
     }
+    
     painel.innerHTML = html;
 }
+
 // Vincula a inicialização geral ao carregar a janela
 window.onload = iniciarApp;
