@@ -296,7 +296,7 @@ async function carregarPlanilha() {
 }
 
 /* ==========================================================================
-   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
+   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO (MODIFICADO)
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
@@ -306,7 +306,7 @@ function obterHtmlZona(zona, tipo) {
 function detectarClasseZona(zona) {
     if (!zona) return "";
     
-    // Transforma tudo em maiúsculo e limpa espaços para garantir a leitura
+    // Deixamos uma versão em maiúsculo APENAS para a checagem lógica interna
     const z = zona.toUpperCase().trim();
     
     // 1. ZONAS TRADICIONAIS DA CAPITAL (Pega "ZN", "Sete Sois - ZN", etc.)
