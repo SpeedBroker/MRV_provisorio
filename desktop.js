@@ -305,12 +305,24 @@ function obterHtmlZona(zona, tipo) {
 
 function detectarClasseZona(zona) {
     if (!zona) return "";
+    
+    // Transforma tudo em maiúsculo e limpa espaços para garantir a leitura
     const z = zona.toUpperCase().trim();
-    if (z.includes("ZO")) return "btn-zo";
-    if (z.includes("ZL")) return "btn-zl";
+    
+    // 1. ZONAS TRADICIONAIS DA CAPITAL (Pega "ZN", "Sete Sois - ZN", etc.)
     if (z.includes("ZN")) return "btn-zn";
+    if (z.includes("ZL")) return "btn-zl";
+    if (z.includes("ZO")) return "btn-zo";
     if (z.includes("ZS")) return "btn-zs";
-    return ""; 
+    
+    // 2. NOVOS TERMOS SIMPLIFICADOS DO INTERIOR E GRANDE SP
+    if (z.includes("GSP")) return "btn-gsp";
+    if (z.includes("REGCAMPINAS")) return "btn-campinas";
+    if (z.includes("REGRIBPRETO")) return "btn-ribeirao";
+    if (z.includes("REGVALE")) return "btn-vale";
+    
+    // Caso apareça alguma outra região que não mapeamos ainda
+    return "btn-outros"; 
 }
 
 function navegarVitrine(nome) { 
