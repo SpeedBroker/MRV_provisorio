@@ -110,6 +110,7 @@ body {
     box-sizing: border-box;
     justify-content: space-between; 
     color: #000000 !important; /* GARANTE: Fonte preta para QUALQUER botão (comum ou complexo) */
+    text-transform: none !important; /* CORREÇÃO: Faz com que respeite letras maiúsculas/minúsculas da tabela */
 }
 
 /* HOVER: Contorno verde sem negrito */
@@ -119,7 +120,7 @@ body {
 }
 
 /* CLIQUE (ATIVO) */
-.btRes.ativo, .separador-complexo-btn.ativo { 
+.btRes.active, .separador-complexo-btn.ativo { 
     background-color: #ececec !important; 
     color: #000000 !important; /* Mantém preto no clique */
     border: 1px solid var(--mrv-verde) !important; 
@@ -144,8 +145,8 @@ body {
 /* --- COMPLEXOS --- */
 .separador-complexo-btn { 
     font-weight: bold; 
-    text-transform: uppercase; 
     border: none !important;
+    text-transform: none !important; /* CORREÇÃO: Garante o padrão correto para títulos de complexo regionais */
 }
 
 /* Cores de Fundo dos Complexos (Mantidos vivos e claros com texto preto absoluto) */
@@ -183,7 +184,7 @@ body {
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    text-transform: uppercase; 
+    text-transform: none !important; /* CORREÇÃO: Se o nome mapeado for RegVale/RegCampinas, exibe misto */
 }
 
 #caixa-a { 
@@ -245,8 +246,7 @@ path.commrv:hover, path.ativo {
     height: 38px !important; 
     font-weight: bold !important; 
     font-size: 0.95rem !important; 
-    border-radius: 4px; 
-    text-transform: uppercase; 
+    text-transform: none !important; /* CORREÇÃO: Permite exibir RegVale / RegCampinas no topo da vitrine sem forçar maiúsculo */
     color: #fff; 
     margin-top: 2px; 
     margin-bottom: 10px; 
@@ -281,7 +281,7 @@ path.commrv:hover, path.ativo {
     font-weight: bold !important;
     display: block !important;
     margin-bottom: 2px !important;
-    text-transform: uppercase !important;
+    text-transform: none !important; /* CORREÇÃO: Impede que sub-rótulos forcem maiúsculas se trouxerem nomes do banco */
 }
 
 /* Controla os destaques em negrito se houver (tag strong) */
@@ -514,7 +514,7 @@ path.commrv:hover, path.ativo {
     padding: 10px;
     font-size: 0.85rem;
     font-weight: bold;
-    text-transform: uppercase;
+    text-transform: none !important; /* CORREÇÃO: Faz o cabeçalho interno do bloco respeitar letras maiúsculas/minúsculas */
 }
 
 .detalhes-residencial-container .sub-header {
