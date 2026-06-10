@@ -51,7 +51,7 @@ function configurarBotaoDocumentos() {
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
                 let htmlDocs = `
-                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
+                    
                     <div style="padding: 10px 0;">
                 `;
 
@@ -176,7 +176,7 @@ function posicionarPreview(e, elemento) {
     elemento.style.left = `${left}px`;
 }
 
-function copiarTextoRapido(texto, msg = "Link copiado!") {
+function copiarTexto(texto, msg = "Link copiado!") {
     if (!texto || texto === "") return;
     navigator.clipboard.writeText(texto).then(() => {
         alert(msg);
@@ -187,7 +187,7 @@ function copiarTextoRapido(texto, msg = "Link copiado!") {
 
 function copiarLink(url) {
     const linkSeguro = formatarLinkSeguro(url);
-    copiarTextoRapido(linkSeguro, "Link seguro copiado!");
+    copiarTexto(linkSeguro, "Link seguro copiado!");
 }
 
 function abrirDocumentoDireto(url) {
@@ -210,7 +210,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -262,7 +262,7 @@ async function carregarPlanilha() {
                 zona: colunas[COL.ZONA] || "", 
                 nome: nomeImovel,
                 nomeFull: colunas[COL.NOME_FULL] || nomeImovel,
-                estoque: colunas[COL.ESTOQUE] || "",
+                estoque: colunas[COL.ESTOQUE],
                 endereco: colunas[COL.END] || "",
                 entrega: colunas[COL.ENTREGA] || "---",
                 obra: colunas[COL.OBRA] || "0",
@@ -305,12 +305,24 @@ function obterHtmlZona(zona, tipo) {
 
 function detectarClasseZona(zona) {
     if (!zona) return "";
+    
+    // Transforma tudo em maiúsculo e limpa espaços para garantir a leitura
     const z = zona.toUpperCase().trim();
-    if (z.includes("ZO")) return "btn-zo";
-    if (z.includes("ZL")) return "btn-zl";
+    
+    // 1. ZONAS TRADICIONAIS DA CAPITAL (Pega "ZN", "Sete Sois - ZN", etc.)
     if (z.includes("ZN")) return "btn-zn";
+    if (z.includes("ZL")) return "btn-zl";
+    if (z.includes("ZO")) return "btn-zo";
     if (z.includes("ZS")) return "btn-zs";
-    return ""; 
+    
+    // 2. NOVOS TERMOS SIMPLIFICADOS DO INTERIOR E GRANDE SP
+    if (z.includes("GSP")) return "btn-gsp";
+    if (z.includes("REGCAMPINAS")) return "btn-campinas";
+    if (z.includes("REGRIBPRETO")) return "btn-ribeirao";
+    if (z.includes("REGVALE")) return "btn-vale";
+    
+    // Caso apareça alguma outra região que não mapeamos ainda
+    return "btn-outros"; 
 }
 
 function navegarVitrine(nome) { 
@@ -405,6 +417,7 @@ function desenharMapas() {
     if (cb) cb.onclick = () => trocarMapas(true);
 }
 
+/* Corrigido o bug de zerar a lista ao trocar de mapa clicando na caixa menor */
 function trocarMapas(completo) { 
     mapaAtivo = (mapaAtivo === 'GSP') ? 'INTERIOR' : 'GSP'; 
     if (completo) { 
@@ -418,7 +431,7 @@ function trocarMapas(completo) {
 }
 
 /* ==========================================================================
-   BLOCO 06: LISTA LATERAL
+   BLOCO 06: LISTA LATERAL (CORRIGIDO PARA ADICIONAR AS CLASSES DE ZONA)
    ========================================================================== */
 function gerarListaLateral() {
     const container = document.getElementById('lista-imoveis');
@@ -432,7 +445,6 @@ function gerarListaLateral() {
                 </div>`;
     }).join('');
 }
-
 
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
@@ -481,6 +493,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     
     let html = ""; 
     
+    // CORRIGIDO: Injetando a classeZona nos botões de sub-navegação da vitrine
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
@@ -502,31 +515,35 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
+        // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff"; 
+        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; 
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
+        // Linha 2: Limitador ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
         </div>`;
 
+        // Linha 3: Casa Paulista ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
         </div>`;
 
+        // Linha 4: Entrega, Obra e Estoque
         html += `
         <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
             <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
@@ -547,13 +564,14 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
             lines.forEach(linhaStr => {
-                const colsArr = linhaStr.split(',').map(c => c.trim());
+                const colsArr = inlineStr = linhaStr.split(',').map(c => c.trim());
                 if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
                     precoReal = colsArr[1];
                 }
             });
         }
 
+        // Linha final: Faixa Laranja com o valor do imóvel
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
             À PARTIR DE: ${precoReal}
@@ -561,6 +579,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         
         html += `</div>`;
        
+        // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
@@ -594,12 +613,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `</div>`;
 
         let materiaisHtml = "";
-        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+         materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+         materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+         materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
@@ -607,6 +626,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 ${materiaisHtml}
             </div>`;
         }
+        
+        /* Inicializa o hover logo após atualizar o HTML da vitrine */
+        setTimeout(inicializarHoverMiniaturas, 50);
+
     } else {
         let corComplexo = "#333";
         if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
@@ -616,11 +639,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${colComplexo}; color: ${colTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
                  </div>`;
                  
-        html += `<div class="box-complexo-full" style="border: 1px solid ${colComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
+        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
                     <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                         <span>📍 ${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
@@ -638,23 +661,13 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 ${materiaisComplexo}
             </div>`;
         }
+        
+        /* Inicializa o hover logo após atualizar o HTML da vitrine */
+        setTimeout(inicializarHoverMiniaturas, 50);
     }
+    
     painel.innerHTML = html;
 }
 
-// CORREÇÃO CRÍTICA: Função fechada perfeitamente com o uso de toast e fallback para alert
-function copiarTexto(texto, mensagemSucesso) {
-    if (!texto) return;
-    navigator.clipboard.writeText(texto).then(() => {
-        const toast = document.getElementById('toast-feedback');
-        if (toast) {
-            toast.innerText = mensagemSucesso || "Copiado com sucesso!";
-            toast.classList.add('mostrar');
-            setTimeout(() => toast.classList.remove('mostrar'), 2500);
-        } else {
-            alert(mensagemSucesso || "Link copiado!");
-        }
-    }).catch(err => {
-        console.error('Erro ao copiar: ', err);
-    });
-}
+// Vincula a inicialização geral ao carregar a janela
+window.onload = iniciarApp;
