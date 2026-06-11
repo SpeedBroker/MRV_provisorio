@@ -23,7 +23,6 @@ const COL = {
     ESTANDE: 31 
 };
 
-
 /* ==========================================================================
    BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
    ========================================================================== */
@@ -32,7 +31,7 @@ async function iniciarApp() {
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
     } catch (err) { 
-        console.error(err); 
+        console.error("Erro na inicialização do app:", err); 
     }
 }
 
@@ -69,7 +68,6 @@ function configurarBotaoDocumentos() {
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
                 
-                // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
             }
         });
@@ -86,7 +84,6 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
@@ -103,7 +100,6 @@ function formatarLinkPreview(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Retorna o link ideal e leve para renderizar dentro da miniatura
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
@@ -119,11 +115,9 @@ function inicializarHoverMiniaturas() {
         if (!urlPreview) return;
 
         botao.addEventListener('mouseenter', (e) => {
-            // Remove qualquer preview existente para evitar duplicados
             const antigo = document.getElementById('preview-flutuante-drive');
             if (antigo) antigo.remove();
 
-            // Cria o container do preview flutuante
             const previewDiv = document.createElement('div');
             previewDiv.id = 'preview-flutuante-drive';
             previewDiv.style.position = 'fixed';
@@ -135,13 +129,11 @@ function inicializarHoverMiniaturas() {
             previewDiv.style.borderRadius = '8px';
             previewDiv.style.overflow = 'hidden';
             previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
+            previewDiv.style.pointerEvents = 'none';
 
-            // Insere o iframe com o link leve de preview
             previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
             document.body.appendChild(previewDiv);
 
-            // Posiciona perto do botão do mouse
             posicionarPreview(e, previewDiv);
         });
 
@@ -163,11 +155,9 @@ function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
 
-    // Ajusta se passar da borda direita da tela
     if (left + 340 > window.innerWidth) {
         left = e.clientX - 340;
     }
-    // Ajusta se passar da borda de baixo da tela
     if (top + 240 > window.innerHeight) {
         top = e.clientY - 240;
     }
@@ -210,14 +200,15 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
-            if (!inlineLimpa) return null;
+            const inlineLimpa = line => linha.replace(/^"|"$/g, '').trim();
+            const cleanStr = inlineLimpa();
+            if (!cleanStr) return null;
 
-            const ultimaVirgula = inlineLimpa.lastIndexOf(',');
+            const ultimaVirgula = cleanStr.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = inlineLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = inlineLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = cleanStr.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = cleanStr.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -291,8 +282,9 @@ async function carregarPlanilha() {
         }).filter(i => i !== null);
 
         DADOS_PLANILHA.sort((a, b) => a.ordem - b.ordem);
-        desenharMapas(); gerarListaLateral();
-    } catch (e) { console.error(e); }
+        desenharMapas(); 
+        gerarListaLateral();
+    } catch (e) { console.error("Erro ao carregar planilha principal:", e); }
 }
 
 /* ==========================================================================
@@ -549,8 +541,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </div>
                     <div class="tabela-corpo">
                         ${dados.map(linhaStr => {
-                            const cols = inlineStr => linhaStr.split(',').map(c => c.trim());
-                            const colsArr = cols();
+                            const colsArr = linhaStr.split(',').map(c => c.trim());
                             if(colsArr.length <= 1) return "";
                             return `<div class="tabela-row">
                                 ${colsArr.map((v, idx) => {
@@ -644,27 +635,28 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
     painel.innerHTML = html;
 
-    // Ativa a lógica do hover nas miniaturas recém-criadas
     inicializarHoverMiniaturas();
 }
 
 /* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
+   BLOCO 08: CONFIGURAÇÃO DE EVENTOS DO DOM (UNIFICADO)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Inicializa o Modal (Sobre)
     const modal = document.getElementById("modal-sobre");
     const btn = document.getElementById("btn-sobre");
     const span = document.querySelector(".modal-close");
 
-    if(btn && modal) {
+    if (btn && modal) {
         btn.onclick = () => { modal.style.display = "block"; };
     }
-    if(span && modal) {
+    if (span && modal) {
         span.onclick = () => { modal.style.display = "none"; };
     }
     window.onclick = (event) => {
         if (event.target == modal) { modal.style.display = "none"; }
     };
-});
 
-window.onload = iniciarApp;
+    // 2. Dispara o carregamento e montagem assíncrona dos dados da planilha
+    iniciarApp();
+});
