@@ -232,7 +232,6 @@ function comandoSelecao(idPath, nomePath, fonte) {
     try {
         const idNorm = idPath.toLowerCase().replace(/\s/g, '');
         
-        // Proteção contra mapas não carregados na memória global
         const gspPaths = (typeof MAPA_GSP !== 'undefined' && MAPA_GSP.paths) ? MAPA_GSP.paths : [];
         const interiorPaths = (typeof MAPA_INTERIOR !== 'undefined' && MAPA_INTERIOR.paths) ? MAPA_INTERIOR.paths : [];
 
@@ -326,7 +325,6 @@ function renderizarNoContainer(id, dados, interativo) {
 }
 
 function desenharMapas() {
-    // Verificações robustas para evitar quebras se as variáveis externas não existirem no momento exato
     const gspDisponivel = typeof MAPA_GSP !== 'undefined';
     const interiorDisponivel = typeof MAPA_INTERIOR !== 'undefined';
 
@@ -357,7 +355,7 @@ function trocarMapas(completo) {
 /* ==========================================================================
    BLOCO 06: LISTA LATERAL
    ========================================================================== */
-function gerarListaLateral() {
+function generarListaLateral() {
     const container = document.getElementById('lista-imoveis');
     if (!container) return;
     container.innerHTML = DADOS_PLANILHA.map(item => {
@@ -410,6 +408,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
+    // Correção da URL estruturada do Maps usando interpolação correta do JavaScript
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -595,9 +594,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.onclick = (event) => {
         if (event.target == modal) { modal.style.display = "none"; }
     };
-});
-
-// Inicialização segura
-window.addEventListener('load', () => {
-    iniciarApp();
 });
