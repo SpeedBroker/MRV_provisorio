@@ -1,658 +1,572 @@
 /* ==========================================================================
-   BLOCO 01: CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
+   1. CONFIGURAÇÕES E DADOS GERAIS
    ========================================================================== */
-let DADOS_PLANILHA = [];
-let DOCUMENTOS_GERAIS = []; 
-let pathAtivo = null;  
-let imovelAtivo = null;  
-let mapaAtivo = 'GSP'; 
-
-const COL = {
-    ID: 0, CATEGORIA: 1, ORDEM: 2, 
-    ZONA: 3, 
-    NOME: 4, NOME_FULL: 5,  
-    ESTOQUE: 6, END: 7, TIPOLOGIAS: 8, ENTREGA: 9, 
-    P_DE: 10, P_ATE: 11, OBRA: 12, LIMITADOR: 13, 
-    REGIAO: 14, CASA_PAULISTA: 15, CAMPANHA: 16, 
-    DESC_LONGA: 18, OBSERVACOES: 19,
-    LOCALIZACAO: 20, MOBILIDADE: 21, CULTURA_LAZER: 22,    
-    COMERCIO: 23, SAUDE_EDUCACAO: 24,
-    BOOK_CLIENTE: 25, BOOK_CORRETOR: 26,
-    LINKS_VIDEOS: 27, LINKS_PLANTAS: 28,  
-    LINKS_IMPLANT: 29, LINKS_DIVERSOS: 30,
-    ESTANDE: 31 
+const CONFIG_SISTEMA = {
+    urlPlanilhaDados: "https://script.google.com/macros/s/AKfycbz_9I9xXQ_lq76Zc3b7P8Z3n5O_7rX8V_yX/exec"
 };
 
+// Estado global da aplicação
+let bancoDadosImoveis = [];
+let imovelAtivoAtual = null;
+
 /* ==========================================================================
-   BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
+   2. INICIALIZAÇÃO DA APLICAÇÃO
    ========================================================================== */
-async function iniciarApp() {
-    try { 
-        await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
-        configurarBotaoDocumentos(); 
-    } catch (err) { 
-        console.error(err); 
+document.addEventListener("DOMContentLoaded", () => {
+    configurarEventosGlobais();
+    carregarDadosIniciais();
+});
+
+/**
+ * Configura os ouvintes de eventos para elementos estáticos do DOM
+ */
+function configurarEventosGlobais() {
+    // Botão Sobre o Sistema
+    const btnSobre = document.getElementById("btn-sobre");
+    if (btnSobre) {
+        btnSobre.addEventListener("click", abrirModalSobre);
     }
-}
 
-function configurarBotaoDocumentos() {
-    const btnDocs = document.getElementById('btn-documentos');
-    if (btnDocs) {
-        btnDocs.addEventListener('click', () => {
-            imovelAtivo = null;
-            pathAtivo = null;
-            document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
-            gerarListaLateral();
-            
-            const ct = document.getElementById('cidade-titulo');
-            if (ct) ct.innerText = "DOCUMENTOS GERAIS CORPORATIVOS";
-
-            const painel = document.getElementById('ficha-tecnica');
-            if (painel) {
-                let htmlDocs = `
-                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
-                    <div style="padding: 10px 0;">
-                `;
-
-                if (DOCUMENTOS_GERAIS.length === 0) {
-                    htmlDocs += `
-                        <div style="text-align:center; color:#999; margin-top:50px;">
-                            <p>Nenhum documento encontrado na aba.</p>
-                        </div>`;
-                } else {
-                    DOCUMENTOS_GERAIS.forEach(doc => {
-                        htmlDocs += criarCardMaterial(doc.titulo, doc.url, '📝');
-                    });
-                }
-
-                htmlDocs += `</div>`;
-                painel.innerHTML = htmlDocs;
-                
-                // Ativa a lógica do hover nas miniaturas recém-criadas
-                inicializarHoverMiniaturas();
-            }
-        });
+    // Fechamento do Modal
+    const btnFecharModal = document.querySelector(".modal-close");
+    if (btnFecharModal) {
+        btnFecharModal.addEventListener("click", fecharModalSobre);
     }
-}
 
-// Retorna o link oficial de visualização, garantindo botões de impressão e download
-function formatarLinkSeguro(url) {
-    if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
-    
-    let link = url.trim();
-    
-    if (link.includes('drive.google.com')) {
-        const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
-        
-        if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
-            return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
-        }
-    }
-    return link;
-}
-
-// Retorna o link específico para a miniatura em hover
-function formatarLinkPreview(url) {
-    if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
-    
-    let link = url.trim();
-    
-    if (link.includes('drive.google.com')) {
-        const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
-        
-        if (match && match[1]) {
-            // Retorna o link ideal e leve para renderizar dentro da miniatura
-            return `https://drive.google.com/file/d/${match[1]}/preview`;
-        }
-    }
-    return link;
-}
-
-// LÓGICA DO HOVER DA MINIATURA
-function inicializarHoverMiniaturas() {
-    const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
-    
-    botoesAbrir.forEach(botao => {
-        const urlPreview = botao.getAttribute('data-preview');
-        if (!urlPreview) return;
-
-        botao.addEventListener('mouseenter', (e) => {
-            // Remove qualquer preview existente para evitar duplicados
-            const antigo = document.getElementById('preview-flutuante-drive');
-            if (antigo) antigo.remove();
-
-            // Cria o container do preview flutuante
-            const previewDiv = document.createElement('div');
-            previewDiv.id = 'preview-flutuante-drive';
-            previewDiv.style.position = 'fixed';
-            previewDiv.style.width = '320px';
-            previewDiv.style.height = '220px';
-            previewDiv.style.backgroundColor = '#fff';
-            previewDiv.style.border = '1px solid #ccc';
-            previewDiv.style.boxShadow = '0px 4px 15px rgba(0,0,0,0.2)';
-            previewDiv.style.borderRadius = '8px';
-            previewDiv.style.overflow = 'hidden';
-            previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
-
-            // Insere o iframe com o link leve de preview
-            previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
-            document.body.appendChild(previewDiv);
-
-            // Posiciona perto do botão do mouse
-            posicionarPreview(e, previewDiv);
-        });
-
-        botao.addEventListener('mousemove', (e) => {
-            const previewDiv = document.getElementById('preview-flutuante-drive');
-            if (previewDiv) {
-                posicionarPreview(e, previewDiv);
-            }
-        });
-
-        botao.addEventListener('mouseleave', () => {
-            const previewDiv = document.getElementById('preview-flutuante-drive');
-            if (previewDiv) previewDiv.remove();
-        });
+    // Fechar modal clicando fora da área de conteúdo
+    window.addEventListener("click", (e) => {
+        const modal = document.getElementById("modal-sobre");
+        if (e.target === modal) fecharModalSobre();
     });
+
+    // Configuração do container de Preview Dinâmico do Drive (Cursor Tracker)
+    criarEstruturaPreviewFlutuante();
 }
 
-function posicionarPreview(e, elemento) {
-    let top = e.clientY + 15;
-    let left = e.clientX + 15;
-
-    // Ajusta se passar da borda direita da tela
-    if (left + 340 > window.innerWidth) {
-        left = e.clientX - 340;
-    }
-    // Ajusta se passar da borda de baixo da tela
-    if (top + 240 > window.innerHeight) {
-        top = e.clientY - 240;
-    }
-
-    elemento.style.top = `${top}px`;
-    elemento.style.left = `${left}px`;
-}
-
-function abrirDocumentoDireto(url) {
-    const linkSeguro = formatarLinkSeguro(url);
-    if (linkSeguro) {
-        window.open(linkSeguro, '_blank');
-    }
-}
-
-/* ==========================================================================
-   BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
-   ========================================================================== */
-async function carregarAbaDocumentos() {
-    const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-    const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Documentos&v=${new Date().getTime()}`;
-    
+/**
+ * Consome a API do Google Apps Script para buscar os dados dos imóveis
+ */
+async function carregarDadosIniciais() {
     try {
-        const response = await fetch(URL_DOCS);
-        let texto = await response.text();
-        const linhasPuras = texto.split(/\r?\n/);
-
-        DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
-            if (!inlineLimpa) return null;
-
-            const ultimaVirgula = inlineLimpa.lastIndexOf(',');
-            if (ultimaVirgula === -1) return null;
-
-            const titulo = inlineLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = inlineLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
-
-            if (!titulo || !url.startsWith('http')) return null;
-
-            return { titulo, url };
-        }).filter(d => d !== null);
-
-    } catch (e) {
-        console.error("Erro ao carregar aba de documentos: ", e);
+        const resposta = await fetch(CONFIG_SISTEMA.urlPlanilhaDados);
+        if (!resposta.ok) throw new Error("Erro na resposta da rede.");
+        
+        bancoDadosImoveis = await resposta.json();
+        
+        // Inicializa as renderizações com base nos dados carregados
+        renderizarListaLateral(bancoDadosImoveis);
+        configurarCliquesMapa();
+        
+    } catch (erro) {
+        console.error("Falha fatal ao carregar dados do Dashboard:", erro);
     }
 }
 
-async function carregarPlanilha() {
-    const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-    const URL_CSV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0&v=${new Date().getTime()}`;
-    try {
-        const response = await fetch(URL_CSV);
-        let texto = await response.text();
-        const líneasPuras = texto.split(/\r?\n/);
-
-        DADOS_PLANILHA = líneasPuras.slice(1).map(linha => {
-            const colunas = []; let campo = "", aspas = false;
-            for (let i = 0; i < linha.length; i++) {
-                const char = linha[i];
-                if (char === '"') aspas = !aspas;
-                else if (char === ',' && !aspas) { colunas.push(campo.trim()); campo = ""; }
-                else { campo += char; }
-            }
-            colunas.push(campo.trim());
-
-            const nomeImovel = colunas[COL.NOME] || "";
-            const idPath = (colunas[COL.ID] || "").toLowerCase().replace(/\s/g, '');
-            const ordem = parseInt(colunas[COL.ORDEM]);
-
-            if (!idPath || nomeImovel.length <= 1 || isNaN(ordem)) return null;
-
-            const cat = (colunas[COL.CATEGORIA] || "").toUpperCase();
-            
-            return {
-                id_path: idPath,
-                tipo: cat.includes('COMPLEXO') ? 'N' : 'R',
-                ordem: ordem,
-                zona: colunas[COL.ZONA] || "", 
-                nome: nomeImovel,
-                nomeFull: colunas[COL.NOME_FULL] || nomeImovel,
-                estoque: colunas[COL.ESTOQUE],
-                endereco: colunas[COL.END] || "",
-                entrega: colunas[COL.ENTREGA] || "---",
-                obra: colunas[COL.OBRA] || "0",
-                tipologiasH: colunas[COL.TIPOLOGIAS] || "", 
-                regiao: colunas[COL.REGIAO] || "---",
-                p_de: colunas[COL.P_DE] || "---",
-                p_ate: colunas[COL.P_ATE] || "---",
-                limitador: colunas[COL.LIMITADOR] || "---",
-                casa_paulista: colunas[COL.CASA_PAULISTA] || "---",
-                campanha: colunas[COL.CAMPANHA] || "",
-                observacoes: colunas[COL.OBSERVACOES] || "", 
-                descLonga: colunas[COL.DESC_LONGA] || "",
-                localizacao: colunas[COL.LOCALIZACAO] || "",
-                mobilidade: colunas[COL.MOBILIDADE] || "",
-                lazer: colunas[COL.CULTURA_LAZER] || "",
-                comercio: colunas[COL.COMERCIO] || "",
-                saude: colunas[COL.SAUDE_EDUCACAO] || "",
-                linkCliente: colunas[COL.BOOK_CLIENTE] || "",
-                linkCorretor: colunas[COL.BOOK_CORRETOR] || "",
-                linksVideos: colunas[COL.LINKS_VIDEOS] || "",
-                linksPlantas: colunas[COL.LINKS_PLANTAS] || "",
-                linksImplant: colunas[COL.LINKS_IMPLANT] || "",
-                linksDiversos: colunas[COL.LINKS_DIVERSOS] || "",
-                estande: colunas[COL.ESTANDE] || ""
-            };
-        }).filter(i => i !== null);
-
-        DADOS_PLANILHA.sort((a, b) => a.ordem - b.ordem);
-        desenharMapas(); gerarListaLateral();
-    } catch (e) { console.error(e); }
-}
-
 /* ==========================================================================
-   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
+   3. SIDEBAR ESQUERDA - LISTAGEM REATIVA (COMPLEXOS E RESIDENCIAIS)
    ========================================================================== */
-function obterHtmlZona(zona, tipo) {
-    if (tipo === 'N' || !zona || zona === "---") return "";
-    return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona.toUpperCase()}</span>`;
-}
+/**
+ * Renderiza dinamicamente a lista da esquerda agrupando por Zona/Região
+ */
+function renderizarListaLateral(dados) {
+    const containerSidebar = document.querySelector(".sidebar-esq");
+    if (!containerSidebar) return;
 
-function detectarClasseZona(zona) {
-    if (!zona) return "";
-    const z = zona.toUpperCase().trim();
-    
-    // Verificações das Zonas de SP
-    if (z === "ZO" || z.includes("OESTE")) return "btn-zo";
-    if (z === "ZL" || z.includes("LESTE")) return "btn-zl";
-    if (z === "ZN" || z.includes("NORTE")) return "btn-zn";
-    if (z === "ZS" || z.includes("SUL")) return "btn-zs";
-    
-    // AJUSTE CIRÚRGICO: Novas regiões fora da Grande SP (RegVale, Campinas, etc.)
-    if (z.includes("VALE") || z.includes("REGVALE") || z === "REG VALE") return "btn-vale";
-    if (z.includes("CAMPINAS") || z.includes("REGCAMP")) return "btn-campinas";
-    if (z.includes("SOROCABA") || z.includes("REGSOR")) return "btn-sorocaba";
-    if (z.includes("SANTOS") || z.includes("LITORAL")) return "btn-santos";
-    if (z.includes("RIBEIRAO") || z === "RP") return "btn-ribeirao";
-    
-    return ""; 
-}
+    containerSidebar.innerHTML = ""; // Limpa carregamentos prévios
 
-function navegarVitrine(nome) { 
-    const imovel = DADOS_PLANILHA.find(i => i.nome === nome);
-    if (!imovel) return;
-    comandoSelecao(imovel.id_path, null, imovel); 
-}
-
-function comandoSelecao(idPath, nomePath, fonte) {
-    const idNorm = idPath.toLowerCase().replace(/\s/g, '');
-    const noGSP = MAPA_GSP.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
-    const noInterior = MAPA_INTERIOR.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
-    
-    if (noGSP && mapaAtivo !== 'GSP') trocarMapas(false);
-    if (noInterior && mapaAtivo !== 'INTERIOR') trocarMapas(false);
-    
-    pathAtivo = idNorm;
-    const imoveisDaCidade = DADOS_PLANILHA.filter(d => d.id_path === pathAtivo);
-    const selecionado = fonte || imoveisDaCidade[0];
-    
-    if (!selecionado) return; 
-    
-    imovelAtivo = selecionado.nome;
-
-    document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
-    const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
-    if (elMapa) elMapa.classList.add('ativo');
-
-    gerarListaLateral();
-    const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
-    const nomeOficial = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || pathAtivo;
-    
-    atualizarTituloSuperior(nomeOficial);
-    montarVitrine(selecionado, imoveisDaCidade, nomeOficial);
-}
-
-function atualizarTituloSuperior(texto) {
-    const titulo = document.getElementById('cidade-titulo');
-    if (!titulo) return;
-    if (texto) { titulo.innerText = `MRV EM ${texto.toUpperCase()}`; } 
-    else if (pathAtivo) {
-        const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
-        const nomeFixo = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || "";
-        titulo.innerText = `MRV EM ${nomeFixo.toUpperCase()}`;
-    } else { titulo.innerText = "SELECIONE UMA REGIÃO NO MAPA"; }
-}
-
-/* ==========================================================================
-   BLOCO 05: RENDERIZAÇÃO DOS MAPAS (SVG)
-   ========================================================================== */
-function renderizarNoContainer(id, dados, interativo) {
-    const container = document.getElementById(id);
-    if (!container) return;
-    container.style.display = "flex"; 
-    container.style.alignItems = "center";
-    container.style.justifyContent = "center"; 
-    container.style.overflow = "hidden";
-
-    const pathsHtml = dados.paths.map(p => {
-        const idNorm = p.id.toLowerCase().replace(/\s/g, '');
-        const temMRV = DADOS_PLANILHA.some(d => d.id_path === idNorm);
-        const ativo = (pathAtivo === idNorm && interativo) ? 'ativo' : '';
-        const isGSP = idNorm === "grandesaopaulo";
-        let eventos = "";
-        
-        if (interativo) {
-            if (isGSP) { 
-                eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
-            } else { 
-                eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
-            }
-        }
-        return `<path id="${id}-${idNorm}" d="${p.d}" class="${(temMRV || isGSP) && interativo ? 'commrv '+ativo : ''}" ${eventos}></path>`;
-    }).join('');
-
-    const escala = interativo 
-        ? 'transform: scale(1.25); transform-origin: center;' 
-        : 'transform: scale(0.75); transform-origin: center;';
-
-    container.innerHTML = `
-        <svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%; ${escala}">
-            <g transform="${dados.transform || ''}">
-                ${pathsHtml}
-            </g>
-        </svg>`;
-}
-
-function desenharMapas() {
-    renderizarNoContainer('caixa-a', (mapaAtivo === 'GSP') ? MAPA_GSP : MAPA_INTERIOR, true);
-    renderizarNoContainer('caixa-b', (mapaAtivo === 'GSP') ? MAPA_INTERIOR : MAPA_GSP, false);
-    const cb = document.getElementById('caixa-b');
-    if (cb) cb.onclick = () => trocarMapas(true);
-}
-
-function trocarMapas(completo) { 
-    mapaAtivo = (mapaAtivo === 'GSP') ? 'INTERIOR' : 'GSP'; 
-    if (completo) { 
-        pathAtivo = null; imovelAtivo = null; 
-        const ft = document.getElementById('ficha-tecnica');
-        if (ft) ft.innerHTML = `<div style="text-align:center; color:#ccc; margin-top:80px;"><p style="font-size:30px;">📍</p><p>Clique no mapa ou na lista</p></div>`;
-        const ct = document.getElementById('cidade-titulo');
-        if (ct) ct.innerText = "SELECIONE UMA REGIÃO NO MAPA";
-    }
-    desenharMapas(); gerarListaLateral(); 
-}
-
-/* ==========================================================================
-   BLOCO 06: LISTA LATERAL
-   ========================================================================== */
-function gerarListaLateral() {
-    const container = document.getElementById('lista-imoveis');
-    if (!container) return;
-    container.innerHTML = DADOS_PLANILHA.map(item => {
-        const ativo = item.nome === imovelAtivo ? 'ativo' : '';
-        const classeZona = detectarClasseZona(item.zona); 
-        
-        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" style="${item.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${item.nome}')">
-                    <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
-                </div>`;
-    }).join('');
-}
-
-/* ==========================================================================
-   BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
-   ========================================================================== */
-const criarCardMaterial = (titulo, url, icone) => {
-    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
-    
-    const linkSeguroAbrir = formatarLinkSeguro(url);
-    const linkMiniaturaHover = formatarLinkPreview(url);
-
-    return `
-    <div class="card-material-item">
-        <div class="card-material-left">
-            <span class="card-icon">${icone}</span>
-            <span class="card-text">${titulo}</span>
-        </div>
-        <div class="card-material-right" style="position: relative;">
-            <button onclick="window.open('${linkSeguroAbrir}', '_blank')" 
-                    class="card-btn-abrir" 
-                    style="cursor: pointer; border: none;"
-                    data-preview="${linkMiniaturaHover}">
-                Abrir
-            </button>
-            <button onclick="copiarTexto('${linkSeguroAbrir}', 'Link seguro copiado!')" class="card-btn-copiar">Copiar</button>
-        </div>
-    </div>`;
-};
-
-const extrairLinks = (campo, icone) => {
-    if(!campo || campo === "---") return "";
-    let htmlTemp = "";
-    const grupos = campo.split(';').map(g => g.trim()).filter(g => g !== "");
-    grupos.forEach(g => {
-        const partes = g.split(',').map(p => p.trim());
-        if(partes.length >= 2) htmlTemp += criarCardMaterial(partes[0], partes[1], icone);
-    });
-    return htmlTemp;
-};
-
-function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
-    const painel = document.getElementById('ficha-tecnica');
-    if (!painel) return;
-    const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
-    
-    // CORREÇÃO DOS LINKS: Sintaxe corrigida de template string para a URL do Maps funcionar sem travar
-    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
-    
-    let html = ""; 
-    
-    if(outros.length > 0) {
-        html += `<div style="margin-bottom:6px;">${outros.map(i => {
-            const classeZ = detectarClasseZona(i.zona); 
-            return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%; ${i.tipo === 'N' ? 'color: #333333 !important;' : ''}" onclick="navegarVitrine('${i.nome}')">
-                <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
-            </button>`}).join('')}</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">`;
+    if (!dados || dados.length === 0) {
+        containerSidebar.innerHTML = '<p style="padding:15px; font-size:0.75rem; color:#777;">Nenhum imóvel encontrado.</p>';
+        return;
     }
 
-    if (selecionado.tipo === 'R') {
-        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;        
-        html += `
-        <div style="padding: 2px 0 5px 0;">
-            <div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
-                <span style="flex:1;">📍 ${selecionado.endereco}</span>
-                <div style="display:flex; gap:3px; margin-left:5px;">
-                    <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                    <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-                </div>
-            </div>
-        </div>`;
-
-        // Início da Caixa Unificada com bordas arredondadas externas (Design cinza original)
-        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
-        if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
-        }
+    dados.forEach(imovel => {
+        const botaolista = document.createElement("a");
+        botaolista.href = "#";
         
-        const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
-        if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
-            corEstoque = "#aaaaaa";
+        // Define o identificador único para o clique reativo
+        botaolista.setAttribute("data-id", imovel.id || imovel.nome);
+
+        // Identifica se o registro é um Complexo ou Residencial Comum
+        const ehComplexo = String(imovel.tipo || "").toUpperCase() === "COMPLEXO";
+        const classeRegiao = determinarClasseZona(imovel.zona || imovel.regiao);
+
+        if (ehComplexo) {
+            // Aplica as classes e estilizações de COMPLEXO
+            botaolista.className = `separador-complexo-btn ${classeRegiao}`;
+            botaolista.innerHTML = `<span>${imovel.nome}</span> <span style="font-size:0.6rem;">➔</span>`;
         } else {
-            const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
+            // Aplica as classes e estilizações de RESIDENCIAL Comum
+            botaolista.className = `btRes ${classeRegiao}`;
+            botaolista.innerHTML = `<span>${imovel.nome}</span>`;
         }
-        const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        // Linha 2: Limitador ocupando a linha inteira
-        html += `
-        <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
-            <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
-        </div>`;
+        // CORREÇÃO CRUCIAL: Captura cliques tanto em residenciais (.btRes) quanto em complexos (.separador-complexo-btn)
+        botaolista.addEventListener("click", (evento) => {
+            evento.preventDefault();
+            gerenciarSelecaoImovel(botaolista, imovel);
+        });
 
-        // Linha 3: Casa Paulista ocupando a linha inteira
-        html += `
-        <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
-            <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
-        </div>`;
+        containerSidebar.appendChild(botaolista);
+    });
+}
 
-        // Linha 4: Entrega, Obra e Estoque
-        html += `
-        <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
-            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Entrega</label>
-                <strong style="font-size: 0.75rem; color: #ffffff;">${selecionado.entrega}</strong>
-            </div>
-            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Obra</label>
-                <strong style="font-size: 0.75rem; color: #ffffff;">${selecionado.obra || 0}%</strong>
-            </div>
-            <div style="flex: 1; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Estoque</label>
-                <strong style="font-size: 0.75rem;">${valorEstoqueColorido}</strong>
-            </div>
-        </div>`;
+/**
+ * Retorna a classe CSS correspondente com base na zona ou cidade informada
+ */
+function determinarClasseZona(zona) {
+    if (!zona) return "btn-zo";
+    const z = zona.toLowerCase().trim();
 
-        let precoReal = "CONSULTAR";
-        if (selecionado.tipologiasH) {
-            const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
-            lines.forEach(linhaStr => {
-                const colsArr = linhaStr.split(',').map(c => c.trim());
-                if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
-                    precoReal = colsArr[1];
+    if (z.includes("norte") || z === "zn") return "btn-zn";
+    if (z.includes("sul") || z === "zs") return "btn-zs";
+    if (z.includes("leste") || z === "zl") return "btn-zl";
+    if (z.includes("oeste") || z === "zo") return "btn-zo";
+    
+    // Regiões do Interior e Expansão
+    if (z.includes("vale") || z.includes("paraíba")) return "btn-vale";
+    if (z.includes("campinas")) return "btn-campinas";
+    if (z.includes("sorocaba")) return "btn-sorocaba";
+    if (z.includes("santos") || z.includes("baixada")) return "btn-santos";
+    if (z.includes("ribeirão") || z.includes("preto")) return "btn-ribeirao";
+
+    return "btn-zo"; // Fallback padrão
+}
+
+/**
+ * Controla os estados visuais ativos e dispara a atualização da vitrine da direita
+ */
+function gerenciarSelecaoImovel(elementoClicado, dadosImovel) {
+    // Remove o estado ativo de QUALQUER botão anterior (Residencial ou Complexo)
+    document.querySelectorAll(".btRes, .separador-complexo-btn").forEach(btn => {
+        btn.classList.remove("ativo");
+    });
+
+    // Ativa o botão selecionado atual
+    elementoClicado.classList.remove("ativo");
+    elementoClicado.classList.add("ativo");
+
+    imovelAtivoAtual = dadosImovel;
+
+    // Sincroniza e acende o mapa geográfico se aplicável
+    sincronizarMapaComSelecao(dadosImovel.cidade || dadosImovel.regiao);
+
+    // Atualiza a vitrine da direita de forma completa
+    atualizarVitrineDireita(dadosImovel);
+}
+
+/* ==========================================================================
+   4. MAPA INTERATIVO (SVG)
+   ========================================================================= */
+/**
+ * Configura as interações de hover e clique nos polígonos/paths do mapa SVG
+ */
+function configurarCliquesMapa() {
+    const caminhosMapa = document.querySelectorAll("svg path");
+    
+    caminhosMapa.forEach(path => {
+        path.addEventListener("click", () => {
+            const nomeRegiaoMapa = path.getAttribute("name") || path.getAttribute("id");
+            if (!nomeRegiaoMapa) return;
+
+            // Remove destaque ativo de outros paths
+            caminhosMapa.forEach(p => p.classList.remove("ativo"));
+            path.classList.add("ativo");
+
+            // Atualiza o título superior do centro
+            const containerTitulo = document.getElementById("cidade-titulo");
+            if (containerTitulo) containerTitulo.textContent = nomeRegiaoMapa;
+
+            // Filtra os imóveis daquela região exata clicada
+            filtrarImoveisPorRegiao(nomeRegiaoMapa);
+        });
+    });
+}
+
+/**
+ * Filtra a barra lateral e seleciona o primeiro item ao clicar em uma região do mapa
+ */
+function filtrarImoveisPorRegiao(nomeRegiao) {
+    const regiaoAlvo = nomeRegiao.toLowerCase().trim();
+    
+    // Procura o primeiro imóvel ou complexo que pertença a essa região
+    const imovelCorrespondente = bancoDadosImoveis.find(imovel => {
+        const cid = String(imovel.cidade || "").toLowerCase();
+        const zon = String(imovel.zona || "").toLowerCase();
+        return cid.includes(regiaoAlvo) || zon.includes(regiaoAlvo);
+    });
+
+    if (imovelCorrespondente) {
+        // Localiza o botão correspondente criado na barra lateral e simula o clique nele
+        const idProcurado = imovelCorrespondente.id || imovelCorrespondente.nome;
+        const botaoAlvo = document.querySelector(`[data-id="${idProcurado}"]`);
+        if (botaoAlvo) {
+            botaoAlvo.click();
+            botaoAlvo.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }
+}
+
+/**
+ * Mantém o mapa sincronizado visualmente quando o usuário clica na lista da esquerda
+ */
+function sincronizarMapaComSelecao(nomeCidade) {
+    if (!nomeCidade) return;
+    const cidadeNormalizada = nomeCidade.toLowerCase().trim();
+
+    document.querySelectorAll("svg path").forEach(path => {
+        const nameAttr = String(path.getAttribute("name") || "").toLowerCase();
+        const idAttr = String(path.getAttribute("id") || "").toLowerCase();
+
+        if (nameAttr.includes(cidadeNormalizada) || idAttr.includes(cidadeNormalizada)) {
+            path.classList.add("ativo");
+            const containerTitulo = document.getElementById("cidade-titulo");
+            if (containerTitulo) containerTitulo.textContent = nomeCidade;
+        } else {
+            path.classList.remove("ativo");
+        }
+    });
+}
+
+/* ==========================================================================
+   5. SIDEBAR DIREITA - RENDERIZADOR DA VITRINE E DETALHES
+   ========================================================================== */
+/**
+ * Constrói dinamicamente toda a estrutura de exibição técnica do imóvel/complexo selecionado
+ */
+function atualizarVitrineDireita(imovel) {
+    const containerVitrine = document.querySelector(".sidebar-dir");
+    if (!containerVitrine) return;
+
+    containerVitrine.innerHTML = ""; // Reseta vitrine anterior
+
+    // Determina a cor de destaque da faixa superior
+    const ehComplexo = String(imovel.tipo || "").toUpperCase() === "COMPLEXO";
+    const classeFaixaColorida = ehComplexo ? "faixa-preta" : "faixa-laranja";
+
+    // 1. Criação do Título com a faixa colorida reativa
+    const elementoFaixaTitulo = document.createElement("div");
+    elementoFaixaTitulo.className = `titulo-vitrine-faixa ${classeFaixaColorida}`;
+    elementoFaixaTitulo.textContent = imovel.nome;
+    containerVitrine.appendChild(elementoFaixaTitulo);
+
+    // 2. Se for um COMPLEXO, renderiza o Bloco Informativo de Complexo e encerra a árvore ou puxa seus filhos
+    if (ehComplexo) {
+        renderizarEstruturaDeComplexo(containerVitrine, imovel);
+        return;
+    }
+
+    // 3. Se for um RESIDENCIAL COMUM, monta a tabela técnica padrão e o Grid Estruturado
+    renderizarEstruturaDeResidencial(containerVitrine, imovel);
+}
+
+/**
+ * Renderiza o layout exclusivo de Complexos na vitrine da direita
+ */
+function renderizarEstruturaDeComplexo(container, complexo) {
+    const boxComplexo = document.createElement("div");
+    boxComplexo.className = "box-complexo-full";
+    
+    boxComplexo.innerHTML = `
+        <div style="font-size:0.85rem; font-weight:bold; margin-bottom:8px; color:var(--mrv-preto);">
+            🏢 ${complexo.nome.toUpperCase()}
+        </div>
+        <p style="font-size:0.75rem; color:#555; line-height:1.4; margin-bottom:12px;">
+            ${complexo.descricao || "Este complexo reúne excelentes opções de moradia com infraestrutura completa e lazer integrado para toda a sua família."}
+        </p>
+    `;
+
+    // CORREÇÃO CRUCIAL: Se houverem residenciais vinculados a este complexo na base de dados, cria botões clicáveis para eles sobre a vitrine!
+    const residenciaisFilhos = bancoDadosImoveis.filter(item => 
+        item.complexoPertencente && String(item.complexoPertencente).toLowerCase().trim() === String(complexo.nome).toLowerCase().trim()
+    );
+
+    if (residenciaisFilhos.length > 0) {
+        const subTituloFilhos = document.createElement("div");
+        subTituloFilhos.style = "font-size:0.7rem; font-weight:bold; margin-top:15px; margin-bottom:6px; text-transform:uppercase; color:#777;";
+        subTituloFilhos.textContent = "Residenciais integrantes deste Complexo:";
+        boxComplexo.appendChild(subTituloFilhos);
+
+        residencaisFilhos.forEach(filho => {
+            const btnFilho = document.createElement("button");
+            btnFilho.className = "btRes btn-zo"; // Aplica estilo padrão de botão de residencial
+            btnFilho.style = "width:100% !important; margin:4px 0 !important; text-align:left; justify-content:flex-start; gap:8px;";
+            btnFilho.innerHTML = `📍 <span style="font-weight:bold;">${filho.nome}</span>`;
+            
+            // Permite clicar no residencial de dentro da vitrine do complexo!
+            btnFilho.addEventListener("click", () => {
+                const botaoLateralOriginal = document.querySelector(`[data-id="${filho.id || filho.nome}"]`);
+                if (botaoLateralOriginal) {
+                    botaoLateralOriginal.click();
+                } else {
+                    atualizarVitrineDireita(filho);
                 }
             });
-        }
-
-        // Linha final: Faixa Laranja com o valor do imóvel integrado na caixa cinza original
-        html += `
-        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
-            À PARTIR DE: ${precoReal}
-        </div>`;
-        
-        html += `</div>`;
-       
-        // Blocos de Diferenciais e Informações Complementares
-        html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
-        if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
-            html += `
-            <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
-                <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
-                    <div style="display:flex; gap:3px; margin-left:5px;">
-                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}', 'Link do estande copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        const criarBoxDiferencial = (label, texto, corFundo, corBorda, temBorda) => {
-            if(!texto || texto === "---" || texto === "") return "";
-            return `
-            <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <label style="display:block; font-size:0.52rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
-                <p style="margin:0; font-size:0.65rem; color:#444; line-height:1.3;">${texto}</p>
-            </div>`;
-        };
-        html += criarBoxDiferencial('💡 Observação Importante', selecionado.observacoes, '#fff9c4', '#fbc02d', true);
-        html += criarBoxDiferencial('📍 Localização', selecionado.localizacao, '#fdf2e9', '#f37021', true);
-        html += criarBoxDiferencial('🚍 Mobilidade', selecionado.mobilidade, '#f1f8e9', '#2e7d32', true);
-        html += criarBoxDiferencial('🎭 Cultura e Lazer', selecionado.lazer, '#e3f2fd', '#1565c0', true);
-        html += criarBoxDiferencial('🛒 Comércio', selecionado.comercio, '#ffebee', '#c62828', true);
-        html += criarBoxDiferencial('🏥 Saúde e Educação', selecionado.saude, '#f3e5f5', '#6a1b9a', false);
-        html += `</div>`;
-
-        let materiaisHtml = "";
-        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
-        
-        if (materiaisHtml !== "") {
-            html += `<div style="margin-top: 10px;">
-                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
-                ${materiaisHtml}
-            </div>`;
-        }
-    } else {
-        let corComplexo = "#333";
-        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
-        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
-        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
-        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
-
-        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
-
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
-                    ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
-                 </div>`;
-                 
-        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
-                    <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <span>📍 ${selecionado.endereco}</span> 
-                        <span style="display:flex; gap:3px;">
-                            <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-                        </span>
-                    </p>
-                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
-                 </div>`;
-                 
-        let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
-        if (materialsComplexo !== "") { 
-            html += `<div style="margin-top: 10px; padding: 0 5px;">
-                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
-                ${materiaisComplexo}
-            </div>`;
-        }
+            boxComplexo.appendChild(btnFilho);
+        });
     }
-    painel.innerHTML = html;
+
+    container.appendChild(boxComplexo);
     
-    // REATIVAÇÃO ESSENCIAL: Garante que os Hovers funcionem sempre que uma nova vitrine for montada
-    inicializarHoverMiniaturas();
+    // Adiciona os cards de materiais vinculados ao complexo se houverem
+    renderizarCardsMateriais(container, complexo);
 }
 
-// RESTAURAÇÃO COMPLETA: Função global de cópia sem alert() finalizada corretamente
-function copiarTexto(texto, mensagemSucesso) {
-    if (!texto) return;
-    navigator.clipboard.writeText(texto).then(() => {
-        // Exibe mensagem amigável no console ou via toast se houver estrutura, evitando alert() intrusivo
-        console.log(mensagemSucesso);
-    }).catch(err => {
-        console.error('Erro ao copiar: ', err);
+/**
+ * Renderiza o layout tradicional de Ficha Técnica e Grid 50/50 para Residenciais comuns
+ */
+function renderizarEstruturaDeResidencial(container, imovel) {
+    // Tabela básica de localização superior
+    const tabelaLocalizacao = document.createElement("table");
+    tabelaLocalizacao.style = "width:100%; margin-bottom:10px; border-collapse:collapse;";
+    tabelaLocalizacao.innerHTML = `
+        <tr>
+            <td style="padding:4px 0; color:#333;">
+                <b>Endereço:</b> <span>${imovel.endereco || "Não informado"}</span>
+                ${imovel.linkMaps ? `<a href="${imovel.linkMaps}" target="_blank" class="btn-maps" style="margin-left:6px;">Ver no Maps</a>` : ""}
+            </td>
+        </tr>
+    `;
+    container.appendChild(tabelaLocalizacao);
+
+    // Bloco Padronizado de Detalhes (Grid 50/50 com alturas equalizadas)
+    const containerGridDetalhes = document.createElement("div");
+    containerGridDetalhes.className = "detalhes-residencial-container";
+
+    // Monta o cabeçalho interno do container
+    let estruturaGridHTML = `
+        <div class="header-residencial">${imovel.nome}</div>
+        <div class="sub-header">
+            <span><b>Status:</b> ${imovel.status || "Lançamento"}</span>
+            <div class="btn-links-fnd">
+                ${imovel.linkFnd ? `<a href="${imovel.linkFnd}" target="_blank" style="background:#00713a;">FND</a>` : ""}
+                ${imovel.linkTour ? `<a href="${imovel.linkTour}" target="_blank" style="background:#f37021;">TOUR</a>` : ""}
+            </div>
+        </div>
+    `;
+
+    // Faixa de isenção condicional
+    if (imovel.isencaoInpc && String(imovel.isencaoInpc).toUpperCase() === "SIM") {
+        estruturaGridHTML += `<div class="faixa-isencao">🚨 IMÓVEL COM ISENÇÃO DE INPC!</div>`;
+    }
+
+    // Abre o corpo do grid reativo
+    estruturaGridHTML += `<div class="grid-info">`;
+
+    // Células do Grid (Lado A / Lado B combinados perfeitamente)
+    estruturaGridHTML += `
+        <div class="grid-cell border-right"><span class="label">Tipologia:</span><span class="valor">${imovel.tipologia || "-"}</span></div>
+        <div class="grid-cell"><span class="label">Vagas:</span><span class="valor">${imovel.vagas || "-"}</span></div>
+        
+        <div class="grid-cell border-right"><span class="label">Faixa MCMV:</span><span class="valor">${imovel.faixaMcmv || "-"}</span></div>
+        <div class="grid-cell"><span class="label">Renda Alvo:</span><span class="valor">${imovel.rendaAlvo || "-"}</span></div>
+        
+        <div class="grid-cell border-right full-width" style="border-right:none;">
+            <span class="label">Parceria PPP:</span><span class="valor">${imovel.ppp || "Não"}</span>
+        </div>
+
+        <div class="grid-cell border-right full-width" style="border-right:none; background:#fdfdfd;">
+            <div style="display:flex; flex-direction:column; width:100%;">
+                <span class="label" style="margin-bottom:4px; text-transform:uppercase; font-size:0.65rem;">📍 Localização Estratégica:</span>
+                <p style="font-size:0.72rem; color:#555; margin:0; line-height:1.3;">${imovel.textoLocalizacao || "Localização privilegiada com fácil acesso a comércios e serviços."}</p>
+            </div>
+        </div>
+
+        <div class="grid-cell border-right full-width" style="border-right:none; background:#fbfbfb;">
+            <div style="display:flex; flex-direction:column; width:100%;">
+                <span class="label" style="margin-bottom:4px; text-transform:uppercase; font-size:0.65rem;">🚇 Mobilidade & Transporte:</span>
+                <p style="font-size:0.72rem; color:#555; margin:0; line-height:1.3;">${imovel.textoMobilidade || "Excelente malha de transporte público nas proximidades do local."}</p>
+            </div>
+        </div>
+    `;
+
+    // Fecha a div principal do grid
+    estruturaGridHTML += `</div>`;
+
+    // Bloco de Preço Inferior do Container
+    if (imovel.precoChave) {
+        estruturaGridHTML += `
+            <div class="container-preco">
+                <div class="preco-label">A partir de:</div>
+                <div class="preco-botao">${imovel.precoChave}</div>
+            </div>
+        `;
+    }
+
+    containerGridDetalhes.innerHTML = estruturaGridHTML;
+    container.appendChild(containerGridDetalhes);
+
+    // Renderiza a tabela compacta de preços complementares se houver dados
+    renderizarTabelaPrecosAdicionais(container, imovel);
+
+    // Renderiza os cards de materiais de vendas e links do drive
+    renderizarCardsMateriais(container, imovel);
+}
+
+/**
+ * Cria a tabela de preços secundários em formato enxuto
+ */
+function renderizarTabelaPrecosAdicionais(container, imovel) {
+    if (!imovel.precoTabela && !imovel.precoAto) return;
+
+    const tabelaContainer = document.createElement("div");
+    tabelaContainer.className = "tabela-precos-container";
+
+    tabelaContainer.innerHTML = `
+        <div class="tabela-header">
+            <div class="col-tabela">PREÇO DE TABELA</div>
+            <div class="col-tabela" style="border-right:none;">SUGESTÃO DE ATO</div>
+        </div>
+        <div class="tabela-row">
+            <div class="col-tabela col-laranja">${imovel.precoTabela || "-"}</div>
+            <div class="col-tabela" style="border-right:none; font-weight:bold; color:#333;">${imovel.precoAto || "-"}</div>
+        </div>
+    `;
+    container.appendChild(tabelaContainer);
+}
+
+/**
+ * Renderiza a lista de arquivos e links com suporte ao Preview Flutuante Dinâmico
+ */
+function renderizarCardsMateriais(container, imovel) {
+    const blocoMateriais = document.createElement("div");
+    blocoMateriais.style = "margin-top:12px;";
+
+    const materiaisDisponiveis = [
+        { nome: "Implantação Bloco", url: imovel.matImplantacao, icone: "📐" },
+        { nome: "Tabela de Vendas", url: imovel.matTabela, icone: "📊" },
+        { nome: "Book Digital", url: imovel.matBook, icone: "📖" }
+    ];
+
+    materiaisDisponiveis.forEach(material => {
+        if (!material.url) return; // Ignora se o link não existir na planilha
+
+        const card = document.createElement("div");
+        card.className = "card-material-item";
+        card.innerHTML = `
+            <div class="card-material-left">
+                <span class="card-icon">${material.icone}</span>
+                <span class="card-text">${material.nome}</span>
+            </div>
+            <div class="card-material-right">
+                <div class="btn-com-preview">
+                    <a href="${material.url}" target="_blank" class="card-btn-abrir">Abrir</a>
+                </div>
+                <button class="card-btn-copiar">Copiar</button>
+            </div>
+        `;
+
+        // Ativa o rastreador de cursor para exibir o Preview Flutuante neste link
+        vincularEventosDePreview(card.querySelector(".btn-com-preview"), material.url);
+
+        // Ativa a função de cópia rápida para a área de transferência com Toast
+        card.querySelector(".card-btn-copiar").addEventListener("click", () => {
+            executarCopiaLink(material.url);
+        });
+
+        blocoMateriais.appendChild(card);
     });
+
+    container.appendChild(blocoMateriais);
+}
+
+/* ==========================================================================
+   6. SISTEMA DE PREVIEW FLUTUANTE DINÂMICO (MOUSE TRACKER)
+   ========================================================================== */
+/**
+ * Constrói o container invisível na raiz do body para o preview flutuante
+ */
+function criarEstruturaPreviewFlutuante() {
+    let containerPreview = document.getElementById("preview-flutuante-drive");
+    if (!containerPreview) {
+        containerPreview = document.createElement("div");
+        containerPreview.id = "preview-flutuante-drive";
+        containerPreview.style = `
+            position: fixed;
+            display: none;
+            width: 320px;
+            height: 210px;
+            z-index: 10000;
+            pointer-events: none;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #ffffff;
+        `;
+        document.body.appendChild(containerPreview);
+    }
+}
+
+/**
+ * Vincula as coordenadas e eventos do mouse para exibir o iframe flutuante do Drive
+ */
+function vincularEventosDePreview(elementoGatilho, urlMaterial) {
+    const containerPreview = document.getElementById("preview-flutuante-drive");
+    if (!elementoGatilho || !containerPreview) return;
+
+    elementoGatilho.addEventListener("mouseenter", () => {
+        // Converte o link padrão do Drive para a versão limpa de visualização do iframe
+        let urlPreview Limpa = urlMaterial;
+        if (urlMaterial.includes("drive.google.com")) {
+            urlPreviewLimpa = urlMaterial.replace("/view", "/preview").replace("/edit", "/preview");
+        }
+
+        containerPreview.innerHTML = `
+            <iframe src="${urlPreviewLimpa}" 
+                    style="width:130%; height:160%; border:none; margin-top:-45px; margin-left:-15px; pointer-events:none;">
+            </iframe>
+        `;
+        containerPreview.style.display = "block";
+    });
+
+    elementoGatilho.addEventListener("mousemove", (evento) => {
+        // Posiciona a caixinha de preview ligeiramente deslocada do cursor para não cobrir o clique
+        containerPreview.style.left = `${evento.clientX + 15}px`;
+        containerPreview.style.top = `${evento.clientY - 110}px`;
+    });
+
+    elementoGatilho.addEventListener("mouseleave", () => {
+        containerPreview.style.display = "none";
+        containerPreview.innerHTML = "";
+    });
+}
+
+/* ==========================================================================
+   7. AUXILIARES E MODAIS (TOAST / WHATSAPP)
+   ========================================================================== */
+/**
+ * Executa a cópia para o clipboard do usuário e dispara a notificação flutuante
+ */
+function executarCopiaLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        let caixaToast = document.querySelector(".toast-notificacao");
+        if (!caixaToast) {
+            caixaToast = document.createElement("div");
+            caixaToast.className = "toast-notificacao";
+            document.body.appendChild(caixaToast);
+        }
+        
+        caixaToast.innerHTML = `✅ Link copiado com sucesso!`;
+        caixaToast.classList.add("mostrar");
+
+        setTimeout(() => {
+            caixaToast.classList.remove("mostrar");
+        }, 2500);
+    }).catch(err => {
+        console.error("Falha ao copiar link de material: ", err);
+    });
+}
+
+/**
+ * Abre o Modal Sobre o Sistema
+ */
+function abrirModalSobre() {
+    const modal = document.getElementById("modal-sobre");
+    if (modal) modal.style.display = "block";
+}
+
+/**
+ * Fecha o Modal Sobre o Sistema
+ */
+function fecharModalSobre() {
+    const modal = document.getElementById("modal-sobre");
+    if (modal) modal.style.display = "none";
 }
