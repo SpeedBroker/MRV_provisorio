@@ -100,7 +100,7 @@ function renderizarListaLateral(dados) {
             botaolista.innerHTML = `<span>${imovel.nome}</span>`;
         }
 
-        // CORREÇÃO CRUCIAL: Captura cliques tanto em residenciais (.btRes) quanto em complexos (.separador-complexo-btn)
+        // Captura cliques tanto em residenciais (.btRes) quanto em complexos (.separador-complexo-btn)
         botaolista.addEventListener("click", (evento) => {
             evento.preventDefault();
             gerenciarSelecaoImovel(botaolista, imovel);
@@ -142,7 +142,6 @@ function gerenciarSelecaoImovel(elementoClicado, dadosImovel) {
     });
 
     // Ativa o botão selecionado atual
-    elementoClicado.classList.remove("ativo");
     elementoClicado.classList.add("ativo");
 
     imovelAtivoAtual = dadosImovel;
@@ -275,7 +274,7 @@ function renderizarEstruturaDeComplexo(container, complexo) {
         </p>
     `;
 
-    // CORREÇÃO CRUCIAL: Se houverem residenciais vinculados a este complexo na base de dados, cria botões clicáveis para eles sobre a vitrine!
+    // Filtra os residenciais que pertencem a este complexo
     const residenciaisFilhos = bancoDadosImoveis.filter(item => 
         item.complexoPertencente && String(item.complexoPertencente).toLowerCase().trim() === String(complexo.nome).toLowerCase().trim()
     );
@@ -286,13 +285,13 @@ function renderizarEstruturaDeComplexo(container, complexo) {
         subTituloFilhos.textContent = "Residenciais integrantes deste Complexo:";
         boxComplexo.appendChild(subTituloFilhos);
 
-        residencaisFilhos.forEach(filho => {
+        residenciaisFilhos.forEach(filho => {
             const btnFilho = document.createElement("button");
             btnFilho.className = "btRes btn-zo"; // Aplica estilo padrão de botão de residencial
             btnFilho.style = "width:100% !important; margin:4px 0 !important; text-align:left; justify-content:flex-start; gap:8px;";
             btnFilho.innerHTML = `📍 <span style="font-weight:bold;">${filho.nome}</span>`;
             
-            // Permite clicar no residencial de dentro da vitrine do complexo!
+            // Permite clicar no residencial de dentro da vitrine do complexo
             btnFilho.addEventListener("click", () => {
                 const botaoLateralOriginal = document.querySelector(`[data-id="${filho.id || filho.nome}"]`);
                 if (botaoLateralOriginal) {
@@ -344,7 +343,7 @@ function renderizarEstruturaDeResidencial(container, imovel) {
         </div>
     `;
 
-    // Faixa de isenção condicional
+    // Faixa de isenção condicional (Corrigido de blueprintGridHTML para estruturaGridHTML)
     if (imovel.isencaoInpc && String(imovel.isencaoInpc).toUpperCase() === "SIM") {
         estruturaGridHTML += `<div class="faixa-isencao">🚨 IMÓVEL COM ISENÇÃO DE INPC!</div>`;
     }
@@ -504,7 +503,7 @@ function vincularEventosDePreview(elementoGatilho, urlMaterial) {
 
     elementoGatilho.addEventListener("mouseenter", () => {
         // Converte o link padrão do Drive para a versão limpa de visualização do iframe
-        let urlPreview Limpa = urlMaterial;
+        let urlPreviewLimpa = urlMaterial;
         if (urlMaterial.includes("drive.google.com")) {
             urlPreviewLimpa = urlMaterial.replace("/view", "/preview").replace("/edit", "/preview");
         }
@@ -568,5 +567,6 @@ function abrirModalSobre() {
  */
 function fecharModalSobre() {
     const modal = document.getElementById("modal-sobre");
+    if (modal) modal.style.none = "block";
     if (modal) modal.style.display = "none";
 }
