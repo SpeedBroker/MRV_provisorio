@@ -23,16 +23,22 @@ const COL = {
     ESTANDE: 31 
 };
 
-
 /* ==========================================================================
    BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
    ========================================================================== */
 async function iniciarApp() {
+    // Trava de segurança: Verifica se as variáveis dos mapas existem no escopo global
+    if (typeof MAPA_GSP === 'undefined' || typeof MAPA_INTERIOR === 'undefined') {
+        console.error("ERRO CRÍTICO: Os arquivos de configuração dos mapas (MAPA_GSP ou MAPA_INTERIOR) não foram carregados antes deste script.");
+        alert("Erro de inicialização: Arquivos de base dos mapas não encontrados. Verifique a ordem dos scripts no HTML.");
+        return;
+    }
+
     try { 
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
     } catch (err) { 
-        console.error(err); 
+        console.error("Erro ao iniciar aplicação:", err); 
     }
 }
 
@@ -50,9 +56,7 @@ function configurarBotaoDocumentos() {
 
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
-                let htmlDocs = `
-                    <div style="padding: 10px 0;">
-                `;
+                let htmlDocs = `<div style="padding: 10px 0;">`;
 
                 if (DOCUMENTOS_GERAIS.length === 0) {
                     htmlDocs += `
@@ -76,12 +80,9 @@ function configurarBotaoDocumentos() {
 
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
-    
     let link = url.trim();
-    
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
-        
         if (match && match[1]) {
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
@@ -91,12 +92,9 @@ function formatarLinkSeguro(url) {
 
 function formatarLinkPreview(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
-    
     let link = url.trim();
-    
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
-        
         if (match && match[1]) {
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
@@ -106,7 +104,6 @@ function formatarLinkPreview(url) {
 
 function inicializarHoverMiniaturas() {
     const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
-    
     botoesAbrir.forEach(botao => {
         const urlPreview = botao.getAttribute('data-preview');
         if (!urlPreview) return;
@@ -136,9 +133,7 @@ function inicializarHoverMiniaturas() {
 
         botao.addEventListener('mousemove', (e) => {
             const previewDiv = document.getElementById('preview-flutuante-drive');
-            if (previewDiv) {
-                posicionarPreview(e, previewDiv);
-            }
+            if (previewDiv) posicionarPreview(e, previewDiv);
         });
 
         botao.addEventListener('mouseleave', () => {
@@ -151,14 +146,8 @@ function inicializarHoverMiniaturas() {
 function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
-
-    if (left + 340 > window.innerWidth) {
-        left = e.clientX - 340;
-    }
-    if (top + 240 > window.innerHeight) {
-        top = e.clientY - 240;
-    }
-
+    if (left + 340 > window.innerWidth) left = e.clientX - 340;
+    if (top + 240 > window.innerHeight) top = e.clientY - 240;
     elemento.style.top = `${top}px`;
     elemento.style.left = `${left}px`;
 }
@@ -170,18 +159,6 @@ function copiarTexto(texto, msg = "Link copiado!") {
     }).catch(err => {
         console.error('Erro ao copiar: ', err);
     });
-}
-
-function copiarLink(url) {
-    const linkSeguro = formatarLinkSeguro(url);
-    copiarTexto(linkSeguro, "Link seguro copiado!");
-}
-
-function abrirDocumentoDireto(url) {
-    const linkSeguro = formatarLinkSeguro(url);
-    if (linkSeguro) {
-        window.open(linkSeguro, '_blank');
-    }
 }
 
 /* ==========================================================================
@@ -278,8 +255,11 @@ async function carregarPlanilha() {
         }).filter(i => i !== null);
 
         DADOS_PLANILHA.sort((a, b) => a.ordem - b.ordem);
-        desenharMapas(); gerarListaLateral();
-    } catch (e) { console.error(e); }
+        desenharMapas(); 
+        gerarListaLateral();
+    } catch (e) { 
+        console.error("Erro ao carregar/processar planilha:", e); 
+    }
 }
 
 /* ==========================================================================
@@ -287,14 +267,12 @@ async function carregarPlanilha() {
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
-    // Preserva letras maiúsculas e minúsculas originais (ex: RegVale)
     return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona}</span>`;
 }
 
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
-    
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZO")) return "btn-zo";
@@ -303,7 +281,6 @@ function detectarClasseZona(zona) {
     if (z.includes("CAMPINAS")) return "btn-campinas";
     if (z.includes("RIB")) return "btn-ribeirao";
     if (z.includes("VALE")) return "btn-vale";
-    
     return "btn-outros"; 
 }
 
@@ -344,12 +321,15 @@ function comandoSelecao(idPath, nomePath, fonte) {
 function atualizarTituloSuperior(texto) {
     const titulo = document.getElementById('cidade-titulo');
     if (!titulo) return;
-    if (texto) { titulo.innerText = `MRV EM ${texto.toUpperCase()}`; } 
-    else if (pathAtivo) {
+    if (texto) { 
+        titulo.innerText = `MRV EM ${texto.toUpperCase()}`; 
+    } else if (pathAtivo) {
         const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
         const nomeFixo = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || "";
         titulo.innerText = `MRV EM ${nomeFixo.toUpperCase()}`;
-    } else { titulo.innerText = "SELECIONE UMA REGIÃO NO MAPA"; }
+    } else { 
+        titulo.innerText = "SELECIONE UMA REGIÃO NO MAPA"; 
+    }
 }
 
 /* ==========================================================================
@@ -358,6 +338,7 @@ function atualizarTituloSuperior(texto) {
 function renderizarNoContainer(id, dados, interativo) {
     const container = document.getElementById(id);
     if (!container) return;
+    
     container.style.display = "flex"; 
     container.style.alignItems = "center";
     container.style.justifyContent = "center"; 
@@ -408,7 +389,8 @@ function trocarMapas(completo) {
         const ct = document.getElementById('cidade-titulo');
         if (ct) ct.innerText = "SELECIONE UMA REGIÃO NO MAPA";
     }
-    desenharMapas(); gerarListaLateral(); 
+    desenharMapas(); 
+    gerarListaLateral(); 
 }
 
 /* ==========================================================================
@@ -548,85 +530,4 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
 
         html += `
-        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
-            À PARTIR DE: ${precoReal}
-        </div>`;
-        
-        html += `</div>`;
-       
-        html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
-        if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
-            html += `
-            <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
-                <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
-                    <div style="display:flex; gap:3px; margin-left:5px;">
-                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}', 'Link do estande copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        const criarBoxDiferencial = (label, texto, corFundo, corBorda, temBorda) => {
-            if(!texto || texto === "---" || texto === "") return "";
-            return `
-            <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <label style="display:block; font-size:0.52rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
-                <p style="margin:0; font-size:0.65rem; color:#444; line-height:1.3;">${texto}</p>
-            </div>`;
-        };
-        html += criarBoxDiferencial('💡 Observação Importante', selecionado.observacoes, '#fff9c4', '#fbc02d', true);
-        html += criarBoxDiferencial('📍 Localização', selecionado.localizacao, '#fdf2e9', '#f37021', true);
-        html += criarBoxDiferencial('🚍 Mobilidade', selecionado.mobilidade, '#f1f8e9', '#2e7d32', true);
-        html += criarBoxDiferencial('🎭 Cultura e Lazer', selecionado.lazer, '#e3f2fd', '#1565c0', true);
-        html += criarBoxDiferencial('🛒 Comércio', selecionado.comercio, '#ffebee', '#c62828', true);
-        html += criarBoxDiferencial('🏥 Saúde e Educação', selecionado.saude, '#f3e5f5', '#6a1b9a', false);
-        html += `</div>`;
-
-        let materiaisHtml = "";
-        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
-        
-        // CORREÇÃO: Variável corrigida de "materialsHtml" para "materiaisHtml"
-        if (materiaisHtml !== "") {
-            html += `<div style="margin-top: 10px;">
-                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
-                ${materiaisHtml}
-            </div>`;
-        }
-        
-        setTimeout(inicializarHoverMiniaturas, 50);
-
-    } else {
-        let corComplexo = "#333";
-        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
-        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
-        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
-        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
-
-        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
-
-        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
-                    ${selecionado.nomeFull} — ${selecionado.regiao}
-                 </div>`;
-                 
-        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
-                    <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <span>📍 ${selecionado.endereco}</span> 
-                        <span style="display:flex; gap:3px;">
-                            <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
-                        </span>
-                    </p>
-                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
-                 </div>`;
-    }
-    painel.innerHTML = html;
-}
+        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display:
