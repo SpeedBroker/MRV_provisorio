@@ -2,7 +2,7 @@
    1. CONFIGURAÇÕES E DADOS GERAIS
    ========================================================================== */
 const CONFIG_SISTEMA = {
-    urlPlanilhaDados: "https://script.google.com/macros/s/AKfycbz_9I9xXQ_lq76Zc3b7P8Z3n5O_7rX8V_yX/exec"
+    urlPlanilhaDados: "https://script.google.com/macros/s/AKfycbzFilsjEmRMeo1QJXIOX-0lUYtFeZKcMyvrebiSZu77P7r36vpmJe3WZSBdfQuzDms/exec"
 };
 
 // Estado global da aplicação
