@@ -23,53 +23,57 @@ const COL = {
     ESTANDE: 31 
 };
 
-
 /* ==========================================================================
    BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
    ========================================================================== */
 async function iniciarApp() {
+    console.log("Iniciando aplicação...");
     try { 
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
     } catch (err) { 
-        console.error("Erro ao iniciar a aplicação:", err); 
+        console.error("Erro no fluxo de inicialização:", err); 
     }
 }
 
 function configurarBotaoDocumentos() {
-    const btnDocs = document.getElementById('btn-documentos');
-    if (btnDocs) {
-        btnDocs.addEventListener('click', () => {
-            imovelAtivo = null;
-            pathAtivo = null;
-            document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
-            gerarListaLateral();
-            
-            const ct = document.getElementById('cidade-titulo');
-            if (ct) ct.innerText = "DOCUMENTOS GERAIS CORPORATIVOS";
+    try {
+        const btnDocs = document.getElementById('btn-documentos');
+        if (btnDocs) {
+            btnDocs.addEventListener('click', () => {
+                imovelAtivo = null;
+                pathAtivo = null;
+                document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
+                gerarListaLateral();
+                
+                const ct = document.getElementById('cidade-titulo');
+                if (ct) ct.innerText = "DOCUMENTOS GERAIS CORPORATIVOS";
 
-            const painel = document.getElementById('ficha-tecnica');
-            if (painel) {
-                let htmlDocs = `
-                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
-                    <div style="padding: 10px 0;">
-                `;
+                const painel = document.getElementById('ficha-tecnica');
+                if (painel) {
+                    let htmlDocs = `
+                        <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
+                        <div style="padding: 10px 0;">
+                    `;
 
-                if (DOCUMENTOS_GERAIS.length === 0) {
-                    htmlDocs += `
-                        <div style="text-align:center; color:#999; margin-top:50px;">
-                            <p>Nenhum documento encontrado na aba.</p>
-                        </div>`;
-                } else {
-                    DOCUMENTOS_GERAIS.forEach(doc => {
-                        htmlDocs += criarCardMaterial(doc.titulo, doc.url, '📝');
-                    });
+                    if (DOCUMENTOS_GERAIS.length === 0) {
+                        htmlDocs += `
+                            <div style="text-align:center; color:#999; margin-top:50px;">
+                                <p>Nenhum documento encontrado na aba.</p>
+                            </div>`;
+                    } else {
+                        DOCUMENTOS_GERAIS.forEach(doc => {
+                            htmlDocs += criarCardMaterial(doc.titulo, doc.url, '📝');
+                        });
+                    }
+
+                    htmlDocs += `</div>`;
+                    painel.innerHTML = htmlDocs;
                 }
-
-                htmlDocs += `</div>`;
-                painel.innerHTML = htmlDocs;
-            }
-        });
+            });
+        }
+    } catch (e) {
+        console.error("Erro ao configurar botão de documentos:", e);
     }
 }
 
@@ -98,7 +102,6 @@ function copiarLink(url) {
     const linkSeguro = formatarLinkSeguro(url);
     copiarTexto(linkSeguro, "Link seguro copiado!");
 }
-
 
 /* ==========================================================================
    BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
@@ -201,7 +204,6 @@ async function carregarPlanilha() {
     }
 }
 
-
 /* ==========================================================================
    BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
    ========================================================================== */
@@ -227,31 +229,40 @@ function navegarVitrine(nome) {
 }
 
 function comandoSelecao(idPath, nomePath, fonte) {
-    const idNorm = idPath.toLowerCase().replace(/\s/g, '');
-    const noGSP = MAPA_GSP.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
-    const noInterior = MAPA_INTERIOR.paths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
-    
-    if (noGSP && mapaAtivo !== 'GSP') trocarMapas(false);
-    if (noInterior && mapaAtivo !== 'INTERIOR') trocarMapas(false);
-    
-    pathAtivo = idNorm;
-    const imoveisDaCidade = DADOS_PLANILHA.filter(d => d.id_path === pathAtivo);
-    const selecionado = fonte || imoveisDaCidade[0];
-    
-    if (!selecionado) return; 
-    
-    imovelAtivo = selecionado.nome;
+    try {
+        const idNorm = idPath.toLowerCase().replace(/\s/g, '');
+        
+        // Proteção contra mapas não carregados na memória global
+        const gspPaths = (typeof MAPA_GSP !== 'undefined' && MAPA_GSP.paths) ? MAPA_GSP.paths : [];
+        const interiorPaths = (typeof MAPA_INTERIOR !== 'undefined' && MAPA_INTERIOR.paths) ? MAPA_INTERIOR.paths : [];
 
-    document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
-    const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
-    if (elMapa) elMapa.classList.add('ativo');
+        const noGSP = gspPaths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
+        const noInterior = interiorPaths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
+        
+        if (noGSP && mapaAtivo !== 'GSP') trocarMapas(false);
+        if (noInterior && mapaAtivo !== 'INTERIOR') trocarMapas(false);
+        
+        pathAtivo = idNorm;
+        const imoveisDaCidade = DADOS_PLANILHA.filter(d => d.id_path === pathAtivo);
+        const selecionado = fonte || imoveisDaCidade[0];
+        
+        if (!selecionado) return; 
+        
+        imovelAtivo = selecionado.nome;
 
-    gerarListaLateral();
-    const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
-    const nomeOficial = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || pathAtivo;
-    
-    atualizarTituloSuperior(nomeOficial);
-    montarVitrine(selecionado, imoveisDaCidade, nomeOficial);
+        document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
+        const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
+        if (elMapa) elMapa.classList.add('ativo');
+
+        gerarListaLateral();
+        const todosPaths = gspPaths.concat(interiorPaths);
+        const nomeOficial = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || pathAtivo;
+        
+        atualizarTituloSuperior(nomeOficial);
+        montarVitrine(selecionado, imoveisDaCidade, nomeOficial);
+    } catch (err) {
+        console.error("Erro na seleção do comando:", err);
+    }
 }
 
 function atualizarTituloSuperior(texto) {
@@ -260,7 +271,9 @@ function atualizarTituloSuperior(texto) {
     if (texto) { 
         titulo.innerText = `MRV EM ${texto.toUpperCase()}`; 
     } else if (pathAtivo) {
-        const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
+        const gspPaths = (typeof MAPA_GSP !== 'undefined' && MAPA_GSP.paths) ? MAPA_GSP.paths : [];
+        const interiorPaths = (typeof MAPA_INTERIOR !== 'undefined' && MAPA_INTERIOR.paths) ? MAPA_INTERIOR.paths : [];
+        const todosPaths = gspPaths.concat(interiorPaths);
         const nomeFixo = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || "";
         titulo.innerText = `MRV EM ${nomeFixo.toUpperCase()}`;
     } else { 
@@ -268,48 +281,60 @@ function atualizarTituloSuperior(texto) {
     }
 }
 
-
 /* ==========================================================================
    BLOCO 05: RENDERIZAÇÃO DOS MAPAS (SVG)
    ========================================================================== */
 function renderizarNoContainer(id, dados, interativo) {
-    const container = document.getElementById(id);
-    if (!container) return;
-    container.style.display = "flex"; 
-    container.style.alignItems = "center";
-    container.style.justifyContent = "center"; 
-    container.style.overflow = "hidden";
+    try {
+        const container = document.getElementById(id);
+        if (!container || !dados || !dados.paths) return;
+        container.style.display = "flex"; 
+        container.style.alignItems = "center";
+        container.style.justifyContent = "center"; 
+        container.style.overflow = "hidden";
 
-    const pathsHtml = dados.paths.map(p => {
-        const idNorm = p.id.toLowerCase().replace(/\s/g, '');
-        const temMRV = DADOS_PLANILHA.some(d => d.id_path === idNorm);
-        const ativo = (pathAtivo === idNorm && interativo) ? 'ativo' : '';
-        const isGSP = idNorm === "grandesaopaulo";
-        let eventos = "";
-        
-        if (interativo) {
-            if (isGSP) { 
-                eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
-            } else { 
-                eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
+        const pathsHtml = dados.paths.map(p => {
+            const idNorm = p.id.toLowerCase().replace(/\s/g, '');
+            const temMRV = DADOS_PLANILHA.some(d => d.id_path === idNorm);
+            const ativo = (pathAtivo === idNorm && interativo) ? 'ativo' : '';
+            const isGSP = idNorm === "grandesaopaulo";
+            let eventos = "";
+            
+            if (interativo) {
+                if (isGSP) { 
+                    eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
+                } else { 
+                    eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
+                }
             }
-        }
-        return `<path id="${id}-${idNorm}" d="${p.d}" class="${(temMRV || isGSP) && interativo ? 'commrv ' + ativo : ''}" ${eventos}></path>`;
-    }).join('');
+            return `<path id="${id}-${idNorm}" d="${p.d}" class="${(temMRV || isGSP) && interativo ? 'commrv ' + ativo : ''}" ${eventos}></path>`;
+        }).join('');
 
-    const escala = interativo 
-        ? 'transform: scale(1.25); transform-origin: center;' 
-        : 'transform: scale(0.75); transform-origin: center;';
+        const escala = interativo 
+            ? 'transform: scale(1.25); transform-origin: center;' 
+            : 'transform: scale(0.75); transform-origin: center;';
 
-    container.innerHTML = `
-        <svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%; ${escala}">
-            <g transform="${dados.transform || ''}">
-                ${pathsHtml}
-            </g>
-        </svg>`;
+        container.innerHTML = `
+            <svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%; ${escala}">
+                <g transform="${dados.transform || ''}">
+                    ${pathsHtml}
+                </g>
+            </svg>`;
+    } catch (e) {
+        console.error("Erro ao renderizar mapa no container " + id + ":", e);
+    }
 }
 
 function desenharMapas() {
+    // Verificações robustas para evitar quebras se as variáveis externas não existirem no momento exato
+    const gspDisponivel = typeof MAPA_GSP !== 'undefined';
+    const interiorDisponivel = typeof MAPA_INTERIOR !== 'undefined';
+
+    if (!gspDisponivel || !interiorDisponivel) {
+        console.warn("Variáveis de mapa (MAPA_GSP ou MAPA_INTERIOR) ainda não carregadas.");
+        return;
+    }
+
     renderizarNoContainer('caixa-a', (mapaAtivo === 'GSP') ? MAPA_GSP : MAPA_INTERIOR, true);
     renderizarNoContainer('caixa-b', (mapaAtivo === 'GSP') ? MAPA_INTERIOR : MAPA_GSP, false);
     const cb = document.getElementById('caixa-b');
@@ -329,7 +354,6 @@ function trocarMapas(completo) {
     gerarListaLateral(); 
 }
 
-
 /* ==========================================================================
    BLOCO 06: LISTA LATERAL
    ========================================================================== */
@@ -338,14 +362,13 @@ function gerarListaLateral() {
     if (!container) return;
     container.innerHTML = DADOS_PLANILHA.map(item => {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
-        const classeZona = Peanut = detectarClasseZona(item.zona); 
+        const classeZona = detectarClasseZona(item.zona); 
         
         return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" onclick="navegarVitrine('${item.nome}')">
                     <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
                 </div>`;
     }).join('');
 }
-
 
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
@@ -387,7 +410,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // CORREÇÃO DA SINTAXE DO MAPS: Ajustado o template string correto com ${}
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -484,7 +506,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
                     <div style="display:flex; gap:3px; margin-left:5px;">
-                        <a href="' + urlMapsEstande + '" target="_blank" class="btn-maps">MAPS</a>
+                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
                         <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
                     </div>
                 </div>
@@ -518,7 +540,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
                 <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
-                ${materialsHtml}
+                ${materiaisHtml}
             </div>`;
         }
     } else {
@@ -575,5 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
-// Inicialização segura com fallback
-window.addEventListener('load', iniciarApp);
+// Inicialização segura
+window.addEventListener('load', () => {
+    iniciarApp();
+});
