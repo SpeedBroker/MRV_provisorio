@@ -17,11 +17,11 @@
     --mrv-zs: #ec008c; 
 
     /* Cores das Regiões Expansão / Interior */
-    --mrv-vale: #008080;      /* Teal / Verde Água */
-    --mrv-campinas: #4a148c;  /* Roxo Escuro */
-    --mrv-sorocaba: #5d4037;  /* Marrom Nobre */
-    --mrv-santos: #0277bd;    /* Azul Oceano */
-    --mrv-ribeirao: #e65100;  /* Laranja Escuro / Queimado */
+    --mrv-vale: #008080;      
+    --mrv-campinas: #4a148c;  
+    --mrv-sorocaba: #5d4037;  
+    --mrv-santos: #0277bd;    
+    --mrv-ribeirao: #e65100;  
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -83,7 +83,7 @@ body {
 }
 
 /* ==========================================================================
-   4. SIDEBAR ESQUERDA (LISTA DE IMÓVEIS)
+   4. SIDEBAR ESQUERDA (LISTA DE IMÓVEIS E COMPLEXOS)
    ========================================================================== */
 .sidebar-esq { 
     width: 280px; 
@@ -104,12 +104,17 @@ body {
     border-radius: 4px; 
     font-size: 0.72rem; 
     cursor: pointer; 
-    border: 1px solid #ddd; 
+    border: 1px solid #ddd !important; /* Força borda inicial para evitar pulos de layout */
     text-decoration: none;
     transition: all 0.1s ease;
     box-sizing: border-box;
     justify-content: space-between; 
-    color: #000000 !important; /* Garante fonte preta para QUALQUER botão (comum ou complexo) */
+    color: #000000 !important; 
+}
+
+/* Evita que spans ou ícones internos "roubem" o clique do JS nos complexos/residenciais */
+.btRes *, .separador-complexo-btn * {
+    pointer-events: none !important;
 }
 
 /* HOVER: Contorno verde sem negrito */
@@ -118,13 +123,13 @@ body {
     background-color: #f0f0f0 !important;
 }
 
-/* CLIQUE (ATIVO) */
+/* CLIQUE (ATIVO) - Aplicado uniformemente a residenciais e complexos ativos */
 .btRes.ativo, .separador-complexo-btn.ativo { 
     background-color: #ececec !important; 
-    color: #000000 !important; /* Mantém preto no clique */
+    color: #000000 !important; 
     border: 1px solid var(--mrv-verde) !important; 
     border-right: 5px solid var(--mrv-verde) !important; 
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
 /* --- RESIDENCIAIS INTERNOS (btRes) --- */
@@ -133,7 +138,7 @@ body {
 .btRes.btn-zn { background-color: rgba(255, 192, 0, 0.1) !important; border-right: 5px solid var(--mrv-zn) !important; }
 .btRes.btn-zs { background-color: rgba(236, 0, 140, 0.1) !important; border-right: 5px solid var(--mrv-zs) !important; }
 
-/* Adicionado: Suporte de cores suaves para residenciais das novas regiões */
+/* Suporte de cores suaves para residenciais das novas regiões */
 .btRes.btn-vale { background-color: rgba(0, 128, 128, 0.1) !important; border-right: 5px solid var(--mrv-vale) !important; }
 .btRes.btn-campinas { background-color: rgba(74, 20, 140, 0.1) !important; border-right: 5px solid var(--mrv-campinas) !important; }
 .btRes.btn-sorocaba { background-color: rgba(93, 64, 55, 0.1) !important; border-right: 5px solid var(--mrv-sorocaba) !important; }
@@ -144,21 +149,28 @@ body {
 .separador-complexo-btn { 
     font-weight: bold; 
     text-transform: uppercase; 
-    border: none !important;
 }
 
-/* Cores de Fundo dos Complexos (Mantidos vivos e claros com texto preto absoluto ou branco para contrastar) */
+/* Cores de Fundo Iniciais dos Complexos (Removido o border:none para herdar o comportamento de clique) */
 .separador-complexo-btn.btn-zo { background-color: #ff9d42 !important; } 
 .separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; } 
 .separador-complexo-btn.btn-zn { background-color: #ffd700 !important; } 
 .separador-complexo-btn.btn-zs { background-color: #ff33aa !important; }
 
-/* Adicionado: Suporte visual completo para os botões de complexos das novas regiões */
+/* Suporte para os botões de complexos das regiões do interior */
 .separador-complexo-btn.btn-vale { background-color: #26a69a !important; color: #ffffff !important; }
 .separador-complexo-btn.btn-campinas { background-color: #ba68c8 !important; color: #ffffff !important; }
 .separador-complexo-btn.btn-sorocaba { background-color: #8d6e63 !important; color: #ffffff !important; }
 .separador-complexo-btn.btn-santos { background-color: #4fc3f7 !important; }
 .separador-complexo-btn.btn-ribeirao { background-color: #ffb74d !important; }
+
+/* Mantém o texto claro dos complexos escuros mesmo quando ativos */
+.separador-complexo-btn.btn-zl.ativo,
+.separador-complexo-btn.btn-vale.ativo,
+.separador-complexo-btn.btn-campinas.ativo,
+.separador-complexo-btn.btn-sorocaba.ativo {
+    color: #ffffff !important;
+}
 
 /* ==========================================================================
    5. CENTRO (MAPAS E TÍTULOS)
@@ -235,7 +247,7 @@ path.commrv:hover, path.ativo {
     flex-shrink: 0; 
 }
 
-/* Ajuste no título da faixa para iniciar o topo da vitrine com respiro ideal */
+/* Ajuste no título da faixa */
 .titulo-vitrine-faixa { 
     display: flex !important; 
     align-items: center !important; 
@@ -266,7 +278,6 @@ path.commrv:hover, path.ativo {
     line-height: 1.3 !important;
 }
 
-/* Controla o texto da descrição (tags p e span) */
 .sidebar-dir div[style*="border-left"] p,
 .sidebar-dir div[style*="border-left"] span {
     font-size: 0.75rem !important; 
@@ -274,7 +285,6 @@ path.commrv:hover, path.ativo {
     margin: 0 !important;
 }
 
-/* Controla o título menor (tag label) */
 .sidebar-dir div[style*="border-left"] label {
     font-size: 0.75rem !important; 
     font-weight: bold !important;
@@ -283,7 +293,6 @@ path.commrv:hover, path.ativo {
     text-transform: uppercase !important;
 }
 
-/* Controla os destaques em negrito se houver (tag strong) */
 .sidebar-dir div[style*="border-left"] strong {
     font-size: 0.65rem !important;
 }
