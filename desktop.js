@@ -116,15 +116,14 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const linhaLimpa = line => line.replace(/^"|"$/g, '').trim();
-            const linhaFormatada = linhaLimpa(linha);
-            if (!linhaFormatada) return null;
+            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
+            if (!linhaLimpa) return null;
 
-            const ultimaVirgula = linhaFormatada.lastIndexOf(',');
+            const ultimaVirgula = linhaLimpa.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = linhaFormatada.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = linhaFormatada.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = linhaLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = linhaLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -216,10 +215,20 @@ function obterHtmlZona(zona, tipo) {
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
-    if (z.includes("ZO")) return "btn-zo";
-    if (z.includes("ZL")) return "btn-zl";
-    if (z.includes("ZN")) return "btn-zn";
-    if (z.includes("ZS")) return "btn-zs";
+    
+    // Zonas tradicionais da Grande SP
+    if (z === "ZO" || z.includes("OESTE")) return "btn-zo";
+    if (z === "ZL" || z.includes("LESTE")) return "btn-zl";
+    if (z === "ZN" || z.includes("NORTE")) return "btn-zn";
+    if (z === "ZS" || z.includes("SUL")) return "btn-zs";
+    
+    // Novas regiões do Interior / Litoral (Mapeamento de classes css customizadas)
+    if (z.includes("CAMPINAS") || z === "INTERIOR 1") return "btn-campinas";
+    if (z.includes("SOROCABA") || z === "INTERIOR 2") return "btn-sorocaba";
+    if (z.includes("SANTOS") || z.includes("BAIXADA") || z === "LITORAL") return "btn-santos";
+    if (z.includes("VALE") || z.includes("SJC")) return "btn-vale";
+    if (z.includes("RIBERAO") || z.includes("RP")) return "btn-ribeirao";
+    
     return ""; 
 }
 
@@ -251,8 +260,6 @@ function comandoSelecao(idPath, nomePath, fonte) {
         imovelAtivo = selecionado.nome;
 
         document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
-        
-        // Ativa o elemento no mapa principal (caixa-a)
         const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
         if (elMapa) elMapa.classList.add('ativo');
 
@@ -411,7 +418,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // CORREÇÃO AQUI: Mudado de 0{...} para ${...}
+    // COMPLETO: Correção com a interpolação oficial do ES6 `${...}` que resolve o travamento
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -433,7 +440,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                 <span style="flex:1;">📍 ${selecionado.endereco}</span>
                 <div style="display:flex; gap:3px; margin-left:5px;">
                     <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                    <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                    <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; cursor:pointer; color:white; border-radius:3px; padding:2px 6px;">LINK</button>
                 </div>
             </div>
         </div>`;
@@ -485,11 +492,10 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </div>
                     <div class="tabela-corpo">
                         ${dados.map(linhaStr => {
-                            const cols = lineStr => lineStr.split(',').map(c => c.trim());
-                            const colsData = cols(linhaStr);
-                            if(colsData.length <= 1) return "";
+                            const cols = linhaStr.split(',').map(c => c.trim());
+                            if(cols.length <= 1) return "";
                             return `<div class="tabela-row">
-                                ${colsData.map((v, idx) => {
+                                ${cols.map((v, idx) => {
                                     const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
                                     return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
                                 }).join('')}
@@ -502,7 +508,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            // CORREÇÃO AQUI: Mudado de 0{...} para ${...}
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
@@ -511,7 +516,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
                     <div style="display:flex; gap:3px; margin-left:5px;">
                         <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer; color:white; border-radius:3px; padding:2px 6px;">LINK</button>
                     </div>
                 </div>
             </div>`;
