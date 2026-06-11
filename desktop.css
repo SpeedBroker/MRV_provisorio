@@ -11,17 +11,17 @@
     --cinza-mapa: #777;
 
     /* Cores das Zonas (Padrão MRV SP) */
-    --mrv-zo: #00713a;
+    --mrv-zo: var(--mrv-laranja); /* ZO agora usa o mesmo laranja padrão */
     --mrv-zl: #002060; 
     --mrv-zn: #ffc000; 
     --mrv-zs: #ec008c; 
-    
-    /* NOVAS CORES (Regiões do Interior e Metropolitana) */
-    --mrv-gsp: #14b8a6;      /* Verde Oliva / Turquesa */
-    --mrv-vale: #f59e0b;     /* Âmbar / Laranja Escuro */
-    --mrv-campinas: #8b5cf6; /* Roxo */
-    --mrv-ribeirao: #ec4899; /* Rosa Intenso */
-    --mrv-outros: #6b7280;   /* Cinza Auxiliar */
+
+    /* Cores das Regiões Expansão / Interior */
+    --mrv-vale: #008080;      /* Teal / Verde Água */
+    --mrv-campinas: #4a148c;  /* Roxo Escuro */
+    --mrv-sorocaba: #5d4037;  /* Marrom Nobre */
+    --mrv-santos: #0277bd;    /* Azul Oceano */
+    --mrv-ribeirao: #e65100;  /* Laranja Escuro / Queimado */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -109,8 +109,7 @@ body {
     transition: all 0.1s ease;
     box-sizing: border-box;
     justify-content: space-between; 
-    color: #000000 !important; /* GARANTE: Fonte preta para QUALQUER botão (comum ou complexo) */
-    text-transform: none !important; /* CORREÇÃO: Faz com que respeite letras maiúsculas/minúsculas da tabela */
+    color: #000000 !important; /* Garante fonte preta para QUALQUER botão (comum ou complexo) */
 }
 
 /* HOVER: Contorno verde sem negrito */
@@ -120,7 +119,7 @@ body {
 }
 
 /* CLIQUE (ATIVO) */
-.btRes.active, .separador-complexo-btn.ativo { 
+.btRes.ativo, .separador-complexo-btn.ativo { 
     background-color: #ececec !important; 
     color: #000000 !important; /* Mantém preto no clique */
     border: 1px solid var(--mrv-verde) !important; 
@@ -128,39 +127,38 @@ body {
     font-weight: bold;
 }
 
-/* --- RESIDENCIAIS (btRes) --- 
-   MODIFICAÇÃO: Tons escurecidos de 0.1 para 0.22 para dar mais destaque visual */
-.btRes.btn-zo { background-color: rgba(37, 218, 86, 0.22) !important; border-right: 5px solid var(--mrv-zo) !important; }
-.btRes.btn-zl { background-color: rgba(0, 32, 96, 0.22) !important; border-right: 5px solid var(--mrv-zl) !important; }
-.btRes.btn-zn { background-color: rgba(255, 192, 0, 0.22) !important; border-right: 5px solid var(--mrv-zn) !important; }
-.btRes.btn-zs { background-color: rgba(236, 0, 140, 0.22) !important; border-right: 5px solid var(--mrv-zs) !important; }
+/* --- RESIDENCIAIS INTERNOS (btRes) --- */
+.btRes.btn-zo { background-color: rgba(243, 112, 33, 0.1) !important; border-right: 5px solid var(--mrv-zo) !important; }
+.btRes.btn-zl { background-color: rgba(0, 32, 96, 0.1) !important; border-right: 5px solid var(--mrv-zl) !important; }
+.btRes.btn-zn { background-color: rgba(255, 192, 0, 0.1) !important; border-right: 5px solid var(--mrv-zn) !important; }
+.btRes.btn-zs { background-color: rgba(236, 0, 140, 0.1) !important; border-right: 5px solid var(--mrv-zs) !important; }
 
-/* Novas Regiões nos Residenciais */
-.btRes.btn-gsp { background-color: rgba(20, 184, 166, 0.22) !important; border-right: 5px solid var(--mrv-gsp) !important; }
-.btRes.btn-vale { background-color: rgba(245, 158, 11, 0.22) !important; border-right: 5px solid var(--mrv-vale) !important; }
-.btRes.btn-campinas { background-color: rgba(139, 92, 246, 0.22) !important; border-right: 5px solid var(--mrv-campinas) !important; }
-.btRes.btn-ribeirao { background-color: rgba(236, 72, 153, 0.22) !important; border-right: 5px solid var(--mrv-ribeirao) !important; }
-.btRes.btn-outros { background-color: rgba(107, 114, 128, 0.22) !important; border-right: 5px solid var(--mrv-outros) !important; }
+/* Adicionado: Suporte de cores suaves para residenciais das novas regiões */
+.btRes.btn-vale { background-color: rgba(0, 128, 128, 0.1) !important; border-right: 5px solid var(--mrv-vale) !important; }
+.btRes.btn-campinas { background-color: rgba(74, 20, 140, 0.1) !important; border-right: 5px solid var(--mrv-campinas) !important; }
+.btRes.btn-sorocaba { background-color: rgba(93, 64, 55, 0.1) !important; border-right: 5px solid var(--mrv-sorocaba) !important; }
+.btRes.btn-santos { background-color: rgba(2, 119, 189, 0.1) !important; border-right: 5px solid var(--mrv-santos) !important; }
+.btRes.btn-ribeirao { background-color: rgba(230, 81, 0, 0.1) !important; border-right: 5px solid var(--mrv-ribeirao) !important; }
 
 /* --- COMPLEXOS --- */
 .separador-complexo-btn { 
     font-weight: bold; 
+    text-transform: uppercase; 
     border: none !important;
-    text-transform: none !important; /* CORREÇÃO: Garante o padrão correto para títulos de complexo regionais */
 }
 
-/* Cores de Fundo dos Complexos (Mantidos vivos e claros com texto preto absoluto) */
+/* Cores de Fundo dos Complexos (Mantidos vivos e claros com texto preto absoluto ou branco para contrastar) */
 .separador-complexo-btn.btn-zo { background-color: #ff9d42 !important; } 
-.separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; /* Exceção visual: fundo ZL é muito escuro, mantido branco para leitura */ } 
+.separador-complexo-btn.btn-zl { background-color: #003399 !important; color: #ffffff !important; } 
 .separador-complexo-btn.btn-zn { background-color: #ffd700 !important; } 
 .separador-complexo-btn.btn-zs { background-color: #ff33aa !important; }
 
-/* Novas Regiões nos Complexos */
-.separador-complexo-btn.btn-gsp { background-color: #2dd4bf !important; }
-.separador-complexo-btn.btn-vale { background-color: #fbbf24 !important; }
-.separador-complexo-btn.btn-campinas { background-color: #a78bfa !important; }
-.separador-complexo-btn.btn-ribeirao { background-color: #f472b6 !important; }
-.separador-complexo-btn.btn-outros { background-color: #9ca3af !important; }
+/* Adicionado: Suporte visual completo para os botões de complexos das novas regiões */
+.separador-complexo-btn.btn-vale { background-color: #26a69a !important; color: #ffffff !important; }
+.separador-complexo-btn.btn-campinas { background-color: #ba68c8 !important; color: #ffffff !important; }
+.separador-complexo-btn.btn-sorocaba { background-color: #8d6e63 !important; color: #ffffff !important; }
+.separador-complexo-btn.btn-santos { background-color: #4fc3f7 !important; }
+.separador-complexo-btn.btn-ribeirao { background-color: #ffb74d !important; }
 
 /* ==========================================================================
    5. CENTRO (MAPAS E TÍTULOS)
@@ -184,7 +182,7 @@ body {
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    text-transform: none !important; /* CORREÇÃO: Se o nome mapeado for RegVale/RegCampinas, exibe misto */
+    text-transform: uppercase; 
 }
 
 #caixa-a { 
@@ -246,7 +244,8 @@ path.commrv:hover, path.ativo {
     height: 38px !important; 
     font-weight: bold !important; 
     font-size: 0.95rem !important; 
-    text-transform: none !important; /* CORREÇÃO: Permite exibir RegVale / RegCampinas no topo da vitrine sem forçar maiúsculo */
+    border-radius: 4px; 
+    text-transform: uppercase; 
     color: #fff; 
     margin-top: 2px; 
     margin-bottom: 10px; 
@@ -281,14 +280,14 @@ path.commrv:hover, path.ativo {
     font-weight: bold !important;
     display: block !important;
     margin-bottom: 2px !important;
-    text-transform: none !important; /* CORREÇÃO: Impede que sub-rótulos forcem maiúsculas se trouxerem nomes do banco */
+    text-transform: uppercase !important;
 }
 
 /* Controla os destaques em negrito se houver (tag strong) */
 .sidebar-dir div[style*="border-left"] strong {
     font-size: 0.65rem !important;
 }
-    
+   
 /* ==========================================================================
    7. TABELAS DE PREÇOS (MANTIDO COMPACTO)
    ========================================================================== */
@@ -333,7 +332,7 @@ path.commrv:hover, path.ativo {
 }
 
 /* ==========================================================================
-   8. CARDS DE MATERIAIS E PREVIEW
+   8. CARDS DE MATERIAIS E PREVIEW FLUTUANTE (DINÂMICO)
    ========================================================================== */
 .card-material-item { 
     display: flex; 
@@ -351,8 +350,6 @@ path.commrv:hover, path.ativo {
 .card-icon { font-size: 1rem; }
 .card-text { font-size: 0.7rem; font-weight: 600; color: #333; }
 .card-material-right { display: flex; gap: 5px; align-items: center; }
-
-.btn-com-preview { position: relative; display: inline-block; }
 
 .card-btn-abrir, .card-btn-copiar { 
     width: 70px; 
@@ -372,32 +369,12 @@ path.commrv:hover, path.ativo {
 .card-btn-abrir { background: var(--mrv-verde); }
 .card-btn-copiar { background: var(--mrv-laranja); }
 
-.preview-container {
-    display: none; 
-    position: absolute; 
-    bottom: 35px; 
-    right: 0; 
-    width: 320px; 
-    height: 210px;
-    background: white; 
-    border: 2px solid var(--mrv-verde); 
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
-    z-index: 1000; 
-    overflow: hidden; 
-}
-
-.preview-container iframe { 
-    width: 130%; 
-    height: 160%; 
-    border: none; 
-    pointer-events: none;
-    margin-top: -45px; 
-    margin-left: -15px; 
-}
-
-.btn-com-preview:hover .preview-container { 
-    display: block; 
+/* Estilização padrão para o elemento criado via JS no hover das miniaturas */
+#preview-flutuante-drive {
+    border: 2px solid var(--mrv-verde) !important;
+    box-shadow: 0px 8px 25px rgba(0,0,0,0.25) !important;
+    background-color: #ffffff !important;
+    transition: opacity 0.15s ease-out;
 }
 
 /* ==========================================================================
@@ -514,7 +491,7 @@ path.commrv:hover, path.ativo {
     padding: 10px;
     font-size: 0.85rem;
     font-weight: bold;
-    text-transform: none !important; /* CORREÇÃO: Faz o cabeçalho interno do bloco respeitar letras maiúsculas/minúsculas */
+    text-transform: uppercase;
 }
 
 .detalhes-residencial-container .sub-header {
