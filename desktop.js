@@ -209,25 +209,26 @@ async function carregarPlanilha() {
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
-    return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona.toUpperCase()}</span>`;
+    return `<span style="font-size:10px; font-weight:bold; color:inherit;">${zona.toUpperCase()}</span>`;
 }
 
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
     
-    // Zonas tradicionais da Grande SP
+    // Regiões da Grande SP
     if (z === "ZO" || z.includes("OESTE")) return "btn-zo";
     if (z === "ZL" || z.includes("LESTE")) return "btn-zl";
     if (z === "ZN" || z.includes("NORTE")) return "btn-zn";
     if (z === "ZS" || z.includes("SUL")) return "btn-zs";
+    if (z === "GSP" || z.includes("GRANDE")) return "btn-gsp";
     
-    // Novas regiões do Interior / Litoral (Mapeamento de classes css customizadas)
-    if (z.includes("CAMPINAS") || z === "INTERIOR 1") return "btn-campinas";
-    if (z.includes("SOROCABA") || z === "INTERIOR 2") return "btn-sorocaba";
-    if (z.includes("SANTOS") || z.includes("BAIXADA") || z === "LITORAL") return "btn-santos";
-    if (z.includes("VALE") || z.includes("SJC")) return "btn-vale";
-    if (z.includes("RIBERAO") || z.includes("RP")) return "btn-ribeirao";
+    // Regiões do Interior / Litoral
+    if (z.includes("VALE") || z.includes("REGVALE") || z === "REG VALE") return "btn-vale";
+    if (z.includes("CAMPINAS") || z.includes("REGCAMP")) return "btn-campinas";
+    if (z.includes("SOROCABA") || z.includes("REGSOR")) return "btn-sorocaba";
+    if (z.includes("SANTOS") || z.includes("LITORAL") || z.includes("BAIXADA")) return "btn-santos";
+    if (z.includes("RIBEIRAO") || z.includes("RP")) return "btn-ribeirao";
     
     return ""; 
 }
@@ -334,6 +335,10 @@ function renderizarNoContainer(id, dados, interativo) {
     }
 }
 
+function desenhoMapas() {
+    desenharMapas();
+}
+
 function desenharMapas() {
     const gspDisponivel = typeof MAPA_GSP !== 'undefined';
     const interiorDisponivel = typeof MAPA_INTERIOR !== 'undefined';
@@ -379,7 +384,7 @@ function gerarListaLateral() {
 }
 
 /* ==========================================================================
-   BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
+   BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA AVANÇADA)
    ========================================================================== */
 const criarCardMaterial = (titulo, url, icone) => {
     if (!url || url === "" || url === "---") return "";
@@ -418,7 +423,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // COMPLETO: Correção com a interpolação oficial do ES6 `${...}` que resolve o travamento
+    // CORREÇÃO DOS LINKS: Interpolação ES6 segura com ${...} para evitar travamento do script
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -445,11 +450,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
+        // Bloco de Alertas / Campanhas / Isenções Avançadas
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
+            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 5px; border: 1px dashed #e31010; border-radius: 4px; margin-bottom: 5px; text-transform: uppercase;">${selecionado.campanha}</div>`;
         }
         
+        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         const linhaInfo = (l1, v1, l2, v2, border) => `
             <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
                 <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
@@ -476,6 +482,15 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += linhaInfo('Plantas', selecionado.p_de + ' - ' + selecionado.p_ate, 'Estoque', valorEstoqueColorido, true);
         html += linhaInfo('Limitador', selecionado.limitador, 'C. Paulista', selecionado.casa_paulista, false);
         html += `</div>`;
+
+        // Bloco Avançado: Faixa de Preço Destacada "À partir de:"
+        if(selecionado.p_de && selecionado.p_de !== "---" && selecionado.p_de !== "") {
+            html += `
+            <div style="background: #fff3e0; border: 1px solid var(--mrv-laranja); border-radius: 4px; padding: 6px; text-align: center; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <span style="font-size: 0.6rem; font-weight: bold; color: #e65100; text-transform: uppercase;">À partir de:</span>
+                <strong style="font-size: 0.85rem; color: #e65100; background: white; padding: 2px 10px; border-radius: 3px; border: 1px solid #ffcc80;">R$ ${selecionado.p_de}</strong>
+            </div>`;
+        }
 
         if(selecionado.tipologiasH) {
             const linhas = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
