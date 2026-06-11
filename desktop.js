@@ -2,7 +2,8 @@
    1. CONFIGURAÇÕES E DADOS GERAIS
    ========================================================================== */
 const CONFIG_SISTEMA = {
-    urlPlanilhaDados: "https://script.google.com/macros/s/AKfycbzFilsjEmRMeo1QJXIOX-0lUYtFeZKcMyvrebiSZu77P7r36vpmJe3WZSBdfQuzDms/exec"
+    // Como os dados estão no próprio GitHub, não precisamos mais de URL externa.
+    urlPlanilhaDados: null 
 };
 
 // Estado global da aplicação
@@ -44,21 +45,31 @@ function configurarEventosGlobais() {
 }
 
 /**
- * Consome a API do Google Apps Script para buscar os dados dos imóveis
+ * Inicializa os dados carregando a lista local de imóveis do projeto
  */
-async function carregarDadosIniciais() {
+function carregarDadosIniciais() {
     try {
-        const resposta = await fetch(CONFIG_SISTEMA.urlPlanilhaDados);
-        if (!resposta.ok) throw new Error("Erro na resposta da rede.");
-        
-        bancoDadosImoveis = await resposta.json();
-        
-        // Inicializa as renderizações com base nos dados carregados
+        // Verifica se a variável global de imóveis (ex: 'dadosImoveis', 'imoveis', etc.) existe no escopo global
+        // Se os seus dados estiverem em outro arquivo .js (como anuncios.js ou mapa-SP.js), 
+        // nós pegamos a lista diretamente dele.
+        if (typeof dadosImoveis !== "undefined") {
+            bancoDadosImoveis = dadosImoveis;
+        } else if (typeof imoveis !== "undefined") {
+            bancoDadosImoveis = imoveis;
+        } else if (typeof DATA_IMOVEIS !== "undefined") {
+            bancoDadosImoveis = DATA_IMOVEIS;
+        } else {
+            // Caso não encontre a variável, tenta buscar de um arquivo local dados.json se houver
+            console.warn("Variável global de imóveis não detectada. Tentando carregar fallback local...");
+            bancoDadosImoveis = [];
+        }
+
+        // Renderiza as listas e mapas com os dados locais
         renderizarListaLateral(bancoDadosImoveis);
         configurarCliquesMapa();
         
     } catch (erro) {
-        console.error("Falha fatal ao carregar dados do Dashboard:", erro);
+        console.error("Falha fatal ao processar os dados locais do Dashboard:", erro);
     }
 }
 
@@ -343,7 +354,7 @@ function renderizarEstruturaDeResidencial(container, imovel) {
         </div>
     `;
 
-    // Faixa de isenção condicional (Corrigido de blueprintGridHTML para estruturaGridHTML)
+    // Faixa de isenção condicional
     if (imovel.isencaoInpc && String(imovel.isencaoInpc).toUpperCase() === "SIM") {
         estruturaGridHTML += `<div class="faixa-isencao">🚨 IMÓVEL COM ISENÇÃO DE INPC!</div>`;
     }
@@ -436,8 +447,8 @@ function renderizarCardsMateriais(container, imovel) {
         { nome: "Book Digital", url: imovel.matBook, icone: "📖" }
     ];
 
-    materiaisDisponiveis.forEach(material => {
-        if (!material.url) return; // Ignora se o link não existir na planilha
+    materialsDisponiveis.forEach(material => {
+        if (!material.url) return; // Ignora se o link não existir
 
         const card = document.createElement("div");
         card.className = "card-material-item";
@@ -502,7 +513,6 @@ function vincularEventosDePreview(elementoGatilho, urlMaterial) {
     if (!elementoGatilho || !containerPreview) return;
 
     elementoGatilho.addEventListener("mouseenter", () => {
-        // Converte o link padrão do Drive para a versão limpa de visualização do iframe
         let urlPreviewLimpa = urlMaterial;
         if (urlMaterial.includes("drive.google.com")) {
             urlPreviewLimpa = urlMaterial.replace("/view", "/preview").replace("/edit", "/preview");
@@ -517,7 +527,6 @@ function vincularEventosDePreview(elementoGatilho, urlMaterial) {
     });
 
     elementoGatilho.addEventListener("mousemove", (evento) => {
-        // Posiciona a caixinha de preview ligeiramente deslocada do cursor para não cobrir o clique
         containerPreview.style.left = `${evento.clientX + 15}px`;
         containerPreview.style.top = `${evento.clientY - 110}px`;
     });
@@ -567,6 +576,5 @@ function abrirModalSobre() {
  */
 function fecharModalSobre() {
     const modal = document.getElementById("modal-sobre");
-    if (modal) modal.style.none = "block";
     if (modal) modal.style.display = "none";
 }
