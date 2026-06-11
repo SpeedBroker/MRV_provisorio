@@ -147,17 +147,28 @@
     <script src="anuncios.js" defer></script>
     
 <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Aguarda um milissegundo para garantir que o 'defer' terminou de processar tudo
+    window.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM totalmente carregado. Verificando scripts...");
+        
+        // Verifica se a função iniciarApp existe no escopo global
+        if (typeof iniciarApp === 'function') {
+            console.log("Função iniciarApp encontrada! Executando...");
+            iniciarApp();
+        } else {
+            console.error("Erro Crítico: A função 'iniciarApp' não está disponível.");
+            console.log("Verificando se o arquivo desktop.js foi lido. Tipo de DADOS_PLANILHA:", typeof DADOS_PLANILHA);
+            
+            // Tentativa de chamada alternativa caso tenha carregado em outro momento do ciclo
             setTimeout(() => {
-                if (typeof iniciarApp === "function") {
-                    console.log("Forçando inicialização segura do app...");
+                if (typeof iniciarApp === 'function') {
+                    console.log("iniciarApp encontrada no segundo bloco (atraso de segurança). Executando...");
                     iniciarApp();
                 } else {
-                    console.error("Erro: A função iniciarApp não foi encontrada. O arquivo desktop.js foi carregado?");
+                    alert("O arquivo desktop.js não foi localizado ou possui um erro de sintaxe interno. Verifique o console.");
                 }
-            }, 50);
-        });
-    </script>
+            }, 500);
+        }
+    });
+</script>
 </body>
 </html>
