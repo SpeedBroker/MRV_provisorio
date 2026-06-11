@@ -23,6 +23,7 @@ const COL = {
     ESTANDE: 31 
 };
 
+
 /* ==========================================================================
    BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
    ========================================================================== */
@@ -31,7 +32,7 @@ async function iniciarApp() {
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
     } catch (err) { 
-        console.error("Erro na inicialização do app:", err); 
+        console.error(err); 
     }
 }
 
@@ -68,6 +69,7 @@ function configurarBotaoDocumentos() {
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
                 
+                // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
             }
         });
@@ -84,6 +86,7 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
+            // Força o modo de visualização completo com todas as opções de menu (impressão activa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
@@ -100,6 +103,7 @@ function formatarLinkPreview(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
+            // Retorna o link ideal e leve para renderizar dentro da miniatura
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
@@ -115,9 +119,11 @@ function inicializarHoverMiniaturas() {
         if (!urlPreview) return;
 
         botao.addEventListener('mouseenter', (e) => {
+            // Remove qualquer preview existente para evitar duplicados
             const antigo = document.getElementById('preview-flutuante-drive');
             if (antigo) antigo.remove();
 
+            // Cria o container do preview flutuante
             const previewDiv = document.createElement('div');
             previewDiv.id = 'preview-flutuante-drive';
             previewDiv.style.position = 'fixed';
@@ -129,11 +135,13 @@ function inicializarHoverMiniaturas() {
             previewDiv.style.borderRadius = '8px';
             previewDiv.style.overflow = 'hidden';
             previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none';
+            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
 
+            // Insere o iframe com o link leve de preview
             previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
             document.body.appendChild(previewDiv);
 
+            // Posiciona perto do botão do mouse
             posicionarPreview(e, previewDiv);
         });
 
@@ -155,29 +163,17 @@ function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
 
+    // Ajusta se passar da borda direita da tela
     if (left + 340 > window.innerWidth) {
         left = e.clientX - 340;
     }
+    // Ajusta se passar da borda de baixo da tela
     if (top + 240 > window.innerHeight) {
         top = e.clientY - 240;
     }
 
     elemento.style.top = `${top}px`;
     elemento.style.left = `${left}px`;
-}
-
-function copiarTexto(texto, msg = "Link copiado!") {
-    if (!texto || texto === "") return;
-    navigator.clipboard.writeText(texto).then(() => {
-        alert(msg);
-    }).catch(err => {
-        console.error('Erro ao copiar: ', err);
-    });
-}
-
-function copiarLink(url) {
-    const linkSeguro = formatarLinkSeguro(url);
-    copiarTexto(linkSeguro, "Link seguro copiado!");
 }
 
 function abrirDocumentoDireto(url) {
@@ -200,15 +196,14 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = line => linha.replace(/^"|"$/g, '').trim();
-            const cleanStr = inlineLimpa();
-            if (!cleanStr) return null;
+            const inlineLimpa = inlineLinpa = linha.replace(/^"|"$/g, '').trim();
+            if (!inlineLimpa) return null;
 
-            const ultimaVirgula = cleanStr.lastIndexOf(',');
+            const ultimaVirgula = inlineLimpa.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = cleanStr.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = cleanStr.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = inlineLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = inlineLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -282,9 +277,8 @@ async function carregarPlanilha() {
         }).filter(i => i !== null);
 
         DADOS_PLANILHA.sort((a, b) => a.ordem - b.ordem);
-        desenharMapas(); 
-        gerarListaLateral();
-    } catch (e) { console.error("Erro ao carregar planilha principal:", e); }
+        desenharMapas(); gerarListaLateral();
+    } catch (e) { console.error(e); }
 }
 
 /* ==========================================================================
@@ -425,11 +419,12 @@ function gerarListaLateral() {
     }).join('');
 }
 
+
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
 const criarCardMaterial = (titulo, url, icone) => {
-    if (!url || url === "" || url === "---") return "";
+    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
     
     const linkSeguroAbrir = formatarLinkSeguro(url);
     const linkMiniaturaHover = formatarLinkPreview(url);
@@ -465,12 +460,12 @@ const extrairLinks = (campo, icone) => {
 
 function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     const painel = document.getElementById('ficha-tecnica');
-    if (!painel) return;
+    if (!panel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
+    let html = ""; 
     
     if(outros.length > 0) {
         html += `<div style="margin-bottom:6px;">${outros.map(i => {
@@ -481,80 +476,83 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
 
     if (selecionado.tipo === 'R') {
-        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
-        
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;        
         html += `
         <div style="padding: 2px 0 5px 0;">
-            <div style="font-size:0.65rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
                 <span style="flex:1;">📍 ${selecionado.endereco}</span>
                 <div style="display:flex; gap:3px; margin-left:5px;">
                     <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                    <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                    <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
                 </div>
             </div>
         </div>`;
 
+        // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
+            html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
-        const inlineInfo = (l1, v1, l2, v2, border) => `
-            <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l1}</label>
-                    <strong style="font-size: 0.65rem; color: #333;">${v1}</strong>
-                </div>
-                <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l2}</label>
-                    <strong style="font-size: 0.65rem; color: #333;">${v2}</strong>
-                </div>
-            </div>`;
-
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#333";
+        let corEstoque = "#ffffff"; 
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
-            corEstoque = "#999";
+            corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "var(--vermelho-mrv)";
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; 
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        html += inlineInfo('Entrega', selecionado.entrega, 'Obra', (selecionado.obra || 0) + '%', true);
-        html += inlineInfo('Plantas', selecionado.p_de + ' - ' + selecionado.p_ate, 'Estoque', valorEstoqueColorido, true);
-        html += inlineInfo('Limitador', selecionado.limitador, 'C. Paulista', selecionado.casa_paulista, false);
-        html += `</div>`;
+        // Linha 2: Limitador ocupando a linha inteira
+        html += `
+        <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
+            <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
+        </div>`;
 
-        if(selecionado.tipologiasH) {
+        // Linha 3: Casa Paulista ocupando a linha inteira
+        html += `
+        <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
+            <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
+        </div>`;
+
+        // Linha 4: Entrega, Obra e Estoque
+        html += `
+        <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
+            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Entrega</label>
+                <strong style="font-size: 0.75rem; color: #ffffff;">${selecionado.entrega}</strong>
+            </div>
+            <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Obra</label>
+                <strong style="font-size: 0.75rem; color: #ffffff;">${selecionado.obra || 0}%</strong>
+            </div>
+            <div style="flex: 1; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+                <label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Estoque</label>
+                <strong style="font-size: 0.75rem;">${valorEstoqueColorido}</strong>
+            </div>
+        </div>`;
+
+        let precoReal = "CONSULTAR";
+        if (selecionado.tipologiasH) {
             const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
-            if(lines.length > 0) {
-                const titulos = lines[0].split(',').map(t => t.trim()); 
-                const dados = lines.slice(1);
-                html += `
-                <div class="tabela-precos-container">
-                    <div class="tabela-header">
-                        ${titulos.map((t, idx) => {
-                            const estiloCabecalho = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                            return `<div class="col-tabela" style="${estiloCabecalho}">${t}</div>`;
-                        }).join('')}
-                    </div>
-                    <div class="tabela-corpo">
-                        ${dados.map(linhaStr => {
-                            const colsArr = linhaStr.split(',').map(c => c.trim());
-                            if(colsArr.length <= 1) return "";
-                            return `<div class="tabela-row">
-                                ${colsArr.map((v, idx) => {
-                                    const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
-                                    return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
-                                }).join('')}
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </div>`;
-            }
+            lines.forEach(linhaStr => {
+                const colsArr = linhaStr.split(',').map(c => c.trim());
+                if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
+                    precoReal = colsArr[1];
+                }
+            });
         }
 
+        // Linha final: Faixa Laranja com o valor do imóvel
+        html += `
+        <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+            À PARTIR DE: ${precoReal}
+        </div>`;
+        
+        html += `</div>`;
+       
+        // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
@@ -565,7 +563,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
                     <div style="display:flex; gap:3px; margin-left:5px;">
                         <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                        <button onclick="copiarTexto('${urlMapsEstande}', 'Link do estande copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
                     </div>
                 </div>
             </div>`;
@@ -575,8 +573,8 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             if(!texto || texto === "---" || texto === "") return "";
             return `
             <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
-                <label style="display:block; font-size:0.55rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
-                <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3;">${texto}</p>
+                <label style="display:block; font-size:0.52rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
+                <p style="margin:0; font-size:0.65rem; color:#444; line-height:1.3;">${texto}</p>
             </div>`;
         };
         html += criarBoxDiferencial('💡 Observação Importante', selecionado.observacoes, '#fff9c4', '#fbc02d', true);
@@ -619,7 +617,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                         <span>📍 ${selecionado.endereco}</span> 
                         <span style="display:flex; gap:3px;">
                             <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
-                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                            <button onclick="copiarTexto('${urlMapsResidencial}', 'Link de localização copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
                         </span>
                     </p>
                     <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
@@ -635,28 +633,16 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     }
     painel.innerHTML = html;
 
+    // CRUCIAL: Inicializa o hover para os elementos recém-criados dentro da vitrine
     inicializarHoverMiniaturas();
 }
 
-/* ==========================================================================
-   BLOCO 08: CONFIGURAÇÃO DE EVENTOS DO DOM (UNIFICADO)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicializa o Modal (Sobre)
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if (btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if (span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-
-    // 2. Dispara o carregamento e montagem assíncrona dos dados da planilha
-    iniciarApp();
-});
+function copiarTexto(texto, mensagemSucesso) {
+    if (!texto) return;
+    navigator.clipboard.writeText(texto).then(() => {
+        // Implementação da mensagem de cópia personalizada sem alert()
+        console.log(mensagemSucesso);
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+}
