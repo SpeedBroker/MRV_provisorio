@@ -145,6 +145,19 @@
 
     <script src="mapa-SP.js" defer></script>
     <script src="anuncios.js" defer></script>
-    <script src="desktop.js" defer></script>
+    
+<script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Aguarda um milissegundo para garantir que o 'defer' terminou de processar tudo
+            setTimeout(() => {
+                if (typeof iniciarApp === "function") {
+                    console.log("Forçando inicialização segura do app...");
+                    iniciarApp();
+                } else {
+                    console.error("Erro: A função iniciarApp não foi encontrada. O arquivo desktop.js foi carregado?");
+                }
+            }, 50);
+        });
+    </script>
 </body>
 </html>
