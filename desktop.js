@@ -50,7 +50,10 @@ function configurarBotaoDocumentos() {
 
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
-                let htmlDocs = `<div style="padding: 10px 0;">`;
+                let htmlDocs = `
+                    <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
+                    <div style="padding: 10px 0;">
+                `;
 
                 if (DOCUMENTOS_GERAIS.length === 0) {
                     htmlDocs += `
@@ -65,8 +68,6 @@ function configurarBotaoDocumentos() {
 
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
-                
-                inicializarHoverMiniaturas();
             }
         });
     }
@@ -74,87 +75,14 @@ function configurarBotaoDocumentos() {
 
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
-    
     let link = url.trim();
     if (link.includes('drive.google.com')) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         if (match && match[1]) {
-            return "https://drive.google.com/file/d/" + match[1] + "/view?usp=sharing";
+            return `https://drive.google.com/file/d/${match[1]}/preview?rm=minimal`;
         }
     }
     return link;
-}
-
-function formatarLinkPreview(url) {
-    if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
-    
-    let link = url.trim();
-    if (link.includes('drive.google.com')) {
-        const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
-        if (match && match[1]) {
-            return "https://drive.google.com/file/d/" + match[1] + "/preview";
-        }
-    }
-    return link;
-}
-
-function inicializarHoverMiniaturas() {
-    const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
-    
-    botoesAbrir.forEach(botao => {
-        const urlPreview = botao.getAttribute('data-preview');
-        if (!urlPreview) return;
-
-        botao.addEventListener('mouseenter', (e) => {
-            const antigo = document.getElementById('preview-flutuante-drive');
-            if (antigo) antigo.remove();
-
-            const previewDiv = document.createElement('div');
-            previewDiv.id = 'preview-flutuante-drive';
-            previewDiv.style.position = 'fixed';
-            previewDiv.style.width = '320px';
-            previewDiv.style.height = '220px';
-            previewDiv.style.backgroundColor = '#fff';
-            previewDiv.style.border = '1px solid #ccc';
-            previewDiv.style.boxShadow = '0px 4px 15px rgba(0,0,0,0.2)';
-            previewDiv.style.borderRadius = '8px';
-            previewDiv.style.overflow = 'hidden';
-            previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none';
-
-            previewDiv.innerHTML = '<iframe src="' + urlPreview + '" style="width:100%; height:100%; border:none;"></iframe>';
-            document.body.appendChild(previewDiv);
-
-            posicionarPreview(e, previewDiv);
-        });
-
-        botao.addEventListener('mousemove', (e) => {
-            const previewDiv = document.getElementById('preview-flutuante-drive');
-            if (previewDiv) {
-                posicionarPreview(e, previewDiv);
-            }
-        });
-
-        botao.addEventListener('mouseleave', () => {
-            const previewDiv = document.getElementById('preview-flutuante-drive');
-            if (previewDiv) previewDiv.remove();
-        });
-    });
-}
-
-function posicionarPreview(e, elemento) {
-    let top = e.clientY + 15;
-    let left = e.clientX + 15;
-
-    if (left + 340 > window.innerWidth) {
-        left = e.clientX - 340;
-    }
-    if (top + 240 > window.innerHeight) {
-        top = e.clientY - 240;
-    }
-
-    elemento.style.top = top + "px";
-    elemento.style.left = left + "px";
 }
 
 function copiarTexto(texto, msg = "Link copiado!") {
@@ -171,19 +99,13 @@ function copiarLink(url) {
     copiarTexto(linkSeguro, "Link seguro copiado!");
 }
 
-function abrirDocumentoDireto(url) {
-    const linkSeguro = formatarLinkSeguro(url);
-    if (linkSeguro) {
-        window.open(linkSeguro, '_blank');
-    }
-}
 
 /* ==========================================================================
    BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
    ========================================================================== */
 async function carregarAbaDocumentos() {
     const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-    const URL_DOCS = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&sheet=Documentos&v=" + new Date().getTime();
+    const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Documentos&v=${new Date().getTime()}`;
     
     try {
         const response = await fetch(URL_DOCS);
@@ -191,14 +113,14 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
-            if (!inlineLimpa) return null;
+            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
+            if (!linhaLimpa) return null;
 
-            const ultimaVirgula = inlineLimpa.lastIndexOf(',');
+            const ultimaVirgula = linhaLimpa.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = inlineLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = inlineLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = linhaLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = linhaLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -212,7 +134,7 @@ async function carregarAbaDocumentos() {
 
 async function carregarPlanilha() {
     const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
-    const URL_CSV = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv&gid=0&v=" + new Date().getTime();
+    const URL_CSV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0&v=${new Date().getTime()}`;
     try {
         const response = await fetch(URL_CSV);
         let texto = await response.text();
@@ -279,28 +201,23 @@ async function carregarPlanilha() {
     }
 }
 
+
 /* ==========================================================================
    BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
-    return '<span style="font-size:10px; font-weight:bold; color:#666;">' + zona + '</span>';
+    return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona.toUpperCase()}</span>`;
 }
 
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
-    
-    if (z.includes("ZN")) return "btn-zn";
-    if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZO")) return "btn-zo";
+    if (z.includes("ZL")) return "btn-zl";
+    if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZS")) return "btn-zs";
-    if (z.includes("GSP")) return "btn-gsp";
-    if (z.includes("CAMPINAS")) return "btn-campinas";
-    if (z.includes("RIB")) return "btn-ribeirao";
-    if (z.includes("VALE")) return "btn-vale";
-    
-    return "btn-outros"; 
+    return ""; 
 }
 
 function navegarVitrine(nome) { 
@@ -326,7 +243,7 @@ function comandoSelecao(idPath, nomePath, fonte) {
     imovelAtivo = selecionado.nome;
 
     document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
-    const elMapa = document.getElementById("caixa-a-" + pathAtivo);
+    const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
     if (elMapa) elMapa.classList.add('ativo');
 
     gerarListaLateral();
@@ -341,15 +258,16 @@ function atualizarTituloSuperior(texto) {
     const titulo = document.getElementById('cidade-titulo');
     if (!titulo) return;
     if (texto) { 
-        titulo.innerText = "MRV EM " + texto.toUpperCase(); 
+        titulo.innerText = `MRV EM ${texto.toUpperCase()}`; 
     } else if (pathAtivo) {
         const todosPaths = MAPA_GSP.paths.concat(MAPA_INTERIOR.paths);
         const nomeFixo = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || "";
-        titulo.innerText = "MRV EM " + nomeFixo.toUpperCase();
+        titulo.innerText = `MRV EM ${nomeFixo.toUpperCase()}`;
     } else { 
         titulo.innerText = "SELECIONE UMA REGIÃO NO MAPA"; 
     }
 }
+
 
 /* ==========================================================================
    BLOCO 05: RENDERIZAÇÃO DOS MAPAS (SVG)
@@ -371,19 +289,24 @@ function renderizarNoContainer(id, dados, interativo) {
         
         if (interativo) {
             if (isGSP) { 
-                eventos = 'onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior(\'GRANDE SÃO PAULO\')" onmouseout="atualizarTituloSuperior()"'; 
+                eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
             } else { 
-                eventos = 'onclick="comandoSelecao(\'' + idNorm + '\')" onmouseover="atualizarTituloSuperior(\'' + p.name + '\')" onmouseout="atualizarTituloSuperior()"'; 
+                eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
             }
         }
-        return '<path id="' + id + '-' + idNorm + '" d="' + p.d + '" class="' + ((temMRV || isGSP) && interativo ? 'commrv ' + ativo : '') + '" ' + eventos + '></path>';
+        return `<path id="${id}-${idNorm}" d="${p.d}" class="${(temMRV || isGSP) && interativo ? 'commrv ' + ativo : ''}" ${eventos}></path>`;
     }).join('');
 
     const escala = interativo 
         ? 'transform: scale(1.25); transform-origin: center;' 
         : 'transform: scale(0.75); transform-origin: center;';
 
-    container.innerHTML = '<svg viewBox="' + dados.viewBox + '" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%; ' + escala + '"><g transform="' + (dados.transform || '') + '">' + pathsHtml + '</g></svg>';
+    container.innerHTML = `
+        <svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%; ${escala}">
+            <g transform="${dados.transform || ''}">
+                ${pathsHtml}
+            </g>
+        </svg>`;
 }
 
 function desenharMapas() {
@@ -398,13 +321,14 @@ function trocarMapas(completo) {
     if (completo) { 
         pathAtivo = null; imovelAtivo = null; 
         const ft = document.getElementById('ficha-tecnica');
-        if (ft) ft.innerHTML = '<div style="text-align:center; color:#ccc; margin-top:80px;"><p style="font-size:30px;">📍</p><p>Clique no mapa ou na lista</p></div>';
+        if (ft) ft.innerHTML = `<div style="text-align:center; color:#ccc; margin-top:80px;"><p style="font-size:30px;">📍</p><p>Clique no mapa ou na lista</p></div>`;
         const ct = document.getElementById('cidade-titulo');
         if (ct) ct.innerText = "SELECIONE UMA REGIÃO NO MAPA";
     }
     desenharMapas(); 
     gerarListaLateral(); 
 }
+
 
 /* ==========================================================================
    BLOCO 06: LISTA LATERAL
@@ -414,22 +338,37 @@ function gerarListaLateral() {
     if (!container) return;
     container.innerHTML = DADOS_PLANILHA.map(item => {
         const ativo = item.nome === imovelAtivo ? 'ativo' : '';
-        const classeZona = detectarClasseZona(item.zona); 
+        const classeZona = Peanut = detectarClasseZona(item.zona); 
         
-        return '<div class="' + (item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes') + ' ' + ativo + ' ' + classeZona + '" style="' + (item.tipo === 'N' ? 'color: #333333 !important;' : '') + '" onclick="navegarVitrine(\'' + item.nome + '\')"><strong>' + item.nome + '</strong> ' + obterHtmlZona(item.zona, item.tipo) + '</div>';
+        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" onclick="navegarVitrine('${item.nome}')">
+                    <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
+                </div>`;
     }).join('');
 }
+
 
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
 const criarCardMaterial = (titulo, url, icone) => {
-    if (!url || url === "" || url === "---" || typeof url !== 'string') return "";
-    
-    const linkSeguroAbrir = formatarLinkSeguro(url);
-    const linkMiniaturaHover = formatarLinkPreview(url);
-
-    return '<div class="card-material-item"><div class="card-material-left"><span class="card-icon">' + icone + '</span><span class="card-text">' + titulo + '</span></div><div class="card-material-right" style="position: relative;"><button onclick="window.open(\'' + linkSeguroAbrir + '\', \'_blank\')" class="card-btn-abrir" style="cursor: pointer; border: none;" data-preview="' + linkMiniaturaHover + '">Abrir</button><button onclick="copiarTexto(\'' + linkSeguroAbrir + '\', \'Link seguro copiado!\')" class="card-btn-copiar">Copiar</button></div></div>';
+    if (!url || url === "" || url === "---") return "";
+    const linkSeguro = formatarLinkSeguro(url);
+    return `
+    <div class="card-material-item">
+        <div class="card-material-left">
+            <span class="card-icon">${icone}</span>
+            <span class="card-text">${titulo}</span>
+        </div>
+        <div class="card-material-right">
+            <div class="btn-com-preview">
+                <a href="${linkSeguro}" target="_blank" class="card-btn-abrir">Abrir</a>
+                <div class="preview-container">
+                    <iframe src="${linkSeguro}"></iframe>
+                </div>
+            </div>
+            <button onclick="copiarLink('${url}')" class="card-btn-copiar">Copiar</button>
+        </div>
+    </div>`;
 };
 
 const extrairLinks = (campo, icone) => {
@@ -448,65 +387,117 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // Corrigido aqui para evitar quebra de concatenação de strings
-    const urlMapsResidencial = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(selecionado.endereco);
+    // CORREÇÃO DA SINTAXE DO MAPS: Ajustado o template string correto com ${}
+    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
-    let html = ""; 
+    let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
     
     if(outros.length > 0) {
-        html += '<div style="margin-bottom:6px;">' + outros.map(i => {
+        html += `<div style="margin-bottom:6px;">${outros.map(i => {
             const classeZ = detectarClasseZona(i.zona); 
-            return '<button class="' + (i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes') + ' ' + classeZ + '" style="width:100%; ' + (i.tipo === 'N' ? 'color: #333333 !important;' : '') + '" onclick="navegarVitrine(\'' + i.nome + '\')"><strong>' + i.nome + '</strong> ' + obterHtmlZona(i.zona, i.tipo) + '</button>';
-        }).join('') + '</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">';
+            return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%;" onclick="navegarVitrine('${i.nome}')">
+                <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
+            </button>`}).join('')}</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">`;
     }
 
     if (selecionado.tipo === 'R') {
-        html += '<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-verde); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ' + selecionado.nome + ' — ' + selecionado.regiao + '</div>';        
-        html += '<div style="padding: 2px 0 5px 0;"><div style="font-size:0.8rem; color:#444; display:flex; justify-content:space-between; align-items:center;"><span style="flex:1;">📍 ' + selecionado.endereco + '</span><div style="display:flex; gap:3px; margin-left:5px;"><a href="' + urlMapsResidencial + '" target="_blank" class="btn-maps">MAPS</a><button onclick="copiarTexto(\'' + urlMapsResidencial + '\', \'Link de localização copiado!\')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button></div></div></div>';
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
+        
+        html += `
+        <div style="padding: 2px 0 5px 0;">
+            <div style="font-size:0.65rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
+                <span style="flex:1;">📍 ${selecionado.endereco}</span>
+                <div style="display:flex; gap:3px; margin-left:5px;">
+                    <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                    <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                </div>
+            </div>
+        </div>`;
 
-        html += '<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">';
+        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
-            html += '<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">' + selecionado.campanha + '</div>';
+            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
         }
         
+        const linhaInfo = (l1, v1, l2, v2, border) => `
+            <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
+                <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l1}</label>
+                    <strong style="font-size: 0.65rem; color: #333;">${v1}</strong>
+                </div>
+                <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l2}</label>
+                    <strong style="font-size: 0.65rem; color: #333;">${v2}</strong>
+                </div>
+            </div>`;
+
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff";
+        let corEstoque = "#333";
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
-            corEstoque = "#aaaaaa";
+            corEstoque = "#999";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252";
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "var(--vermelho-mrv)";
         }
-        const valorEstoqueColorido = '<span style="color: ' + corEstoque + '">' + (selecionado.estoque || "---") + ' UN.</span>';
+        const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        html += '<div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;"><strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">' + selecionado.limitador + '</strong></div>';
-        html += '<div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;"><strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">' + selecionado.casa_paulista + '</strong></div>';
+        html += linhaInfo('Entrega', selecionado.entrega, 'Obra', (selecionado.obra || 0) + '%', true);
+        html += linhaInfo('Plantas', selecionado.p_de + ' - ' + selecionado.p_ate, 'Estoque', valorEstoqueColorido, true);
+        html += linhaInfo('Limitador', selecionado.limitador, 'C. Paulista', selecionado.casa_paulista, false);
+        html += `</div>`;
 
-        html += '<div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;"><div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;"><label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Entrega</label><strong style="font-size: 0.75rem; color: #ffffff;">' + selecionado.entrega + '</strong></div><div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;"><label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Obra</label><strong style="font-size: 0.75rem; color: #ffffff;">' + (selecionado.obra || 0) + '%</strong></div><div style="flex: 1; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;"><label style="font-size: 0.65rem; font-weight: bold; color: #a5d6a7; text-transform: uppercase;">Estoque</label><strong style="font-size: 0.75rem;">' + valorEstoqueColorido + '</strong></div></div>';
-
-        let precoReal = "CONSULTAR";
-        if (selecionado.tipologiasH) {
-            const lines = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
-            lines.forEach(linhaStr => {
-                const colsArr = linhaStr.split(',').map(c => c.trim());
-                if (colsArr.length > 1 && colsArr[1] !== "" && colsArr[0].toLowerCase().includes("partir")) {
-                    precoReal = colsArr[1];
-                }
-            });
+        if(selecionado.tipologiasH) {
+            const linhas = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
+            if(linhas.length > 0) {
+                const titulos = linhas[0].split(',').map(t => t.trim()); 
+                const dados = linhas.slice(1);
+                html += `
+                <div class="tabela-precos-container">
+                    <div class="tabela-header">
+                        ${titulos.map((t, idx) => {
+                            const estiloCabecalho = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
+                            return `<div class="col-tabela" style="${estiloCabecalho}">${t}</div>`;
+                        }).join('')}
+                    </div>
+                    <div class="tabela-corpo">
+                        ${dados.map(linhaStr => {
+                            const cols = linhaStr.split(',').map(c => c.trim());
+                            if(cols.length <= 1) return "";
+                            return `<div class="tabela-row">
+                                ${cols.map((v, idx) => {
+                                    const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
+                                    return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
+                                }).join('')}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }
         }
 
-        html += '<div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">À PARTIR DE: ' + precoReal + '</div>';
-        html += '</div>';
-       
-        html += '<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">';
+        html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
-            const urlMapsEstande = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(selecionado.estande);
-            html += '<div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;"><label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label><div style="display:flex; justify-content:space-between; align-items:center;"><p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">' + selecionado.estande + '</p><div style="display:flex; gap:3px; margin-left:5px;"><a href="' + urlMapsEstande + '" target="_blank" class="btn-maps">MAPS</a><button onclick="copiarTexto(\'' + urlMapsEstande + '\', \'Link do estande copiado!\')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button></div></div></div>';
+            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
+            html += `
+            <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
+                <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
+                    <div style="display:flex; gap:3px; margin-left:5px;">
+                        <a href="' + urlMapsEstande + '" target="_blank" class="btn-maps">MAPS</a>
+                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                    </div>
+                </div>
+            </div>`;
         }
 
         const criarBoxDiferencial = (label, texto, corFundo, corBorda, temBorda) => {
             if(!texto || texto === "---" || texto === "") return "";
-            return '<div style="background: ' + corFundo + '; border-left: 6px solid ' + corBorda + '; padding: 6px 10px; ' + (temBorda ? 'border-bottom: 1px solid #ddd;' : '') + '"><label style="display:block; font-size:0.52rem; font-weight:bold; color:' + corBorda + '; text-transform:uppercase; margin-bottom:1px;">' + label + '</label><p style="margin:0; font-size:0.65rem; color:#444; line-height:1.3;">' + texto + '</p></div>';
+            return `
+            <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
+                <label style="display:block; font-size:0.55rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
+                <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3;">${texto}</p>
+            </div>`;
         };
         html += criarBoxDiferencial('💡 Observação Importante', selecionado.observacoes, '#fff9c4', '#fbc02d', true);
         html += criarBoxDiferencial('📍 Localização', selecionado.localizacao, '#fdf2e9', '#f37021', true);
@@ -514,7 +505,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += criarBoxDiferencial('🎭 Cultura e Lazer', selecionado.lazer, '#e3f2fd', '#1565c0', true);
         html += criarBoxDiferencial('🛒 Comércio', selecionado.comercio, '#ffebee', '#c62828', true);
         html += criarBoxDiferencial('🏥 Saúde e Educação', selecionado.saude, '#f3e5f5', '#6a1b9a', false);
-        html += '</div>';
+        html += `</div>`;
 
         let materiaisHtml = "";
         materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
@@ -525,11 +516,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
-            html += '<div style="margin-top: 10px;"><label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>' + materiaisHtml + '</div>';
+            html += `<div style="margin-top: 10px;">
+                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
+                ${materialsHtml}
+            </div>`;
         }
-        
-        setTimeout(inicializarHoverMiniaturas, 50);
-
     } else {
         let corComplexo = "#333";
         if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
@@ -539,16 +530,50 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
 
-        html += '<div class="titulo-vitrine-faixa" style="background-color: ' + corComplexo + '; color: ' + corTexto + '; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">' + selecionado.nomeFull + ' — ' + selecionado.regiao + '</div>';
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+                    ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
+                 </div>`;
                  
-        html += '<div class="box-complexo-full" style="border: 1px solid ' + corComplexo + '; border-radius: 4px; padding: 10px; background: #fff;"><p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><span>📍 ' + selecionado.endereco + '</span><span style="display:flex; gap:3px;"><a href="' + urlMapsResidencial + '" target="_blank" class="btn-maps">MAPS</a><button onclick="copiarTexto(\'' + urlMapsResidencial + '\', \'Link de localização copiado!\')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button></span></p><div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">' + selecionado.descLonga + '</div></div>';
+        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
+                    <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📍 ${selecionado.endereco}</span> 
+                        <span style="display:flex; gap:3px;">
+                            <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                        </span>
+                    </p>
+                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
+                 </div>`;
+                 
+        let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
+        if (materiaisComplexo !== "") { 
+            html += `<div style="margin-top: 10px; padding: 0 5px;">
+                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
+                ${materiaisComplexo}
+            </div>`;
+        }
     }
     painel.innerHTML = html;
 }
 
-// Execução direta imediata para garantir o carregamento mesmo se o HTML atrasar
-window.addEventListener('load', () => {
-    if (typeof DADOS_PLANILHA === 'object' && DADOS_PLANILHA.length === 0) {
-        iniciarApp();
+/* ==========================================================================
+   BLOCO 08: LÓGICA DO MODAL (SOBRE)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
+
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
     }
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
 });
+
+// Inicialização segura com fallback
+window.addEventListener('load', iniciarApp);
