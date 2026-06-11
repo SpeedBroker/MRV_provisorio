@@ -116,14 +116,15 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
-            if (!linhaLimpa) return null;
+            const linhaLimpa = line => line.replace(/^"|"$/g, '').trim();
+            const linhaFormatada = linhaLimpa(linha);
+            if (!linhaFormatada) return null;
 
-            const ultimaVirgula = linhaLimpa.lastIndexOf(',');
+            const ultimaVirgula = linhaFormatada.lastIndexOf(',');
             if (ultimaVirgula === -1) return null;
 
-            const titulo = linhaLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
-            const url = linhaLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+            const titulo = linhaFormatada.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = linhaFormatada.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
 
             if (!titulo || !url.startsWith('http')) return null;
 
@@ -250,6 +251,8 @@ function comandoSelecao(idPath, nomePath, fonte) {
         imovelAtivo = selecionado.nome;
 
         document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
+        
+        // Ativa o elemento no mapa principal (caixa-a)
         const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
         if (elMapa) elMapa.classList.add('ativo');
 
@@ -355,7 +358,7 @@ function trocarMapas(completo) {
 /* ==========================================================================
    BLOCO 06: LISTA LATERAL
    ========================================================================== */
-function generarListaLateral() {
+function gerarListaLateral() {
     const container = document.getElementById('lista-imoveis');
     if (!container) return;
     container.innerHTML = DADOS_PLANILHA.map(item => {
@@ -408,7 +411,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
-    // Correção da URL estruturada do Maps usando interpolação correta do JavaScript
+    // CORREÇÃO AQUI: Mudado de 0{...} para ${...}
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
     
     let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
@@ -482,10 +485,11 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     </div>
                     <div class="tabela-corpo">
                         ${dados.map(linhaStr => {
-                            const cols = linhaStr.split(',').map(c => c.trim());
-                            if(cols.length <= 1) return "";
+                            const cols = lineStr => lineStr.split(',').map(c => c.trim());
+                            const colsData = cols(linhaStr);
+                            if(colsData.length <= 1) return "";
                             return `<div class="tabela-row">
-                                ${cols.map((v, idx) => {
+                                ${colsData.map((v, idx) => {
                                     const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
                                     return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
                                 }).join('')}
@@ -498,6 +502,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
 
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
+            // CORREÇÃO AQUI: Mudado de 0{...} para ${...}
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
             html += `
             <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
