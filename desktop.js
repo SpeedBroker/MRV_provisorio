@@ -86,7 +86,7 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão activa)
+            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
@@ -176,6 +176,20 @@ function posicionarPreview(e, elemento) {
     elemento.style.left = `${left}px`;
 }
 
+function copiarTexto(texto, msg = "Link copiado!") {
+    if (!texto || texto === "") return;
+    navigator.clipboard.writeText(texto).then(() => {
+        alert(msg);
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+}
+
+function copiarLink(url) {
+    const linkSeguro = formatarLinkSeguro(url);
+    copiarTexto(linkSeguro, "Link seguro copiado!");
+}
+
 function abrirDocumentoDireto(url) {
     const linkSeguro = formatarLinkSeguro(url);
     if (linkSeguro) {
@@ -196,7 +210,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = inlineLinpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -420,6 +434,7 @@ function gerarListaLateral() {
 }
 
 
+
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -460,7 +475,7 @@ const extrairLinks = (campo, icone) => {
 
 function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
     const painel = document.getElementById('ficha-tecnica');
-    if (!panel) return;
+    if (!painel) return;
     const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
     
     const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
@@ -495,12 +510,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff"; 
+        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; 
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
@@ -586,12 +601,12 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         html += `</div>`;
 
         let materiaisHtml = "";
-        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
-        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
-        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
-        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
-        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
-        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+         materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+         materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+         materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+         materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+         materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+         materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
         
         if (materiaisHtml !== "") {
             html += `<div style="margin-top: 10px;">
@@ -632,17 +647,61 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
     }
     painel.innerHTML = html;
-
-    // CRUCIAL: Inicializa o hover para os elementos recém-criados dentro da vitrine
-    inicializarHoverMiniaturas();
 }
 
+// Nova função global de cópia sem o uso de alert() do navegador
 function copiarTexto(texto, mensagemSucesso) {
-    if (!texto) return;
+    if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
+        const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
+        if(textoInvalido) texto = decodeURIComponent(textoInvalido);
+    }
+
     navigator.clipboard.writeText(texto).then(() => {
-        // Implementação da mensagem de cópia personalizada sem alert()
-        console.log(mensagemSucesso);
+        const textoMensagem = mensagemSucesso || "Link copiado com sucesso!";
+        
+        const toastAntigo = document.querySelector('.toast-notificacao');
+        if (toastAntigo) toastAntigo.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-notificacao';
+        toast.innerHTML = `✅ ${textoMensagem}`;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('mostrar');
+        }, 50);
+
+        setTimeout(() => {
+            toast.classList.remove('mostrar');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 2500);
+
     }).catch(err => {
-        console.error('Erro ao copiar: ', err);
+        console.error('Erro ao copiar link: ', err);
     });
 }
+
+
+/* ==========================================================================
+   BLOCO 08: LÓGICA DO MODAL (SOBRE)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
+
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
+    }
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
+});
+
+window.onload = iniciarApp;
