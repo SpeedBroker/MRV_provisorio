@@ -300,7 +300,7 @@ async function carregarPlanilha() {
    ========================================================================== */
 function obterHtmlZona(zona, tipo) {
     if (tipo === 'N' || !zona || zona === "---") return "";
-    return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona.toUpperCase()}</span>`;
+    return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona}</span>`;
 }
 
 function detectarClasseZona(zona) {
