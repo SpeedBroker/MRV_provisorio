@@ -51,7 +51,6 @@ function configurarBotaoDocumentos() {
             const painel = document.getElementById('ficha-tecnica');
             if (painel) {
                 let htmlDocs = `
-                    
                     <div style="padding: 10px 0;">
                 `;
 
@@ -69,14 +68,12 @@ function configurarBotaoDocumentos() {
                 htmlDocs += `</div>`;
                 painel.innerHTML = htmlDocs;
                 
-                // Ativa a lógica do hover nas miniaturas recém-criadas
                 inicializarHoverMiniaturas();
             }
         });
     }
 }
 
-// Retorna o link oficial de visualização, garantindo botões de impressão e download
 function formatarLinkSeguro(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -86,14 +83,12 @@ function formatarLinkSeguro(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Força o modo de visualização completo com todas as opções de menu (impressão ativa)
             return `https://drive.google.com/file/d/${match[1]}/view?usp=sharing`;
         }
     }
     return link;
 }
 
-// Retorna o link específico para a miniatura em hover
 function formatarLinkPreview(url) {
     if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
     
@@ -103,14 +98,12 @@ function formatarLinkPreview(url) {
         const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
         
         if (match && match[1]) {
-            // Retorna o link ideal e leve para renderizar dentro da miniatura
             return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
     }
     return link;
 }
 
-// LÓGICA DO HOVER DA MINIATURA
 function inicializarHoverMiniaturas() {
     const botoesAbrir = document.querySelectorAll('.card-btn-abrir');
     
@@ -119,11 +112,9 @@ function inicializarHoverMiniaturas() {
         if (!urlPreview) return;
 
         botao.addEventListener('mouseenter', (e) => {
-            // Remove qualquer preview existente para evitar duplicados
             const antigo = document.getElementById('preview-flutuante-drive');
             if (antigo) antigo.remove();
 
-            // Cria o container do preview flutuante
             const previewDiv = document.createElement('div');
             previewDiv.id = 'preview-flutuante-drive';
             previewDiv.style.position = 'fixed';
@@ -135,13 +126,11 @@ function inicializarHoverMiniaturas() {
             previewDiv.style.borderRadius = '8px';
             previewDiv.style.overflow = 'hidden';
             previewDiv.style.zIndex = '99999';
-            previewDiv.style.pointerEvents = 'none'; // Evita piscar a tela
+            previewDiv.style.pointerEvents = 'none';
 
-            // Insere o iframe com o link leve de preview
             previewDiv.innerHTML = `<iframe src="${urlPreview}" style="width:100%; height:100%; border:none;"></iframe>`;
             document.body.appendChild(previewDiv);
 
-            // Posiciona perto do botão do mouse
             posicionarPreview(e, previewDiv);
         });
 
@@ -163,11 +152,9 @@ function posicionarPreview(e, elemento) {
     let top = e.clientY + 15;
     let left = e.clientX + 15;
 
-    // Ajusta se passar da borda direita da tela
     if (left + 340 > window.innerWidth) {
         left = e.clientX - 340;
     }
-    // Ajusta se passar da borda de baixo da tela
     if (top + 240 > window.innerHeight) {
         top = e.clientY - 240;
     }
@@ -199,7 +186,7 @@ function abrirDocumentoDireto(url) {
 
 /* ==========================================================================
    BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
-   ========================================================================== */
+   ========================================================================= */
 async function carregarAbaDocumentos() {
     const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
     const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Documentos&v=${new Date().getTime()}`;
@@ -210,7 +197,7 @@ async function carregarAbaDocumentos() {
         const linhasPuras = texto.split(/\r?\n/);
 
         DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
-            const inlineLimpa = linha.replace(/^"|"$/g, '').trim();
+            const inlineLimpa = line = linha.replace(/^"|"$/g, '').trim();
             if (!inlineLimpa) return null;
 
             const ultimaVirgula = inlineLimpa.lastIndexOf(',');
@@ -303,6 +290,7 @@ function obterHtmlZona(zona, tipo) {
     return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona}</span>`;
 }
 
+// REVISADO: Agora reconhece também as regiões fora de SP de forma dinâmica
 function detectarClasseZona(zona) {
     if (!zona) return "";
     const z = zona.toUpperCase().trim();
@@ -310,6 +298,8 @@ function detectarClasseZona(zona) {
     if (z.includes("ZL")) return "btn-zl";
     if (z.includes("ZN")) return "btn-zn";
     if (z.includes("ZS")) return "btn-zs";
+    if (z.includes("VALE")) return "btn-regvale";
+    if (z.includes("CAMPINAS")) return "btn-regcampinas";
     return ""; 
 }
 
@@ -434,7 +424,6 @@ function gerarListaLateral() {
 }
 
 
-
 /* ==========================================================================
    BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
    ========================================================================== */
@@ -503,35 +492,31 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>
         </div>`;
 
-        // Início da Caixa Unificada com bordas arredondadas externas
         html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
         if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
             html += `<div style="background: #444444; color: #ffffff; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #555555; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">${selecionado.campanha}</div>`;
         }
         
         const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
-        let corEstoque = "#ffffff"; // Padrão branco para legibilidade no fundo escuro
+        let corEstoque = "#ffffff"; 
         if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
             corEstoque = "#aaaaaa";
         } else {
             const nEst = parseInt(estoqueRaw);
-            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; // Vermelho claro/vivo para destacar perigo sobre o cinza escuro
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "#ff5252"; 
         }
         const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
 
-        // Linha 2: Limitador ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.limitador}</strong>
         </div>`;
 
-        // Linha 3: Casa Paulista ocupando a linha inteira
         html += `
         <div class="grid-cell full-width" style="display: flex; justify-content: center; align-items: center; padding: 6px 10px; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; width: 100%; height: 32px;">
             <strong style="font-size: 0.75rem; text-align: center; word-break: break-word; font-weight: bold; letter-spacing: 0.3px;">${selecionado.casa_paulista}</strong>
         </div>`;
 
-        // Linha 4: Entrega, Obra e Estoque
         html += `
         <div style="display: flex; width: 100%; background-color: #444444; color: #ffffff; border-bottom: 1px solid #555555; box-sizing: border-box; height: 32px;">
             <div style="flex: 1; padding: 6px 8px; border-right: 1px solid #555555; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
@@ -559,7 +544,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             });
         }
 
-        // Linha final: Faixa Laranja com o valor do imóvel
         html += `
         <div style="background-color: var(--mrv-laranja); color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; height: 32px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
             À PARTIR DE: ${precoReal}
@@ -567,7 +551,6 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         
         html += `</div>`;
        
-        // Blocos de Diferenciais e Informações Complementares
         html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
         if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
             const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
@@ -578,7 +561,7 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
                     <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
                     <div style="display:flex; gap:3px; margin-left:5px;">
                         <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
-                        <button onclick="copiarTexto('${urlMapsEstande}', 'Link do estande copiado!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
+                        <button onclick="copiarTexto('${urlMapsEstande}', 'Link do estande copied!')" class="btn-maps" style="border:none; cursor:pointer;">LINK</button>
                     </div>
                 </div>
             </div>`;
@@ -615,13 +598,18 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
             </div>`;
         }
     } else {
+        // REVISADO: Adicionado mapeamento de cor para as faixas dos Complexos das novas regiões
         let corComplexo = "#333";
-        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
-        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
-        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
-        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
+        const zUpper = selecionado.zona.toUpperCase().trim();
+        
+        if (zUpper === 'ZO') corComplexo = "#ff9d42"; 
+        else if (zUpper === 'ZL') corComplexo = "#003399";
+        else if (zUpper === 'ZN') corComplexo = "#ffd700";
+        else if (zUpper === 'ZS') corComplexo = "#ff33aa";
+        else if (zUpper.includes("VALE")) corComplexo = "#8e44ad"; // Roxo elegante para RegVale
+        else if (zUpper.includes("CAMPINAS")) corComplexo = "#16a085"; // Verde-esmeralda para RegCampinas
 
-        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
+        let corTexto = (zUpper === 'ZN') ? "#333" : "white";
 
         html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
                     ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
@@ -647,61 +635,5 @@ function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
         }
     }
     painel.innerHTML = html;
+    inicializarHoverMiniaturas();
 }
-
-// Nova função global de cópia sem o uso de alert() do navegador
-function copiarTexto(texto, mensagemSucesso) {
-    if (!texto || texto.includes('https://www.google.com/maps/search/?api=1&query=$')) {
-        const textoInvalido = texto ? texto.replace('https://www.google.com/maps/search/?api=1&query=$', '') : '';
-        if(textoInvalido) texto = decodeURIComponent(textoInvalido);
-    }
-
-    navigator.clipboard.writeText(texto).then(() => {
-        const textoMensagem = mensagemSucesso || "Link copiado com sucesso!";
-        
-        const toastAntigo = document.querySelector('.toast-notificacao');
-        if (toastAntigo) toastAntigo.remove();
-
-        const toast = document.createElement('div');
-        toast.className = 'toast-notificacao';
-        toast.innerHTML = `✅ ${textoMensagem}`;
-
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('mostrar');
-        }, 50);
-
-        setTimeout(() => {
-            toast.classList.remove('mostrar');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        }, 2500);
-
-    }).catch(err => {
-        console.error('Erro ao copiar link: ', err);
-    });
-}
-
-
-/* ==========================================================================
-   BLOCO 08: LÓGICA DO MODAL (SOBRE)
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modal-sobre");
-    const btn = document.getElementById("btn-sobre");
-    const span = document.querySelector(".modal-close");
-
-    if(btn && modal) {
-        btn.onclick = () => { modal.style.display = "block"; };
-    }
-    if(span && modal) {
-        span.onclick = () => { modal.style.display = "none"; };
-    }
-    window.onclick = (event) => {
-        if (event.target == modal) { modal.style.display = "none"; }
-    };
-});
-
-window.onload = iniciarApp;
