@@ -49,16 +49,37 @@ const MATRIZ_PERFIS_ANUNCIO = {
 function abrirModuloAnuncio() {
     let nomeImovel = "Residencial MRV Selecionado";
     let regiaoImovel = "São Paulo e Região";
-    let urlImagemImovel = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=500&auto=format&fit=crop&q=60"; // Imagem padrão temporária
+    let urlImagemImovel = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=500&auto=format&fit=crop&q=60"; // Foto padrão
 
-    // Busca dinâmica da tela usando a ponte segura com o desktop.js
-    if (typeof window.obterDadosImovelAtual === 'function') {
-        const dadosTela = window.obterDadosImovelAtual();
-        if (dadosTela) {
-            nomeImovel = dadosTela.nome;
-            regiaoImovel = dadosTela.regiao;
-            if (dadosTela.urlImagem) urlImagemImovel = dadosTela.urlImagem;
+    // CAPTURADOR INTELIGENTE AUTOMÁTICO (Sem precisar do desktop.js)
+    try {
+        const fichaDireita = document.getElementById('ficha-tecnica');
+        if (fichaDireita) {
+            // Tenta encontrar a faixa laranja de título criada pelo Bloco 07
+            const faixaTitulo = fichaDireita.querySelector('.titulo-vitrine-faixa') || fichaDireita.querySelector('h2') || fichaDireita.querySelector('div[style*="background-color"] strong');
+            
+            if (faixaTitulo && faixaTitulo.textContent.trim() !== "") {
+                const textoCompleto = faixaTitulo.textContent.trim();
+                // Divide o texto caso tenha travessão ou hífen (Ex: RES. PICO DOS MARINS — SP 2)
+                const partes = textoCompleto.split(/[—\-]/);
+                
+                let extraido = partes[0].replace(/RES\.\s+/i, '').trim();
+                // Formata para Capital Case (Pico Dos Marins)
+                nomeImovel = "Residencial " + extraido.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+                
+                if (partes.length > 1) {
+                    regiaoImovel = partes[1].trim();
+                }
+            }
+
+            // Tenta capturar a primeira imagem do residencial que estiver aberta na ficha técnica para usar na prévia!
+            const imagemFicha = fichaDireita.querySelector('img');
+            if (imagemFicha && imagemFicha.src) {
+                urlImagemImovel = imagemFicha.src;
+            }
         }
+    } catch (e) {
+        console.log("Modo de segurança ativado: usando dados padrão.");
     }
 
     criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel);
@@ -92,10 +113,11 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
         </div>
     `;
 
-    // Estrutura de Duas Colunas (Configurações vs Prévia)
+    // Estrutura de Duas Colunas
     const containerColunasHTML = `
         <div style="display: flex; gap: 25px; flex-wrap: wrap;">
             
+            <!-- COLUNA DA ESQUERDA: CONFIGURAÇÃO -->
             <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; gap: 15px;">
                 
                 <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #f37021;">
@@ -103,6 +125,7 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
                     <strong style="color: #333; font-size: 1rem;">${nomeImovel} (${regiaoImovel})</strong>
                 </div>
 
+                <!-- SELETOR DE PERFIL DE PÚBLICO -->
                 <div>
                     <label style="font-weight: bold; font-size: 0.85rem; color: #004d24; display: block; margin-bottom: 6px;">1. Selecione o Perfil do Lead Alvo:</label>
                     <select id="select-perfil-lead" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.9rem; background: #fff; font-weight: bold; color: #333;">
@@ -114,11 +137,13 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
                     <small id="desc-segmentacao" style="display:block; margin-top:5px; color:#666; font-style:italic; font-size:0.8rem;"></small>
                 </div>
 
+                <!-- SELETOR DE TÍTULO DA CAMPANHA -->
                 <div>
                     <label style="font-weight: bold; font-size: 0.85rem; color: #004d24; display: block; margin-bottom: 6px;">2. Escolha o Título do Anúncio:</label>
                     <select id="select-titulo-anuncio" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.88rem; background: #fff; color: #333;"></select>
                 </div>
 
+                <!-- ORÇAMENTO E RAIO -->
                 <div style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
                         <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Orçamento Diário:</label>
@@ -138,6 +163,7 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
                     </div>
                 </div>
 
+                <!-- LEGENDA GERADA -->
                 <div>
                     <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <span>Legenda Gerada (Copywriting):</span>
@@ -147,6 +173,7 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
                 </div>
             </div>
 
+            <!-- COLUNA DA DIREITA: PRÉVIA VISUAL -->
             <div style="flex: 0.9; min-width: 360px; background: #f0f2f5; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <span style="font-size: 0.75rem; font-weight: bold; color: #65676b; text-transform: uppercase; margin-bottom: 10px; display: block; width: 100%;">Prévia em tempo real (Feed Móvel):</span>
                 
@@ -174,7 +201,6 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
         </div>
     `;
 
-    // Rodapé com o botão Tutorial e Instruções da Etapa 1
     const rodapeHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; margin-top: 5px;">
             <div style="font-size: 0.8rem; color: #666; max-width: 60%;">
@@ -191,7 +217,6 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
     backgroundModal.appendChild(corpoModal);
     document.body.appendChild(backgroundModal);
 
-    // --- ELEMENTOS DE CONTROLE DA INTERFACE ---
     const seletorPerfil = document.getElementById('select-perfil-lead');
     const seletorTitulo = document.getElementById('select-titulo-anuncio');
     const txtCopy = document.getElementById('txt-anuncio-copy');
@@ -200,17 +225,14 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
     const previaTextoFeed = document.getElementById('previa-texto-feed');
     const previaTituloFeed = document.getElementById('previa-titulo-feed');
 
-    // --- FUNÇÃO DE ATUALIZAÇÃO DA TELA (DINAMISMO TOTAL) ---
     function atualizarCamposCampanha() {
         const perfilChave = seletorPerfil.value;
         const configPerfil = MATRIZ_PERFIS_ANUNCIO[perfilChave];
 
         if (!configPerfil) return;
 
-        // Atualiza a descrição explicativa do público abaixo do seletor
         descSegmentacao.textContent = configPerfil.segmentacao;
 
-        // Atualiza as 3 opções de títulos de forma limpa
         const tituloSalvoAntigo = seletorTitulo.value;
         seletorTitulo.innerHTML = '';
         configPerfil.titulos.forEach((titulo, idx) => {
@@ -221,21 +243,17 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
             seletorTitulo.appendChild(opt);
         });
 
-        // Constrói a Copy substituindo as tags coringas do imóvel atual
         let textoCustomizado = configPerfil.textoBase
             .replace(/{NOME_IMOVEL}/g, nomeImovel)
             .replace(/{REGIAO_IMOVEL}/g, regiaoImovel);
 
         txtCopy.value = textoCustomizado;
-
-        // Sincroniza instantaneamente com o Card de Prévia do Feed
         previaTextoFeed.textContent = textoCustomizado;
         previaTituloFeed.textContent = seletorTitulo.value || configPerfil.titulos[0];
     }
 
-    // --- LISTENERS DE INTERATIVIDADE DIRETAS ---
     seletorPerfil.addEventListener('change', () => {
-        seletorTitulo.innerHTML = ''; // reseta títulos para pegar os novos do perfil
+        seletorTitulo.innerHTML = ''; 
         atualizarCamposCampanha();
     });
     
@@ -247,12 +265,9 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
         previaTextoFeed.textContent = txtCopy.value;
     });
 
-    // Botão de Copiar Texto
     document.getElementById('btn-copiar-copy').addEventListener('click', () => {
         txtCopy.select();
-        txtCopy.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(txtCopy.value);
-        
         const btn = document.getElementById('btn-copiar-copy');
         btn.textContent = "✅ Copiado!";
         btn.style.background = "#f37021";
@@ -262,7 +277,6 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
         }, 1500);
     });
 
-    // Botão ver Passo a Passo (Tutorial Etapa 1)
     document.getElementById('btn-anuncio-tutorial').addEventListener('click', () => {
         const verba = document.getElementById('select-anuncio-verba').value;
         const raio = document.getElementById('select-anuncio-raio').value;
@@ -278,16 +292,13 @@ function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
               `7. Baixe a foto do residencial direto do Dashboard e suba na imagem do anúncio!`);
     });
 
-    // Fechamento básico do modal
     const fecharModal = () => backgroundModal.remove();
     document.getElementById('fechar-modal-anuncio').addEventListener('click', fecharModal);
     document.getElementById('btn-anuncio-concluir').addEventListener('click', fecharModal);
 
-    // Inicialização da primeira renderização
     atualizarCamposCampanha();
 }
 
-// --- Vinculação com o Botão de Interface do Painel Principal ---
 document.addEventListener("DOMContentLoaded", () => {
     const btnAnuncioElemento = document.getElementById('btn-anuncio');
     if (btnAnuncioElemento) {
