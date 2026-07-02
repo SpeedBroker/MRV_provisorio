@@ -1,308 +1,603 @@
-// ==========================================================================
-// MÓDULO INDEPENDENTE: ANÚNCIO CLIQUE-ÚNICO (ETAPA 1 - ASSISTENTE DE TRÁFEGO)
-// ==========================================================================
+/* ==========================================================================
+   BLOCO 01: CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
+   ========================================================================== */
+let DADOS_PLANILHA = [];
+let DOCUMENTOS_GERAIS = []; 
+let pathAtivo = null;  
+let imovelAtivo = null;  
+let mapaAtivo = 'GSP'; 
 
-// Simulação da base de dados que futuramente virá da aba "Anuncios" da Planilha
-const MATRIZ_PERFIS_ANUNCIO = {
-    "casal_jovem": {
-        nome: "Perfil Casal Jovem (25-35 anos)",
-        segmentacao: "Focado em Primeiro Imóvel, Sair do Aluguel e Recém-casados.",
-        titulos: [
-            "Realize o sonho do 1º apê! 🔑",
-            "Chega de pagar aluguel hoje mesmo! 🚫🏠",
-            "O seu novo começo planejado na MRV! 💍"
-        ],
-        textoBase: "🏢 Oportunidade Perfeita para Conquistar o seu Primeiro Apê!\n\nHora de planejar o futuro a dois no {NOME_IMOVEL} em {REGIAO_IMOVEL}. Conforto, segurança de condomínio fechado e condições de financiamento perfeitas para o seu bolso.\n\nClique em 'Saiba Mais' e simule agora pelo WhatsApp! 📲"
-    },
-    "familia": {
-        nome: "Perfil Família (30-45 anos)",
-        segmentacao: "Focado em Casados com filhos, busca por espaço, lazer e segurança.",
-        titulos: [
-            "Mais espaço e lazer para seus filhos! 🧸",
-            "O condomínio fechado que sua família merece! 🌳",
-            "Segurança e diversão sem sair de casa! 👮‍♂️"
-        ],
-        textoBase: "👨‍👩‍👧‍👦 O Lugar Perfeito para Ver Seus Filhos Crescerem com Segurança!\n\nVenha morar no {NOME_IMOVEL} em {REGIAO_IMOVEL}. Um residencial completo com área de lazer, piscina, portaria 24h e espaço de sobra para quem você mais ama.\n\nClique em 'Saiba Mais' para receber a tabela de valores! 📲"
-    },
-    "his": {
-        nome: "Perfil Renda HIS (Foco em Subsídio)",
-        segmentacao: "Focado em famílias de Habitação de Interesse Social, subsídio do governo e uso de FGTS.",
-        titulos: [
-            "Conquiste seu apê com o Subsídio do Governo! 🪙",
-            "Entrada super facilitada e parcelada! 📉",
-            "Use seu FGTS para a entrada do seu MRV! 💰"
-        ],
-        textoBase: "✨ Saia do Aluguel com as Maiores Facilidades do Ano!\n\nO {NOME_IMOVEL} em {REGIAO_IMOVEL} entra no programa habitacional com direito a subsídio recorde, parcelas menores que um aluguel e aprovação rápida de crédito.\n\nClique em 'Saiba Mais' e faça uma simulação gratuita! 📲"
-    },
-    "hmp": {
-        nome: "Perfil HMP (Qualidade de Vida e Upgrade)",
-        segmentacao: "Focado em Habitação de Mercado Popular, clientes buscando upgrade de moradia e localização.",
-        titulos: [
-            "O upgrade de vida que você estava esperando! 🚀",
-            "Viva com total conforto e excelente localização! 📍",
-            "Design moderno e lazer premium na sua região! 💎"
-        ],
-        textoBase: "🏢 Conforto, Modernidade e Praticidade Unificados em um Só Lugar!\n\nConheça o {NOME_IMOVEL} em {REGIAO_IMOVEL}. Apartamentos com excelente distribuição de espaço, acabamento diferenciado e localizado perto de tudo o que você precisa no seu dia a dia.\n\nClique em 'Saiba Mais' e agende sua visita ao decorado! 📲"
-    }
+const COL = {
+    ID: 0, CATEGORIA: 1, ORDEM: 2, 
+    ZONA: 3, 
+    NOME: 4, NOME_FULL: 5,  
+    ESTOQUE: 6, END: 7, TIPOLOGIAS: 8, ENTREGA: 9, 
+    P_DE: 10, P_ATE: 11, OBRA: 12, LIMITADOR: 13, 
+    REGIAO: 14, CASA_PAULISTA: 15, CAMPANHA: 16, 
+    DESC_LONGA: 18, OBSERVACOES: 19,
+    LOCALIZACAO: 20, MOBILIDADE: 21, CULTURA_LAZER: 22,    
+    COMERCIO: 23, SAUDE_EDUCACAO: 24,
+    BOOK_CLIENTE: 25, BOOK_CORRETOR: 26,
+    LINKS_VIDEOS: 27, LINKS_PLANTAS: 28,  
+    LINKS_IMPLANT: 29, LINKS_DIVERSOS: 30,
+    ESTANDE: 31 
 };
 
-function abrirModuloAnuncio() {
-    let nomeImovel = "Residencial MRV Selecionado";
-    let regiaoImovel = "São Paulo e Região";
-    let urlImagemImovel = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=500&auto=format&fit=crop&q=60"; // Foto padrão
+/* ==========================================================================
+   BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
+   ========================================================================== */
+async function iniciarApp() {
+    console.log("Iniciando aplicação...");
+    try { 
+        await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
+        configurarBotaoDocumentos(); 
+    } catch (err) { 
+        console.error("Erro no fluxo de inicialização:", err); 
+    }
+}
 
-    // CAPTURADOR INTELIGENTE AUTOMÁTICO (Sem precisar do desktop.js)
+function configurarBotaoDocumentos() {
     try {
-        const fichaDireita = document.getElementById('ficha-tecnica');
-        if (fichaDireita) {
-            // Tenta encontrar a faixa laranja de título criada pelo Bloco 07
-            const faixaTitulo = fichaDireita.querySelector('.titulo-vitrine-faixa') || fichaDireita.querySelector('h2') || fichaDireita.querySelector('div[style*="background-color"] strong');
-            
-            if (faixaTitulo && faixaTitulo.textContent.trim() !== "") {
-                const textoCompleto = faixaTitulo.textContent.trim();
-                // Divide o texto caso tenha travessão ou hífen (Ex: RES. PICO DOS MARINS — SP 2)
-                const partes = textoCompleto.split(/[—\-]/);
+        const btnDocs = document.getElementById('btn-documentos');
+        if (btnDocs) {
+            btnDocs.addEventListener('click', () => {
+                imovelAtivo = null;
+                pathAtivo = null;
+                document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
+                gerarListaLateral();
                 
-                let extraido = partes[0].replace(/RES\.\s+/i, '').trim();
-                // Formata para Capital Case (Pico Dos Marins)
-                nomeImovel = "Residencial " + extraido.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
-                
-                if (partes.length > 1) {
-                    regiaoImovel = partes[1].trim();
-                }
-            }
+                const ct = document.getElementById('cidade-titulo');
+                if (ct) ct.innerText = "DOCUMENTOS GERAIS CORPORATIVOS";
 
-            // Tenta capturar a primeira imagem do residencial que estiver aberta na ficha técnica para usar na prévia!
-            const imagemFicha = fichaDireita.querySelector('img');
-            if (imagemFicha && imagemFicha.src) {
-                urlImagemImovel = imagemFicha.src;
-            }
+                const painel = document.getElementById('ficha-tecnica');
+                if (painel) {
+                    let htmlDocs = `
+                        <div class="vitrine-topo" style="background-color: #dca206; color: #004d24;">📂 ARQUIVOS DIVERSOS</div>
+                        <div style="padding: 10px 0;">
+                    `;
+
+                    if (DOCUMENTOS_GERAIS.length === 0) {
+                        htmlDocs += `
+                            <div style="text-align:center; color:#999; margin-top:50px;">
+                                <p>Nenhum documento encontrado na aba.</p>
+                            </div>`;
+                    } else {
+                        DOCUMENTOS_GERAIS.forEach(doc => {
+                            htmlDocs += criarCardMaterial(doc.titulo, doc.url, '📝');
+                        });
+                    }
+
+                    htmlDocs += `</div>`;
+                    painel.innerHTML = htmlDocs;
+                }
+            });
         }
     } catch (e) {
-        console.log("Modo de segurança ativado: usando dados padrão.");
+        console.error("Erro ao configurar botão de documentos:", e);
     }
-
-    criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel);
 }
 
-function criarEstruturaModalAnuncio(nomeImovel, regiaoImovel, urlImagemImovel) {
-    const backgroundModal = document.createElement('div');
-    backgroundModal.id = 'modal-anuncio-container';
-    backgroundModal.style = `
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(0, 0, 0, 0.7); z-index: 99999;
-        display: flex; justify-content: center; align-items: center;
-        backdrop-filter: blur(4px); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    `;
+function formatarLinkSeguro(url) {
+    if (!url || url === "---" || url === "" || typeof url !== 'string') return "";
+    let link = url.trim();
+    if (link.includes('drive.google.com')) {
+        const match = link.match(/\/d\/(.*?)(\/|$|\?)/) || link.match(/id=(.*?)($|&)/);
+        if (match && match[1]) {
+            return `https://drive.google.com/file/d/${match[1]}/preview?rm=minimal`;
+        }
+    }
+    return link;
+}
 
-    const corpoModal = document.createElement('div');
-    corpoModal.style = `
-        background: #ffffff; padding: 25px; border-radius: 12px;
-        width: 960px; max-width: 95%; max-height: 90vh; overflow-y: auto;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-        display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;
-    `;
+function copiarTexto(texto, msg = "Link copiado!") {
+    if (!texto || texto === "") return;
+    navigator.clipboard.writeText(texto).then(() => {
+        alert(msg);
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+}
 
-    // Cabeçalho unificado
-    const cabecalhoHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 12px;">
-            <h2 style="color: #004d24; margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 8px;">
-                <span>🚀</span> Assistente de Marketing Direto — Etapa 1
-            </h2>
-            <span id="fechar-modal-anuncio" style="cursor:pointer; font-size: 26px; color: #999; font-weight: bold; line-height: 1;">&times;</span>
-        </div>
-    `;
+function copiarLink(url) {
+    const linkSeguro = formatarLinkSeguro(url);
+    copiarTexto(linkSeguro, "Link seguro copiado!");
+}
 
-    // Estrutura de Duas Colunas
-    const containerColunasHTML = `
-        <div style="display: flex; gap: 25px; flex-wrap: wrap;">
+/* ==========================================================================
+   BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
+   ========================================================================== */
+async function carregarAbaDocumentos() {
+    const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
+    const URL_DOCS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Documentos&v=${new Date().getTime()}`;
+    
+    try {
+        const response = await fetch(URL_DOCS);
+        let texto = await response.text();
+        const linhasPuras = texto.split(/\r?\n/);
+
+        DOCUMENTOS_GERAIS = linhasPuras.slice(1).map(linha => {
+            const linhaLimpa = linha.replace(/^"|"$/g, '').trim();
+            if (!linhaLimpa) return null;
+
+            const ultimaVirgula = linhaLimpa.lastIndexOf(',');
+            if (ultimaVirgula === -1) return null;
+
+            const titulo = linhaLimpa.substring(0, ultimaVirgula).trim().replace(/^"|"$/g, '');
+            const url = linhaLimpa.substring(ultimaVirgula + 1).trim().replace(/^"|"$/g, '');
+
+            if (!titulo || !url.startsWith('http')) return null;
+
+            return { titulo, url };
+        }).filter(d => d !== null);
+
+    } catch (e) {
+        console.error("Erro ao carregar aba de documentos: ", e);
+    }
+}
+
+async function carregarPlanilha() {
+    const SHEET_ID = "15V194P2JPGCCPpCTKJsib8sJuCZPgtbNb-rtgNaLS7E";
+    const URL_CSV = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0&v=${new Date().getTime()}`;
+    try {
+        const response = await fetch(URL_CSV);
+        let texto = await response.text();
+        const linhasPuras = texto.split(/\r?\n/);
+
+        DADOS_PLANILHA = linhasPuras.slice(1).map(linha => {
+            const colunas = []; let campo = "", aspas = false;
+            for (let i = 0; i < linha.length; i++) {
+                const char = linha[i];
+                if (char === '"') aspas = !aspas;
+                else if (char === ',' && !aspas) { colunas.push(campo.trim()); campo = ""; }
+                else { campo += char; }
+            }
+            colunas.push(campo.trim());
+
+            const nomeImovel = colunas[COL.NOME] || "";
+            const idPath = (colunas[COL.ID] || "").toLowerCase().replace(/\s/g, '');
+            const ordem = parseInt(colunas[COL.ORDEM]);
+
+            if (!idPath || nomeImovel.length <= 1 || isNaN(ordem)) return null;
+
+            const cat = (colunas[COL.CATEGORIA] || "").toUpperCase();
             
-            <!-- COLUNA DA ESQUERDA: CONFIGURAÇÃO -->
-            <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; gap: 15px;">
-                
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #f37021;">
-                    <span style="font-size: 0.75rem; font-weight: bold; color: #f37021; text-transform: uppercase; display: block;">Produto Identificado</span>
-                    <strong style="color: #333; font-size: 1rem;">${nomeImovel} (${regiaoImovel})</strong>
-                </div>
+            return {
+                id_path: idPath,
+                tipo: cat.includes('COMPLEXO') ? 'N' : 'R',
+                ordem: ordem,
+                zona: colunas[COL.ZONA] || "", 
+                nome: nomeImovel,
+                nomeFull: colunas[COL.NOME_FULL] || nomeImovel,
+                estoque: colunas[COL.ESTOQUE],
+                endereco: colunas[COL.END] || "",
+                entrega: colunas[COL.ENTREGA] || "---",
+                obra: colunas[COL.OBRA] || "0",
+                tipologiasH: colunas[COL.TIPOLOGIAS] || "", 
+                regiao: colunas[COL.REGIAO] || "---",
+                p_de: colunas[COL.P_DE] || "---",
+                p_ate: colunas[COL.P_ATE] || "---",
+                limitador: colunas[COL.LIMITADOR] || "---",
+                casa_paulista: colunas[COL.CASA_PAULISTA] || "---",
+                campanha: colunas[COL.CAMPANHA] || "",
+                observacoes: colunas[COL.OBSERVACOES] || "", 
+                descLonga: colunas[COL.DESC_LONGA] || "",
+                localizacao: colunas[COL.LOCALIZACAO] || "",
+                mobilidade: colunas[COL.MOBILIDADE] || "",
+                lazer: colunas[COL.CULTURA_LAZER] || "",
+                comercio: colunas[COL.COMERCIO] || "",
+                saude: colunas[COL.SAUDE_EDUCACAO] || "",
+                linkCliente: colunas[COL.BOOK_CLIENTE] || "",
+                linkCorretor: colunas[COL.BOOK_CORRETOR] || "",
+                linksVideos: colunas[COL.LINKS_VIDEOS] || "",
+                linksPlantas: colunas[COL.LINKS_PLANTAS] || "",
+                linksImplant: colunas[COL.LINKS_IMPLANT] || "",
+                linksDiversos: colunas[COL.LINKS_DIVERSOS] || "",
+                estande: colunas[COL.ESTANDE] || ""
+            };
+        }).filter(i => i !== null);
 
-                <!-- SELETOR DE PERFIL DE PÚBLICO -->
-                <div>
-                    <label style="font-weight: bold; font-size: 0.85rem; color: #004d24; display: block; margin-bottom: 6px;">1. Selecione o Perfil do Lead Alvo:</label>
-                    <select id="select-perfil-lead" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.9rem; background: #fff; font-weight: bold; color: #333;">
-                        <option value="casal_jovem" selected>Perfil Casal Jovem (Idade: 25-35 | 1º Imóvel)</option>
-                        <option value="familia">Perfil Família (Idade: 30-45 | Foco Filhos & Lazer)</option>
-                        <option value="his">Perfil Renda HIS (Foco em Subsídios do Governo)</option>
-                        <option value="hmp">Perfil HMP (Foco em Qualidade de Vida & Upgrade)</option>
-                    </select>
-                    <small id="desc-segmentacao" style="display:block; margin-top:5px; color:#666; font-style:italic; font-size:0.8rem;"></small>
-                </div>
-
-                <!-- SELETOR DE TÍTULO DA CAMPANHA -->
-                <div>
-                    <label style="font-weight: bold; font-size: 0.85rem; color: #004d24; display: block; margin-bottom: 6px;">2. Escolha o Título do Anúncio:</label>
-                    <select id="select-titulo-anuncio" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.88rem; background: #fff; color: #333;"></select>
-                </div>
-
-                <!-- ORÇAMENTO E RAIO -->
-                <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Orçamento Diário:</label>
-                        <select id="select-anuncio-verba" style="width: 100%; padding: 9px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.85rem; background: #fff;">
-                            <option value="25" selected>R$ 25,00 / dia</option>
-                            <option value="50">R$ 50,00 / dia</option>
-                            <option value="100">R$ 100,00 / dia</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: block; margin-bottom: 6px;">Geolocalização:</label>
-                        <select id="select-anuncio-raio" style="width: 100%; padding: 9px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.85rem; background: #fff;">
-                            <option value="10" selected>Raio de 10km do Stand</option>
-                            <option value="15">Raio de 15km do Stand</option>
-                            <option value="todo-municipio">Toda a Cidade</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- LEGENDA GERADA -->
-                <div>
-                    <label style="font-weight: bold; font-size: 0.85rem; color: #333; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span>Legenda Gerada (Copywriting):</span>
-                        <button id="btn-copiar-copy" style="background:#004d24; color:white; border:none; padding:3px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;">📋 Copiar Texto</button>
-                    </label>
-                    <textarea id="txt-anuncio-copy" style="width: 100%; height: 120px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; resize: none; line-height: 1.4; background:#fafafa; font-family: inherit;"></textarea>
-                </div>
-            </div>
-
-            <!-- COLUNA DA DIREITA: PRÉVIA VISUAL -->
-            <div style="flex: 0.9; min-width: 360px; background: #f0f2f5; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <span style="font-size: 0.75rem; font-weight: bold; color: #65676b; text-transform: uppercase; margin-bottom: 10px; display: block; width: 100%;">Prévia em tempo real (Feed Móvel):</span>
-                
-                <div style="background: #ffffff; width: 100%; max-width: 360px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); border: 1px solid #ced0d4; overflow: hidden; font-family: Helvetica, Arial, sans-serif;">
-                    <div style="padding: 12px; display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 36px; height: 36px; background: #004d24; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem;">MRV</div>
-                        <div>
-                            <strong style="font-size: 0.88rem; color: #050505; display: block;">Meu Corretor MRV</strong>
-                            <span style="font-size: 0.75rem; color: #65676b; display: flex; align-items: center; gap: 3px;">Patrocinado · 🌐</span>
-                        </div>
-                    </div>
-                    <div id="previa-texto-feed" style="padding: 0 12px 10px 12px; font-size: 0.85rem; color: #050505; white-space: pre-line; line-height: 1.35; max-height: 80px; overflow: hidden; text-overflow: ellipsis;"></div>
-                    
-                    <div style="width: 100%; height: 200px; background-image: url('${urlImagemImovel}'); background-size: cover; background-position: center;"></div>
-                    
-                    <div style="background: #f0f2f5; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e5e5;">
-                        <div style="flex: 1; padding-right: 10px;">
-                            <span style="font-size: 0.72rem; color: #65676b; text-transform: uppercase; display: block;">WHATSAPP</span>
-                            <strong id="previa-titulo-feed" style="font-size: 0.9rem; color: #050505; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Título do Anúncio</strong>
-                        </div>
-                        <button style="background: #e4e6eb; color: #050505; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 0.82rem; cursor: not-allowed; white-space: nowrap;">Enviar mensagem</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    const rodapeHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; margin-top: 5px;">
-            <div style="font-size: 0.8rem; color: #666; max-width: 60%;">
-                💡 <strong>Próximo Passo:</strong> Copie o texto gerado acima e utilize a imagem do residencial para abrir sua campanha no Gerenciador de Anúncios.
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <button id="btn-anuncio-tutorial" style="background: #fe9a11; color: #004d24; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;">📖 Ver Passo a Passo</button>
-                <button id="btn-anuncio-concluir" style="background: #f37021; color: #ffffff; border: none; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(243,112,33,0.3);">Pronto!</button>
-            </div>
-        </div>
-    `;
-
-    corpoModal.innerHTML = cabecalhoHTML + containerColunasHTML + rodapeHTML;
-    backgroundModal.appendChild(corpoModal);
-    document.body.appendChild(backgroundModal);
-
-    const seletorPerfil = document.getElementById('select-perfil-lead');
-    const seletorTitulo = document.getElementById('select-titulo-anuncio');
-    const txtCopy = document.getElementById('txt-anuncio-copy');
-    const descSegmentacao = document.getElementById('desc-segmentacao');
-    
-    const previaTextoFeed = document.getElementById('previa-texto-feed');
-    const previaTituloFeed = document.getElementById('previa-titulo-feed');
-
-    function atualizarCamposCampanha() {
-        const perfilChave = seletorPerfil.value;
-        const configPerfil = MATRIZ_PERFIS_ANUNCIO[perfilChave];
-
-        if (!configPerfil) return;
-
-        descSegmentacao.textContent = configPerfil.segmentacao;
-
-        const tituloSalvoAntigo = seletorTitulo.value;
-        seletorTitulo.innerHTML = '';
-        configPerfil.titulos.forEach((titulo, idx) => {
-            const opt = document.createElement('option');
-            opt.value = titulo;
-            opt.textContent = `Opção ${idx + 1}: ${titulo}`;
-            if (titulo === tituloSalvoAntigo) opt.selected = true;
-            seletorTitulo.appendChild(opt);
-        });
-
-        let textoCustomizado = configPerfil.textoBase
-            .replace(/{NOME_IMOVEL}/g, nomeImovel)
-            .replace(/{REGIAO_IMOVEL}/g, regiaoImovel);
-
-        txtCopy.value = textoCustomizado;
-        previaTextoFeed.textContent = textoCustomizado;
-        previaTituloFeed.textContent = seletorTitulo.value || configPerfil.titulos[0];
+        DADOS_PLANILHA.sort((a, b) => a.ordem - b.ordem);
+        desenharMapas(); 
+        gerarListaLateral();
+    } catch (e) { 
+        console.error("Erro ao carregar planilha:", e); 
     }
-
-    seletorPerfil.addEventListener('change', () => {
-        seletorTitulo.innerHTML = ''; 
-        atualizarCamposCampanha();
-    });
-    
-    seletorTitulo.addEventListener('change', () => {
-        previaTituloFeed.textContent = seletorTitulo.value;
-    });
-
-    txtCopy.addEventListener('input', () => {
-        previaTextoFeed.textContent = txtCopy.value;
-    });
-
-    document.getElementById('btn-copiar-copy').addEventListener('click', () => {
-        txtCopy.select();
-        navigator.clipboard.writeText(txtCopy.value);
-        const btn = document.getElementById('btn-copiar-copy');
-        btn.textContent = "✅ Copiado!";
-        btn.style.background = "#f37021";
-        setTimeout(() => {
-            btn.textContent = "📋 Copiar Texto";
-            btn.style.background = "#004d24";
-        }, 1500);
-    });
-
-    document.getElementById('btn-anuncio-tutorial').addEventListener('click', () => {
-        const verba = document.getElementById('select-anuncio-verba').value;
-        const raio = document.getElementById('select-anuncio-raio').value;
-        const perfilTexto = seletorPerfil.options[seletorPerfil.selectedIndex].text;
-
-        alert(`📖 TUTORIAL DE INSTALAÇÃO RÁPIDA (META ADS / GOOGLE):\n\n` +
-              `1. Abra o seu Gerenciador de Anúncios e crie uma campanha de Engajamento/WhatsApp.\n` +
-              `2. Na seção de Público, defina a localização para o endereço do stand da MRV.\n` +
-              `3. Configure o raio de alcance para exatamente: ${raio}km.\n` +
-              `4. Restrinja os dados demográficos baseando-se no ${perfilTexto}.\n` +
-              `5. Defina o seu orçamento diário para iniciar com: R$ ${verba},00.\n` +
-              `6. No criativo do anúncio, clique no botão "📋 Copiar Texto" no nosso sistema e cole no campo de Texto Principal do Meta.\n` +
-              `7. Baixe a foto do residencial direto do Dashboard e suba na imagem do anúncio!`);
-    });
-
-    const fecharModal = () => backgroundModal.remove();
-    document.getElementById('fechar-modal-anuncio').addEventListener('click', fecharModal);
-    document.getElementById('btn-anuncio-concluir').addEventListener('click', fecharModal);
-
-    atualizarCamposCampanha();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const btnAnuncioElemento = document.getElementById('btn-anuncio');
-    if (btnAnuncioElemento) {
-        btnAnuncioElemento.innerHTML = "🚀 Anúncio Clique-Único";
-        btnAnuncioElemento.addEventListener('click', abrirModuloAnuncio);
+/* ==========================================================================
+   BLOCO 04: LÓGICA DO MAPA E SELEÇÃO
+   ========================================================================== */
+function obterHtmlZona(zona, tipo) {
+    if (tipo === 'N' || !zona || zona === "---") return "";
+    return `<span style="font-size:10px; font-weight:bold; color:#666;">${zona.toUpperCase()}</span>`;
+}
+
+function detectarClasseZona(zona) {
+    if (!zona) return "";
+    const z = zona.toUpperCase().trim();
+    if (z.includes("ZO")) return "btn-zo";
+    if (z.includes("ZL")) return "btn-zl";
+    if (z.includes("ZN")) return "btn-zn";
+    if (z.includes("ZS")) return "btn-zs";
+    return ""; 
+}
+
+function navegarVitrine(nome) { 
+    const imovel = DADOS_PLANILHA.find(i => i.nome === nome);
+    if (!imovel) return;
+    comandoSelecao(imovel.id_path, null, imovel); 
+}
+
+function comandoSelecao(idPath, nomePath, fonte) {
+    try {
+        const idNorm = idPath.toLowerCase().replace(/\s/g, '');
+        
+        // Proteção contra mapas não carregados na memória global
+        const gspPaths = (typeof MAPA_GSP !== 'undefined' && MAPA_GSP.paths) ? MAPA_GSP.paths : [];
+        const interiorPaths = (typeof MAPA_INTERIOR !== 'undefined' && MAPA_INTERIOR.paths) ? MAPA_INTERIOR.paths : [];
+
+        const noGSP = gspPaths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
+        const noInterior = interiorPaths.some(p => p.id.toLowerCase().replace(/\s/g, '') === idNorm);
+        
+        if (noGSP && mapaAtivo !== 'GSP') trocarMapas(false);
+        if (noInterior && mapaAtivo !== 'INTERIOR') trocarMapas(false);
+        
+        pathAtivo = idNorm;
+        const imoveisDaCidade = DADOS_PLANILHA.filter(d => d.id_path === pathAtivo);
+        const selecionado = fonte || imoveisDaCidade[0];
+        
+        if (!selecionado) return; 
+        
+        imovelAtivo = selecionado.nome;
+
+        document.querySelectorAll('path').forEach(el => el.classList.remove('ativo'));
+        const elMapa = document.getElementById(`caixa-a-${pathAtivo}`);
+        if (elMapa) elMapa.classList.add('ativo');
+
+        gerarListaLateral();
+        const todosPaths = gspPaths.concat(interiorPaths);
+        const nomeOficial = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || pathAtivo;
+        
+        atualizarTituloSuperior(nomeOficial);
+        montarVitrine(selecionado, imoveisDaCidade, nomeOficial);
+    } catch (err) {
+        console.error("Erro na seleção do comando:", err);
     }
+}
+
+function atualizarTituloSuperior(texto) {
+    const titulo = document.getElementById('cidade-titulo');
+    if (!titulo) return;
+    if (texto) { 
+        titulo.innerText = `MRV EM ${texto.toUpperCase()}`; 
+    } else if (pathAtivo) {
+        const gspPaths = (typeof MAPA_GSP !== 'undefined' && MAPA_GSP.paths) ? MAPA_GSP.paths : [];
+        const interiorPaths = (typeof MAPA_INTERIOR !== 'undefined' && MAPA_INTERIOR.paths) ? MAPA_INTERIOR.paths : [];
+        const todosPaths = gspPaths.concat(interiorPaths);
+        const nomeFixo = todosPaths.find(p => p.id.toLowerCase().replace(/\s/g, '') === pathAtivo)?.name || "";
+        titulo.innerText = `MRV EM ${nomeFixo.toUpperCase()}`;
+    } else { 
+        titulo.innerText = "SELECIONE UMA REGIÃO NO MAPA"; 
+    }
+}
+
+/* ==========================================================================
+   BLOCO 05: RENDERIZAÇÃO DOS MAPAS (SVG)
+   ========================================================================== */
+function renderizarNoContainer(id, dados, interativo) {
+    try {
+        const container = document.getElementById(id);
+        if (!container || !dados || !dados.paths) return;
+        container.style.display = "flex"; 
+        container.style.alignItems = "center";
+        container.style.justifyContent = "center"; 
+        container.style.overflow = "hidden";
+
+        const pathsHtml = dados.paths.map(p => {
+            const idNorm = p.id.toLowerCase().replace(/\s/g, '');
+            const temMRV = DADOS_PLANILHA.some(d => d.id_path === idNorm);
+            const ativo = (pathAtivo === idNorm && interativo) ? 'ativo' : '';
+            const isGSP = idNorm === "grandesaopaulo";
+            let eventos = "";
+            
+            if (interativo) {
+                if (isGSP) { 
+                    eventos = `onclick="trocarMapas(true)" onmouseover="atualizarTituloSuperior('GRANDE SÃO PAULO')" onmouseout="atualizarTituloSuperior()"`; 
+                } else { 
+                    eventos = `onclick="comandoSelecao('${idNorm}')" onmouseover="atualizarTituloSuperior('${p.name}')" onmouseout="atualizarTituloSuperior()"`; 
+                }
+            }
+            return `<path id="${id}-${idNorm}" d="${p.d}" class="${(temMRV || isGSP) && interativo ? 'commrv ' + ativo : ''}" ${eventos}></path>`;
+        }).join('');
+
+        const escala = interativo 
+            ? 'transform: scale(1.25); transform-origin: center;' 
+            : 'transform: scale(0.75); transform-origin: center;';
+
+        container.innerHTML = `
+            <svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:100%; ${escala}">
+                <g transform="${dados.transform || ''}">
+                    ${pathsHtml}
+                </g>
+            </svg>`;
+    } catch (e) {
+        console.error("Erro ao renderizar mapa no container " + id + ":", e);
+    }
+}
+
+function desenharMapas() {
+    // Verificações robustas para evitar quebras se as variáveis externas não existirem no momento exato
+    const gspDisponivel = typeof MAPA_GSP !== 'undefined';
+    const interiorDisponivel = typeof MAPA_INTERIOR !== 'undefined';
+
+    if (!gspDisponivel || !interiorDisponivel) {
+        console.warn("Variáveis de mapa (MAPA_GSP ou MAPA_INTERIOR) ainda não carregadas.");
+        return;
+    }
+
+    renderizarNoContainer('caixa-a', (mapaAtivo === 'GSP') ? MAPA_GSP : MAPA_INTERIOR, true);
+    renderizarNoContainer('caixa-b', (mapaAtivo === 'GSP') ? MAPA_INTERIOR : MAPA_GSP, false);
+    const cb = document.getElementById('caixa-b');
+    if (cb) cb.onclick = () => trocarMapas(true);
+}
+
+function trocarMapas(completo) { 
+    mapaAtivo = (mapaAtivo === 'GSP') ? 'INTERIOR' : 'GSP'; 
+    if (completo) { 
+        pathAtivo = null; imovelAtivo = null; 
+        const ft = document.getElementById('ficha-tecnica');
+        if (ft) ft.innerHTML = `<div style="text-align:center; color:#ccc; margin-top:80px;"><p style="font-size:30px;">📍</p><p>Clique no mapa ou na lista</p></div>`;
+        const ct = document.getElementById('cidade-titulo');
+        if (ct) ct.innerText = "SELECIONE UMA REGIÃO NO MAPA";
+    }
+    desenharMapas(); 
+    gerarListaLateral(); 
+}
+
+/* ==========================================================================
+   BLOCO 06: LISTA LATERAL
+   ========================================================================== */
+function gerarListaLateral() {
+    const container = document.getElementById('lista-imoveis');
+    if (!container) return;
+    container.innerHTML = DADOS_PLANILHA.map(item => {
+        const ativo = item.nome === imovelAtivo ? 'ativo' : '';
+        const classeZona = detectarClasseZona(item.zona); 
+        
+        return `<div class="${item.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${ativo} ${classeZona}" onclick="navegarVitrine('${item.nome}')">
+                    <strong>${item.nome}</strong> ${obterHtmlZona(item.zona, item.tipo)}
+                </div>`;
+    }).join('');
+}
+
+/* ==========================================================================
+   BLOCO 07: CONSTRUÇÃO DA VITRINE (FICHA TÉCNICA)
+   ========================================================================== */
+const criarCardMaterial = (titulo, url, icone) => {
+    if (!url || url === "" || url === "---") return "";
+    const linkSeguro = formatarLinkSeguro(url);
+    return `
+    <div class="card-material-item">
+        <div class="card-material-left">
+            <span class="card-icon">${icone}</span>
+            <span class="card-text">${titulo}</span>
+        </div>
+        <div class="card-material-right">
+            <div class="btn-com-preview">
+                <a href="${linkSeguro}" target="_blank" class="card-btn-abrir">Abrir</a>
+                <div class="preview-container">
+                    <iframe src="${linkSeguro}"></iframe>
+                </div>
+            </div>
+            <button onclick="copiarLink('${url}')" class="card-btn-copiar">Copiar</button>
+        </div>
+    </div>`;
+};
+
+const extrairLinks = (campo, icone) => {
+    if(!campo || campo === "---") return "";
+    let htmlTemp = "";
+    const grupos = campo.split(';').map(g => g.trim()).filter(g => g !== "");
+    grupos.forEach(g => {
+        const partes = g.split(',').map(p => p.trim());
+        if(partes.length >= 2) htmlTemp += criarCardMaterial(partes[0], partes[1], icone);
+    });
+    return htmlTemp;
+};
+
+function montarVitrine(selecionado, listaDaCidade, nomeRegiao) {
+    const painel = document.getElementById('ficha-tecnica');
+    if (!painel) return;
+    const outros = listaDaCidade.filter(i => i.nome !== selecionado.nome);
+    
+    const urlMapsResidencial = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.endereco)}`;
+    
+    let html = `<div class="vitrine-topo">MRV EM ${nomeRegiao}</div>`;
+    
+    if(outros.length > 0) {
+        html += `<div style="margin-bottom:6px;">${outros.map(i => {
+            const classeZ = detectarClasseZona(i.zona); 
+            return `<button class="${i.tipo === 'N' ? 'separador-complexo-btn' : 'btRes'} ${classeZ}" style="width:100%;" onclick="navegarVitrine('${i.nome}')">
+                <strong>${i.nome}</strong> ${obterHtmlZona(i.zona, i.tipo)}
+            </button>`}).join('')}</div><hr style="border:0; border-top:1px solid #eee; margin:6px 0;">`;
+    }
+
+    if (selecionado.tipo === 'R') {
+        html += `<div class="titulo-vitrine-faixa" style="background-color: var(--mrv-laranja); color: white; padding: 6px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.75rem;">RES. ${selecionado.nome.toUpperCase()} — ${selecionado.regiao}</div>`;
+        
+        html += `
+        <div style="padding: 2px 0 5px 0;">
+            <div style="font-size:0.65rem; color:#444; display:flex; justify-content:space-between; align-items:center;">
+                <span style="flex:1;">📍 ${selecionado.endereco}</span>
+                <div style="display:flex; gap:3px; margin-left:5px;">
+                    <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                    <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                </div>
+            </div>
+        </div>`;
+
+        html += `<div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">`;
+        if(selecionado.campanha && selecionado.campanha !== "---" && selecionado.campanha !== "") {
+            html += `<div style="background: #fff5f5; color: #e31010; font-weight: bold; font-size: 0.7rem; text-align: center; padding: 4px; border-bottom: 1px solid #ddd;">${selecionado.campanha}</div>`;
+        }
+        
+        const linhaInfo = (l1, v1, l2, v2, border) => `
+            <div style="display: flex; width: 100%; ${border ? 'border-bottom: 1px solid #ddd;' : ''}">
+                <div style="flex: 1; padding: 4px 8px; border-right: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l1}</label>
+                    <strong style="font-size: 0.65rem; color: #333;">${v1}</strong>
+                </div>
+                <div style="flex: 1; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.55rem; font-weight: bold; color: var(--mrv-verde); text-transform: uppercase;">${l2}</label>
+                    <strong style="font-size: 0.65rem; color: #333;">${v2}</strong>
+                </div>
+            </div>`;
+
+        const estoqueRaw = selecionado.estoque ? selecionado.estoque.toString().toUpperCase().trim() : "";
+        let corEstoque = "#333";
+        if (estoqueRaw === "VENDIDO" || estoqueRaw === "0") {
+            corEstoque = "#999";
+        } else {
+            const nEst = parseInt(estoqueRaw);
+            if (!isNaN(nEst) && nEst < 6) corEstoque = "var(--vermelho-mrv)";
+        }
+        const valorEstoqueColorido = `<span style="color: ${corEstoque}">${selecionado.estoque || "---"} UN.</span>`;
+
+        html += linhaInfo('Entrega', selecionado.entrega, 'Obra', (selecionado.obra || 0) + '%', true);
+        html += linhaInfo('Plantas', selecionado.p_de + ' - ' + selecionado.p_ate, 'Estoque', valorEstoqueColorido, true);
+        html += linhaInfo('Limitador', selecionado.limitador, 'C. Paulista', selecionado.casa_paulista, false);
+        html += `</div>`;
+
+        if(selecionado.tipologiasH) {
+            const linhas = selecionado.tipologiasH.split(';').map(l => l.trim()).filter(l => l !== "");
+            if(linhas.length > 0) {
+                const titulos = linhas[0].split(',').map(t => t.trim()); 
+                const dados = linhas.slice(1);
+                html += `
+                <div class="tabela-precos-container">
+                    <div class="tabela-header">
+                        ${titulos.map((t, idx) => {
+                            const estiloCabecalho = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
+                            return `<div class="col-tabela" style="${estiloCabecalho}">${t}</div>`;
+                        }).join('')}
+                    </div>
+                    <div class="tabela-corpo">
+                        ${dados.map(linhaStr => {
+                            const cols = linhaStr.split(',').map(c => c.trim());
+                            if(cols.length <= 1) return "";
+                            return `<div class="tabela-row">
+                                ${cols.map((v, idx) => {
+                                    const estiloCelula = idx === 1 ? 'background-color: var(--mrv-laranja); color:white; font-weight:bold;' : '';
+                                    return `<div class="col-tabela" style="${estiloCelula}">${idx === 0 ? `<strong>${v}</strong>` : v}</div>`;
+                                }).join('')}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }
+        }
+
+        html += `<div style="border-radius: 4px; overflow: hidden; border: 1px solid #ddd; margin-top: 6px;">`;
+        if(selecionado.estande && selecionado.estande !== "---" && selecionado.estande !== "") {
+            const urlMapsEstande = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selecionado.estande)}`;
+            html += `
+            <div style="background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 6px 10px; border-bottom: 1px solid #ddd;">
+                <label style="display:block; font-size:0.55rem; font-weight:bold; color:#2e7d32; text-transform:uppercase; margin-bottom:1px;">📍 Estande de Vendas</label>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3; flex:1;">${selecionado.estande}</p>
+                    <div style="display:flex; gap:3px; margin-left:5px;">
+                        <a href="${urlMapsEstande}" target="_blank" class="btn-maps">MAPS</a>
+                        <button onclick="copiarTexto('${urlMapsEstande}')" class="btn-maps" style="background:#444; border:none; cursor:pointer;">LINK</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        const criarBoxDiferencial = (label, texto, corFundo, corBorda, temBorda) => {
+            if(!texto || texto === "---" || texto === "") return "";
+            return `
+            <div style="background: ${corFundo}; border-left: 6px solid ${corBorda}; padding: 6px 10px; ${temBorda ? 'border-bottom: 1px solid #ddd;' : ''}">
+                <label style="display:block; font-size:0.55rem; font-weight:bold; color:${corBorda}; text-transform:uppercase; margin-bottom:1px;">${label}</label>
+                <p style="margin:0; font-size:0.68rem; color:#444; line-height:1.3;">${texto}</p>
+            </div>`;
+        };
+        html += criarBoxDiferencial('💡 Observação Importante', selecionado.observacoes, '#fff9c4', '#fbc02d', true);
+        html += criarBoxDiferencial('📍 Localização', selecionado.localizacao, '#fdf2e9', '#f37021', true);
+        html += criarBoxDiferencial('🚍 Mobilidade', selecionado.mobilidade, '#f1f8e9', '#2e7d32', true);
+        html += criarBoxDiferencial('🎭 Cultura e Lazer', selecionado.lazer, '#e3f2fd', '#1565c0', true);
+        html += criarBoxDiferencial('🛒 Comércio', selecionado.comercio, '#ffebee', '#c62828', true);
+        html += criarBoxDiferencial('🏥 Saúde e Educação', selecionado.saude, '#f3e5f5', '#6a1b9a', false);
+        html += `</div>`;
+
+        let materiaisHtml = "";
+        materiaisHtml += criarCardMaterial('Book Cliente', selecionado.linkCliente, '📄');
+        materiaisHtml += criarCardMaterial('Book Corretor', selecionado.linkCorretor, '💼');
+        materiaisHtml += extrairLinks(selecionado.linksVideos, '🎬');
+        materiaisHtml += extrairLinks(selecionado.linksPlantas, '📐');
+        materiaisHtml += extrairLinks(selecionado.linksImplant, '📍');
+        materiaisHtml += extrairLinks(selecionado.linksDiversos, '✨');
+        
+        if (materiaisHtml !== "") {
+            html += `<div style="margin-top: 10px;">
+                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DE APOIO</label>
+                ${materiaisHtml}
+            </div>`;
+        }
+    } else {
+        let corComplexo = "#333";
+        if (selecionado.zona === 'ZO') corComplexo = "#ff9d42"; 
+        else if (selecionado.zona === 'ZL') corComplexo = "#003399";
+        else if (selecionado.zona === 'ZN') corComplexo = "#ffd700";
+        else if (selecionado.zona === 'ZS') corComplexo = "#ff33aa";
+
+        let corTexto = (selecionado.zona === 'ZN') ? "#333" : "white";
+
+        html += `<div class="titulo-vitrine-faixa" style="background-color: ${corComplexo}; color: ${corTexto}; padding: 8px; font-weight: bold; text-align: center; margin-bottom: 5px; border-radius: 4px; font-size: 0.8rem;">
+                    ${selecionado.nomeFull.toUpperCase()} — ${selecionado.regiao}
+                 </div>`;
+                 
+        html += `<div class="box-complexo-full" style="border: 1px solid ${corComplexo}; border-radius: 4px; padding: 10px; background: #fff;">
+                    <p style="font-size:0.7rem; color:#444; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📍 ${selecionado.endereco}</span> 
+                        <span style="display:flex; gap:3px;">
+                            <a href="${urlMapsResidencial}" target="_blank" class="btn-maps">MAPS</a>
+                            <button onclick="copiarTexto('${urlMapsResidencial}')" class="btn-maps" style="background:#444; border:none; color:white; cursor:pointer; border-radius:3px; padding: 2px 6px;">LINK</button>
+                        </span>
+                    </p>
+                    <div style="font-size:0.75rem; color:#444; line-height:1.5; text-align:justify;">${selecionado.descLonga}</div>
+                 </div>`;
+                 
+        let materiaisComplexo = extrairLinks(selecionado.linksImplant, '📍');
+        if (materiaisComplexo !== "") { 
+            html += `<div style="margin-top: 10px; padding: 0 5px;">
+                <label style="display:block; font-size:0.6rem; font-weight:bold; color:#888; text-transform:uppercase; margin-bottom:4px; border-bottom:1px solid #eee;">MATERIAIS DO COMPLEXO</label>
+                ${materiaisComplexo}
+            </div>`;
+        }
+    }
+    painel.innerHTML = html;
+}
+
+/* ==========================================================================
+   BLOCO 08: LÓGICA DO MODAL (SOBRE)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modal-sobre");
+    const btn = document.getElementById("btn-sobre");
+    const span = document.querySelector(".modal-close");
+
+    if(btn && modal) {
+        btn.onclick = () => { modal.style.display = "block"; };
+    }
+    if(span && modal) {
+        span.onclick = () => { modal.style.display = "none"; };
+    }
+    window.onclick = (event) => {
+        if (event.target == modal) { modal.style.display = "none"; }
+    };
+});
+
+// Inicialização segura
+window.addEventListener('load', () => {
+    iniciarApp();
 });
