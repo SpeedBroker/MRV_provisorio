@@ -8,31 +8,32 @@
     <link rel="stylesheet" href="desktop.css">
     <style>
         /* ==========================================================================
-           CONSOLIDAÇÃO DO CABEÇALHO E CENTRALIZAÇÃO DOS BOTÕES (CORRIGIDO)
+           CONSOLIDAÇÃO DO CABEÇALHO E CENTRALIZAÇÃO DOS BOTÕES
            ========================================================================== */
         
         div.header {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
+            position: relative !important;
             padding: 0 20px !important;
             box-sizing: border-box !important;
-            gap: 20px !important; /* Garante que título e botões nunca grudem */
         }
 
         .titulo-mrv-centro {
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
             margin: 0 !important;
             padding: 0 !important;
             font-weight: bold !important;
             text-transform: uppercase !important;
-            text-align: left !important;
-            font-size: 1.1rem !important; /* Ajuste milimétrico para melhor legibilidade */
+            white-space: nowrap !important;
+            text-align: center !important;
+            font-size: 1.2rem !important;
             color: #ffffff !important;
             z-index: 1 !important;
-            flex: 1 !important; /* Ocupa de forma inteligente o espaço dinâmico à esquerda */
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
         }
 
         .container-botoes-mrv {
@@ -42,11 +43,10 @@
             align-items: center !important;
             height: 100% !important;
             z-index: 10 !important;
-            flex-shrink: 0 !important; /* Impede os botões de esmagarem ou reduzirem de tamanho */
         }
 
         button#btn-documentos, 
-        button#btn-sobre,
+        button#btn-speedsim,
         button#btn-anuncio {
             all: unset !important;
             box-sizing: border-box !important;
@@ -68,11 +68,10 @@
             justify-content: center !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
             transition: background-color 0.2s ease, transform 0.1s ease !important;
-            white-space: nowrap !important;
         }
 
         button#btn-documentos:hover, 
-        button#btn-sobre:hover {
+        button#btn-speedsim:hover {
             background-color: #e0a60f !important;
         }
 
@@ -89,30 +88,15 @@
 </head>
 <body>
 
-    <div id="bloqueio-seguranca" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f4f9; color: #333; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: Arial, sans-serif;">
-        <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0f2; text-align: center;">
-            <div id="icone-status" style="margin-bottom: 20px;">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#e0e0e0"/>
-                    <path d="M12 8V12M12 16H12.01" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-            <div id="resultado-validacao">
-                <h2 style="margin-top: 0; color: #444;">Processando...</h2>
-                <p>Conectando ao servidor de licenças do Speed Broker.</p>
-            </div>
-        </div>
-    </div>
-
     <div class="header">
-        <h1 class="titulo-mrv-centro">
-            SPEED BROKER &nbsp;&bull;&nbsp; RESIDENCIAIS MRV EM SÃO PAULO &nbsp;&bull;&nbsp; JUN/26
-        </h1>
+        <div class="titulo-mrv-centro">
+            RESIDENCIAIS MRV EM SÃO PAULO - MAI/26
+        </div>
         
         <div class="container-botoes-mrv">
             <button id="btn-anuncio">🚀 Anúncio Clique-Único (Breve)</button>
             <button id="btn-documentos">Documentos</button>
-            <button id="btn-sobre">Sobre</button>
+            <button id="btn-speedsim">📊 SpeedSim</button>
         </div>
     </div>
 
@@ -135,30 +119,159 @@
         </aside>
     </div>
 
-    <div id="modal-sobre" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
-            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+    <!-- ==========================================================================
+       MODAL DA JANELA DO SIMULADOR SPEEDSIM (MCMV / CAIXA)
+       ========================================================================== -->
+    <div id="modal-speedsim" class="modal">
+        <div class="modal-content-speedsim">
+            <span class="modal-close-speedsim">&times;</span>
+            <h2 style="color: #004d24; margin-bottom: 5px;">📊 SpeedSim — Simulador de Financiamento MCMV</h2>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 15px;">Parâmetros integrados com as regras da Caixa Econômica Federal</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
             
-            <div class="modal-body" style="text-align: center;">
-                <p style="margin-bottom: 20px; color: #333; line-height: 1.5;">
-                    Esse dashboard foi feito para acessarmos de forma rápida informações básicas dos residenciais MRV durante atendimento a leads.
-                </p>
-                
-                <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
-                    <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
-                        As informações podem estar desatualizadas e até erradas, caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
-                    </p>
+            <!-- Linha de Inputs Principais do Cliente -->
+            <div class="speedsim-grid-inputs">
+                <div class="speedsim-field">
+                    <label>Valor do Imóvel (R$)</label>
+                    <input type="number" id="sim-valor-imovel" value="240000">
+                </div>
+                <div class="speedsim-field">
+                    <label>Renda Familiar (R$)</label>
+                    <input type="number" id="sim-renda" value="4500">
+                </div>
+                <div class="speedsim-field">
+                    <label>Data de Nascimento</label>
+                    <input type="date" id="sim-nascimento" value="1995-01-01">
+                </div>
+                <div class="speedsim-field">
+                    <label>Possui 3 anos de FGTS?</label>
+                    <select id="sim-tempo-fgts">
+                        <option value="sim">Sim (Desconto nos Juros)</option>
+                        <option value="nao">Não</option>
+                    </select>
+                </div>
+                <div class="speedsim-field">
+                    <label>Mais de um comprador ou dependente?</label>
+                    <select id="sim-dependente">
+                        <option value="sim">Sim</option>
+                        <option value="nao">Não</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bloco do Cálculo Automático da Caixa (Resultados do Banco) -->
+            <div class="speedsim-banner-resultados">
+                <div class="res-box">
+                    <span>Faixa Enquadrada</span>
+                    <div id="res-faixa" class="res-val">-</div>
+                </div>
+                <div class="res-box">
+                    <span>Financiamento Máximo</span>
+                    <div id="res-finan-max" class="res-val">R$ 0,00</div>
+                </div>
+                <div class="res-box">
+                    <span>Subsídio Concedido</span>
+                    <div id="res-subsidio" class="res-val">R$ 0,00</div>
+                </div>
+                <div class="res-box">
+                    <span>Taxa de Juros</span>
+                    <div id="res-juros" class="res-val">0,00% a.a.</div>
+                </div>
+                <div class="res-box">
+                    <span>Prazo Máximo</span>
+                    <div id="res-prazo" class="res-val">0 meses</div>
+                </div>
+            </div>
+
+            <!-- Bloco de Engenharia Financeira da Entrada Facilitada (Sua Fórmula) -->
+            <h3 style="color: #004d24; margin: 15px 0 10px 0; font-size: 1rem;">📐 Engenharia de Pagamento da Entrada</h3>
+            <div class="speedsim-grid-entrada">
+                <div class="speedsim-field">
+                    <label>Valor da Entrada (Calculado)</label>
+                    <input type="text" id="sim-entrada-total" readonly style="background-color: #f0f0f0; font-weight: bold;">
+                </div>
+                <div class="speedsim-field">
+                    <label>Valor do Sinal (R$)</label>
+                    <input type="number" id="sim-sinal" value="5000">
+                </div>
+                <div class="speedsim-field">
+                    <label>Utilizar do FGTS (R$)</label>
+                    <input type="number" id="sim-fgts-abate" value="10000">
+                </div>
+                <div class="speedsim-field">
+                    <label>Qtd. Parcelas (Construtora)</label>
+                    <input type="number" id="sim-parcelas-entrada" value="36">
+                </div>
+                <div class="speedsim-field">
+                    <label>Parcela Mensal da Entrada</label>
+                    <div id="res-parcela-entrada" style="font-size: 1.2rem; font-weight: bold; color: #f37021; padding-top: 5px;">R$ 0,00</div>
+                </div>
+            </div>
+
+            <!-- Painel de Métricas de Impacto em Tempo Real (Amortização) -->
+            <div class="speedsim-impacto-panel" id="painel-impacto" style="display: none;">
+                <h4 style="margin: 0 0 5px 0; color: #3c763d;">⚡ Impacto das Amortizações em Tempo Real:</h4>
+                <div class="impacto-metrics">
+                    <div>Economia Total em Juros: <strong id="imp-juros">R$ 0,00</strong></div>
+                    <div>Redução no Prazo Geral: <strong id="imp-meses">0 meses</strong></div>
+                    <div>Economia Estimada de TR: <strong id="imp-tr">R$ 0,00</strong></div>
+                </div>
+            </div>
+
+            <!-- Seção de Tabelas Lado a Lado (SAC vs PRICE) -->
+            <div class="speedsim-container-tabelas">
+                <!-- Coluna SAC -->
+                <div class="speedsim-coluna-tabela">
+                    <div class="speedsim-titulo-tabela sac">Sistema de Amortização Constante (SAC)</div>
+                    <div class="speedsim-scroll-wrapper">
+                        <table id="tabela-sac">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">Nº</th>
+                                    <th>Prestação</th>
+                                    <th>Amort.</th>
+                                    <th>Juros</th>
+                                    <th style="width: 25%;">Amort. Extra</th>
+                                    <th>Saldo Devido</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Injetado dinamicamente via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="btn-print-sac" class="btn-print-tabela">📄 Imprimir Resumo SAC (PDF)</button>
                 </div>
 
-                <a href="https://wa.me/5511992617026?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-                    <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
-                </a>
+                <!-- Coluna PRICE -->
+                <div class="speedsim-coluna-tabela">
+                    <div class="speedsim-titulo-tabela price">Sistema Francês (PRICE)</div>
+                    <div class="speedsim-scroll-wrapper">
+                        <table id="tabela-price">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">Nº</th>
+                                    <th>Prestação</th>
+                                    <th>Amort.</th>
+                                    <th>Juros</th>
+                                    <th style="width: 25%;">Amort. Extra</th>
+                                    <th>Saldo Devido</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Injetado dinamicamente via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="btn-print-price" class="btn-print-tabela">📄 Imprimir Resumo PRICE (PDF)</button>
+                </div>
             </div>
+
         </div>
     </div>
 
+    <!-- Scripts do Sistema -->
+    <script src="simulacao.js" defer></script>
     <script src="mapa-SP.js" defer></script>
     <script src="desktop.js" defer></script>
     <script src="anuncios.js" defer></script>
