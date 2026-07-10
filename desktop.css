@@ -35,7 +35,7 @@ body {
 }
 
 /* ==========================================================================
-   2. HEADER E BOTÃO SOBRE
+   2. HEADER E BOTÕES SUPERIORES
    ========================================================================== */
 .header { 
     background-color: var(--mrv-verde) !important; 
@@ -51,27 +51,28 @@ body {
     z-index: 10;
 }
 
-#btn-sobre {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255,255,255,0.2);
-    border: 1px solid white;
-    color: white;
+/* Nova classe padrão para os botões amarelos do topo (Substituindo o #btn-sobre antigo) */
+.btn-header-amarelo {
+    background-color: #ffcc00 !important; /* Amarelo idêntico aos botões do print */
+    border: none !important;
+    color: #000000 !important;
     padding: 6px 18px;
-    border-radius: 20px;
+    border-radius: 4px; /* Casando com o padrão de bordas do documento */
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: bold;
+    text-transform: uppercase;
     transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
 }
 
-#btn-sobre:hover { 
-    background: white; 
-    color: var(--mrv-verde); 
+.btn-header-amarelo:hover { 
+    background-color: #e6b800 !important; /* Um tom levemente mais escuro no hover */
+    transform: scale(1.03);
 }
-
 /* ==========================================================================
    3. ESTRUTURA PRINCIPAL (WRAPPER)
    ========================================================================== */
