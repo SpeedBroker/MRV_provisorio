@@ -8,32 +8,31 @@
     <link rel="stylesheet" href="desktop.css">
     <style>
         /* ==========================================================================
-           CONSOLIDAÇÃO DO CABEÇALHO E CENTRALIZAÇÃO DOS BOTÕES
+           CONSOLIDAÇÃO DO CABEÇALHO E CENTRALIZAÇÃO DOS BOTÕES (CORRIGIDO)
            ========================================================================== */
         
         div.header {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
-            position: relative !important;
             padding: 0 20px !important;
             box-sizing: border-box !important;
+            gap: 20px !important; /* Garante que título e botões nunca grudem */
         }
 
         .titulo-mrv-centro {
-            position: absolute !important;
-            left: 50% !important;
-            top: 50% !important;
-            transform: translate(-50%, -50%) !important;
             margin: 0 !important;
             padding: 0 !important;
             font-weight: bold !important;
             text-transform: uppercase !important;
-            white-space: nowrap !important;
-            text-align: center !important;
-            font-size: 1.2rem !important;
+            text-align: left !important;
+            font-size: 1.1rem !important; /* Ajuste milimétrico para melhor legibilidade */
             color: #ffffff !important;
             z-index: 1 !important;
+            flex: 1 !important; /* Ocupa de forma inteligente o espaço dinâmico à esquerda */
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
         }
 
         .container-botoes-mrv {
@@ -43,6 +42,7 @@
             align-items: center !important;
             height: 100% !important;
             z-index: 10 !important;
+            flex-shrink: 0 !important; /* Impede os botões de esmagarem ou reduzirem de tamanho */
         }
 
         button#btn-documentos, 
@@ -68,6 +68,7 @@
             justify-content: center !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
             transition: background-color 0.2s ease, transform 0.1s ease !important;
+            white-space: nowrap !important;
         }
 
         button#btn-documentos:hover, 
@@ -88,10 +89,25 @@
 </head>
 <body>
 
-    <div class="header">
-        <div class="titulo-mrv-centro">
-            RESIDENCIAIS MRV EM SÃO PAULO - MAI/26
+    <div id="bloqueio-seguranca" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f4f9; color: #333; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: Arial, sans-serif;">
+        <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0f2; text-align: center;">
+            <div id="icone-status" style="margin-bottom: 20px;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#e0e0e0"/>
+                    <path d="M12 8V12M12 16H12.01" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div id="resultado-validacao">
+                <h2 style="margin-top: 0; color: #444;">Processando...</h2>
+                <p>Conectando ao servidor de licenças do Speed Broker.</p>
+            </div>
         </div>
+    </div>
+
+    <div class="header">
+        <h1 class="titulo-mrv-centro">
+            SPEED BROKER &nbsp;&bull;&nbsp; RESIDENCIAIS MRV EM SÃO PAULO &nbsp;&bull;&nbsp; JUN/26
+        </h1>
         
         <div class="container-botoes-mrv">
             <button id="btn-anuncio">🚀 Anúncio Clique-Único (Breve)</button>
@@ -136,14 +152,14 @@
                     </p>
                 </div>
 
-                <a href="https://wa.me/5511992617026?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback">
+                <a href="https://wa.me/5511992617026?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                     <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
                 </a>
             </div>
         </div>
     </div>
 
-<script src="mapa-SP.js" defer></script>
+    <script src="mapa-SP.js" defer></script>
     <script src="desktop.js" defer></script>
     <script src="anuncios.js" defer></script>
 
