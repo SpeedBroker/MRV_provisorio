@@ -1,20 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br" class="notranslate">
 <head>
-    <title>MRV SP - Carregando...</title>
-    <script>
-        function redirecionar() {
-            // Se a tela for menor que 1024px, assume que é mobile/tablet
-            if (window.innerWidth < 1024) {
-                window.location.href = "mobile.html";
-            } else {
-                window.location.href = "desktop.html";
-            }
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedBroker MRV — Autenticação</title>
+    <style>
+        :root {
+            --mrv-verde: #004d24;
+            --mrv-laranja: #f37021;
+            --mrv-cinza: #f4f4f9;
         }
-        window.onload = redirecionar;
-    </script>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--mrv-cinza);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card-seguranca {
+            max-width: 450px;
+            width: 90%;
+            background: white;
+            padding: 40px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #eef0f2;
+            transition: all 0.3s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--mrv-verde);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        h2 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+    </style>
 </head>
-<body style="background:#065e03; display:flex; align-items:center; justify-content:center; height:100vh; color:white; font-family:sans-serif;">
-    <p>Detectando dispositivo...</p>
+<body>
+
+    <div class="card-seguranca" id="painel-status">
+        <div class="spinner"></div>
+        <h2 style="color: var(--mrv-verde);">Verificando Credenciais...</h2>
+        <p>Conectando à portaria de segurança SpeedBroker MRV.</p>
+    </div>
+
+    <script>
+        // COMPLETO: Insira aqui a URL do seu Web App atualizado do Google Apps Script
+        const URL_API_GOOGLE = "COLE_AQUI_A_SUA_URL_DO_WEB_APP";
+
+        function obterParametroUrl(nome) {
+            var regex = new RegExp('[\\?&]' + nome + '=([^&#]*)');
+            var resultados = regex.exec(location.search);
+            return resultados === null ? '' : decodeURIComponent(resultados[1].replace(/\+/g, ' '));
+        }
+
+        function obterOuCriarIdentificadorMaquina() {
+            let idMaquina = localStorage.getItem('mrv_dispositivo_id');
+            if (!idMaquina) {
+                idMaquina = 'usr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('mrv_dispositivo_id', idMaquina);
+            }
+            return idMaquina;
+        }
+
+        const ref = obterParametroUrl('ref');
+        const painel = document.getElementById('painel-status');
+
+        if (!ref) {
+            exibirAcessoRecusado("Acesso Recusado", "Você tentou acessar a URL direta sem o código do seu gerente regional. Solicite o link oficial.");
+        } else {
+            const userID = obterOuCriarIdentificadorMaquina();
+
+            painel.innerHTML = `
+                <div class="spinner"></div>
+                <h2 style="color: var(--mrv-verde);">Validando Acesso...</h2>
+                <p>Verificando integridade das cotas digitais do dispositivo.</p>
+            `;
+
+            // Faz a requisição enviando obrigatoriamente o ref E o userID
+            fetch(`${URL_API_GOOGLE}?ref=${ref}&userID=${userID}`)
+                .then(response => response.json())
+                .then(dados => {
+                    if (dados.status === "autorizado") {
+                        painel.innerHTML = `
+                            <div class="spinner" style="border-top-color: var(--mrv-laranja);"></div>
+                            <h2 style="color: var(--mrv-verde);">Acesso Autorizado!</h2>
+                            <p>Carregando o painel de residenciais...</p>
+                        `;
+                        setTimeout(() => {
+                            // Encaminha para o desktop passando os dois parâmetros na URL para manter sincronia
+                            window.location.href = `desktop.html?ref=${ref}&userID=${userID}`;
+                        }, 1200);
+                    } else {
+                        exibirAcessoRecusado("Acesso Recusado", dados.reason || "Cota esgotada ou link inválido.");
+                    }
+                })
+                .catch(erro => {
+                    console.error("Erro de rede:", erro);
+                    window.location.href = `desktop.html?ref=${ref}&userID=${userID}`;
+                });
+        }
+
+        function exibirAcessoRecusado(titulo, message) {
+            painel.innerHTML = `
+                <div id="icone-erro" style="margin-bottom: 20px;">
+                    <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#ff4d4d"/>
+                        <path d="M8 12H16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 style="color: #d93025;">${titulo}</h2>
+                <p>${message}</p>
+                <p style="color: #a0a0a0; font-size: 11px; margin-top: 25px;">Portaria SpeedBroker • MRV SP</p>
+            `;
+        }
+    </script>
 </body>
 </html>
