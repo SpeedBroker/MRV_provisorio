@@ -174,14 +174,43 @@ const COL = {
 
 
 /* ==========================================================================
-   BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS
+   BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS (ATUALIZADO COM SPEEDSIM)
    ========================================================================== */
 async function iniciarApp() {
     try { 
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
+        configurarBotaoSpeedsim(); // Ativa o modal reaproveitado de forma nativa no JS
     } catch (err) { 
         console.error(err); 
+    }
+}
+
+function configurarBotaoSpeedsim() {
+    const btnSpeedsim = document.getElementById('btn-sobre');
+    const modalSobre = document.getElementById('modal-sobre');
+    const btnFechar = document.getElementById('fechar-modal-sobre');
+
+    if (btnSpeedsim && modalSobre) {
+        // Vincula nativamente o clique do botão superior à abertura do modal
+        btnSpeedsim.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalSobre.style.display = 'block';
+        });
+    }
+
+    if (btnFechar && modalSobre) {
+        // Vincula o clique no 'X' para fechar
+        btnFechar.addEventListener('click', () => {
+            modalSobre.style.display = 'none';
+        });
+
+        // Fecha se o corretor clicar na área escura fora da base branca
+        window.addEventListener('click', (event) => {
+            if (event.target === modalSobre) {
+                modalSobre.style.display = 'none';
+            }
+        });
     }
 }
 
@@ -332,7 +361,6 @@ function abrirDocumentoDireto(url) {
         window.open(linkSeguro, '_blank');
     }
 }
-
 /* ==========================================================================
    BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
    ========================================================================= */
