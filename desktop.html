@@ -1,240 +1,188 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br" class="notranslate">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPEED BROKER • Dashboard MRV SP</title>
+    <title>Dashboard MRV SP</title>
     <link rel="stylesheet" href="desktop.css">
+    <style>
+        /* ==========================================================================
+           CONSOLIDAÇÃO DO CABEÇALHO E CENTRALIZAÇÃO DOS BOTÕES (CORRIGIDO)
+           ========================================================================== */
+        
+        div.header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0 20px !important;
+            box-sizing: border-box !important;
+            gap: 20px !important; /* Garante que título e botões nunca grudem */
+        }
+
+        .titulo-mrv-centro {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            text-align: left !important;
+            font-size: 1.1rem !important; /* Ajuste milimétrico para melhor legibilidade */
+            color: #ffffff !important;
+            z-index: 1 !important;
+            flex: 1 !important; /* Ocupa de forma inteligente o espaço dinâmico à esquerda */
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+        }
+
+        .container-botoes-mrv {
+            display: flex !important;
+            gap: 12px !important;
+            margin-left: auto !important;
+            align-items: center !important;
+            height: 100% !important;
+            z-index: 10 !important;
+            flex-shrink: 0 !important; /* Impede os botões de esmagarem ou reduzirem de tamanho */
+        }
+
+        button#btn-documentos, 
+        button#btn-sobre,
+        button#btn-anuncio {
+            all: unset !important;
+            box-sizing: border-box !important;
+            background-color: #febd11 !important;
+            color: #004d24 !important;
+            border-radius: 4px !important;
+            
+            /* Altura calibrada com sucesso */
+            height: 34px !important;
+            padding: 0 18px !important;
+            
+            font-weight: bold !important;
+            font-size: 0.8rem !important;
+            text-transform: uppercase !important;
+            cursor: pointer !important;
+            text-align: center !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            transition: background-color 0.2s ease, transform 0.1s ease !important;
+            white-space: nowrap !important;
+        }
+
+        button#btn-documentos:hover, 
+        button#btn-sobre:hover {
+            background-color: #e0a60f !important;
+        }
+
+        /* ESTILO EXCLUSIVO DO BOTÃO DE ANÚNCIO PARA DESTACAR NA REUNIÃO */
+        button#btn-anuncio {
+            background-color: #f37021 !important; /* Laranja MRV vibrante */
+            color: #ffffff !important;
+        }
+
+        button#btn-anuncio:hover {
+            background-color: #dca206 !important; /* Muda para dourado no hover */
+        }
+    </style>
 </head>
 <body>
 
-    <!-- ==========================================================================
-         CABEÇALHO DA PÁGINA (HEADER)
-         ========================================================================== -->
-    <div class="header">
-        SPEED BROKER • RESIDENCIAIS MRV EM SÃO PAULO • JUN/26
-        
-        <!-- Área de Botões à Direita (Alinhados e padronizados) -->
-        <div style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: flex; gap: 10px;">
-            <button class="btn-header-amarelo" style="background-color: #f37021 !important; color: white !important;">ANÚNCIO CLIQUE-ÚNICO</button>
-            <button class="btn-header-amarelo">DOCUMENTOS</button>
-            <!-- Novo Botão SpeedSim substituindo o antigo 'Sobre' -->
-            <button id="btn-speedsim" class="btn-header-amarelo">SPEEDSIM</button>
-        </div>
-    </div>
-
-    <!-- ==========================================================================
-         CORPO PRINCIPAL DO SISTEMA (WRAPPER)
-         ========================================================================== -->
-    <div class="wrapper">
-
-        <!-- Sidebar Esquerda: Lista de Empreendimentos e Complexos -->
-        <div class="sidebar-esq" id="sidebar-esquerda">
-            <!-- Os botões de complexos e residenciais serão injetados aqui dinamicamente pelo App.js -->
-            <div class="separador-complexo-btn btn-zn">CIDADE SETE SOIS PIRITUBA</div>
-            <div class="btRes btn-zn ativo">Pico dos Marins <span style="font-size:0.6rem; color:#666;">Sete Sois - ZN</span></div>
-            <div class="btRes btn-zn">Poente das Bromélias <span style="font-size:0.6rem; color:#666;">Sete Sois - ZN</span></div>
-            <div class="btRes btn-zn">Poente das Orquídeas <span style="font-size:0.6rem; color:#666;">Sete Sois - ZN</span></div>
-            <div class="btRes btn-zn">Poente dos Tucanos <span style="font-size:0.6rem; color:#666;">Sete Sois - ZN</span></div>
-            <div class="btRes btn-zn">Poente Flor de Maio <span style="font-size:0.6rem; color:#666;">Sete Sois - ZN</span></div>
-            <div class="btRes btn-zn">Saint Guilherme <span style="font-size:0.6rem; color:#666;">ZN</span></div>
-            <div class="btRes btn-zn">San Miller <span style="font-size:0.6rem; color:#666;">ZN</span></div>
-            <div class="btRes btn-zn">Recanto do Limoeiro <span style="font-size:0.6rem; color:#666;">ZN</span></div>
-            <div class="btRes btn-zl">Spazio Saint Francis <span style="font-size:0.6rem; color:#666;">ZL</span></div>
-            <div class="btRes btn-zl">Saint Rose <span style="font-size:0.6rem; color:#666;">ZL</span></div>
-            <div class="btRes btn-zl">Recanto da Mata <span style="font-size:0.6rem; color:#666;">ZL</span></div>
-        </div>
-
-        <!-- Área Central: Visualização de Mapas e Subtítulos -->
-        <div class="conteudo-centro">
-            <div id="cidade-titulo">MRV EM PIRITUBA - Z. OESTE</div>
-            
-            <!-- Caixa A: Mapa SVG Principal -->
-            <div id="caixa-a">
-                <!-- O SVG do mapa regional ou macro é renderizado aqui via JS -->
-                <svg viewBox="0 0 800 600" id="mapa-svg">
-                    <!-- Paths de exemplo simulando o mapa -->
-                    <path class="commrv" d="M150,150 L200,130 L250,180 L220,250 L140,220 Z" title="Pirituba"></path>
-                    <path class="commrv ativo" d="M250,180 L320,160 L350,230 L290,260 L220,250 Z" title="Jaraguá"></path>
-                    <path d="M320,160 L400,150 L430,220 L350,230 Z" title="Outra Região"></path>
+    <div id="bloqueio-seguranca" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f4f9; color: #333; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: Arial, sans-serif;">
+        <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eef0f2; text-align: center;">
+            <div id="icone-status" style="margin-bottom: 20px;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#e0e0e0"/>
+                    <path d="M12 8V12M12 16H12.01" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
-            
-            <!-- Caixa B: Miniatura de Localização / Macro -->
-            <div id="caixa-b">
-                <!-- Miniatura de navegação geral ou mapa do estado -->
-                <span style="font-size: 0.75rem; color: #777; font-weight: bold; text-transform: uppercase;">Clique para Visão Geral (Macro)</span>
-            </div>
-        </div>
-
-        <!-- Sidebar Direita: Vitrine de Vendas e Ficha Técnica do Residencial -->
-        <div class="sidebar-dir" id="sidebar-direita">
-            
-            <!-- Cabeçalho do Imóvel Selecionado -->
-            <div class="titulo-vitrine-faixa faixa-laranja">RES. PICO DOS MARINS — SP 2</div>
-            
-            <table style="width: 100%; margin-bottom: 10px; font-size: 0.75rem;">
-                <tr>
-                    <td>📍 Rua Igarapé Abelhas, Quadra U, Lote 1, s/n, - Pirituba</td>
-                    <td style="text-align: right; width: 90px;">
-                        <a href="#" class="btn-maps">MAPS</a>
-                        <a href="#" class="btn-maps" style="background:#00c853;">LINK</a>
-                    </td>
-                </tr>
-            </table>
-
-            <!-- Bloco Consolidado de Detalhes Dinâmicos (Seção 11 do CSS) -->
-            <div class="detalhes-residencial-container">
-                <div class="header-residencial">FICHA TÉCNICA DO IMÓVEL</div>
-                <div class="faixa-isencao">TEM ISENÇÃO DE ITBI E REGISTRO NO PLANOCURTO</div>
-                
-                <div class="grid-info">
-                    <div class="grid-cell border-right"><span class="label">Limitadores</span><span class="valor">HIS2 e R2V</span></div>
-                    <div class="grid-cell"><span class="label">Casa Paulista</span><span class="valor">NÃO TEM</span></div>
-                    <div class="grid-cell border-right"><span class="label">Entrega</span><span class="valor">abr/29</span></div>
-                    <div class="grid-cell"><span class="label">Status</span><span class="valor">OBRA</span></div>
-                    <div class="grid-cell border-right"><span class="label">Estoque</span><span class="valor">0%</span></div>
-                    <div class="grid-cell"><span class="label">Unidades</span><span class="valor">104 UN.</span></div>
-                    <div class="grid-cell full-width"><span class="label">Garagem</span><span class="valor">0 OU 1 VAGA</span></div>
-                </div>
-
-                <div class="container-preco">
-                    <div class="preco-label">À PARTIR DE:</div>
-                    <div class="preco-botao">R$ 244.590</div>
-                </div>
-            </div>
-
-            <!-- Caixas de Texto com as Características (Estilo Borda Lateral) -->
-            <div style="border-left: 4px solid #4285F4; padding-left: 10px; margin-bottom: 10px; background: #f8f9fa; padding: 8px;">
-                <label style="font-weight: bold; font-size: 0.75rem; color: #4285F4; display: block;">ESTANDE DE VENDAS</label>
-                <p style="font-size: 0.75rem; color: #444;">AVENIDA RAIMUNDO PEREIRA MAGALHÃES, 7395 - PIRITUBA</p>
-            </div>
-
-            <div style="border-left: 4px solid #f37021; padding-left: 10px; margin-bottom: 10px; background: #f8f9fa; padding: 8px;">
-                <label style="font-weight: bold; font-size: 0.75rem; color: #f37021; display: block;">LOCALIZAÇÃO</label>
-                <p style="font-size: 0.75rem; color: #444;">Inserido no Masterplan Sete Sóis em Pirituba, um bairro planejado numa região em plena valorização.</p>
-            </div>
-
-            <div style="border-left: 4px solid #00713a; padding-left: 10px; margin-bottom: 10px; background: #f8f9fa; padding: 8px;">
-                <label style="font-weight: bold; font-size: 0.75rem; color: #00713a; display: block;">MOBILIDADE</label>
-                <p style="font-size: 0.75rem; color: #444;">Acesso direto pela Av. Raimundo P. de Magalhães. Conexão via ônibus para a <strong>Estação Pirituba (Linha 7-Rubi)</strong>.</p>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ==========================================================================
-         ESTRUTURA DOS MODAIS (INCLUINDO O NOVO SPEEDSIM)
-         ========================================================================== -->
-
-    <!-- Modal SpeedSim (Simulador de Amortização SAC vs PRICE) -->
-    <div id="modal-speedsim" class="modal">
-        <div class="modal-content-speedsim">
-            <span class="modal-close-speedsim" id="fechar-speedsim">&times;</span>
-            
-            <h2 style="color: var(--mrv-verde); margin-bottom: 20px; text-transform: uppercase; font-size: 1.3rem;">
-                SpeedSim - Simulador de Amortização Comparativo
-            </h2>
-
-            <!-- Grid de Entradas Principais -->
-            <div class="speedsim-grid-inputs">
-                <div class="speedsim-field">
-                    <label>Valor do Financiamento (R$)</label>
-                    <input type="number" id="sim-valor-financiamento" placeholder="Ex: 200000" value="200000">
-                </div>
-                <div class="speedsim-field">
-                    <label>Prazo (Meses)</label>
-                    <input type="number" id="sim-prazo" placeholder="Ex: 420" value="420">
-                </div>
-                <div class="speedsim-field">
-                    <label>Taxa de Juros Nominal (% a.a.)</label>
-                    <input type="number" id="sim-taxa-juros" step="0.01" placeholder="Ex: 9.5" value="9.5">
-                </div>
-            </div>
-
-            <!-- Banner de Resultados Rápidos (Resumo das Diferenças) -->
-            <div class="speedsim-banner-resultados">
-                <div class="res-box">
-                    <span>Economia de Juros (SAC vs PRICE)</span>
-                    <div class="res-val" id="res-economia-juros">R$ 0,00</div>
-                </div>
-                <div class="res-box">
-                    <span>Diferença na 1ª Parcela</span>
-                    <div class="res-val" id="res-dif-parcela">R$ 0,00</div>
-                </div>
-                <div class="res-box">
-                    <span>Meses Reduzidos (Amort. Extra)</span>
-                    <div class="res-val" id="res-meses-reduzidos" style="color: var(--mrv-laranja);">0 meses</div>
-                </div>
-            </div>
-
-            <!-- Painel Dinâmico de Impacto das Amortizações -->
-            <div class="speedsim-impacto-panel">
-                <strong style="color: #1b5e20; text-transform: uppercase; font-size: 0.75rem;">Impacto das Amortizações Extraordinárias:</strong>
-                <div class="impacto-metrics">
-                    <div>Total Amortizado Extra: <b id="impacto-total-extra">R$ 0,00</b></div>
-                    <div>Total Poupado em Juros: <b id="impacto-juros-poupados">R$ 0,00</b></div>
-                </div>
-            </div>
-
-            <!-- Tabelas Comparativas Lado a Lado com Scroll Independente -->
-            <div class="speedsim-container-tabelas">
-                
-                <!-- Coluna do Sistema SAC -->
-                <div class="speedsim-coluna-tabela">
-                    <div class="speedsim-titulo-tabela sac">Sistema SAC (Parcelas Decrescentes)</div>
-                    <div class="speedsim-scroll-wrapper">
-                        <table id="tabela-sac">
-                            <thead>
-                                <tr>
-                                    <th style="width: 10%;">Nº</th>
-                                    <th style="width: 22%;">Parcela</th>
-                                    <th style="width: 22%;">Amort.</th>
-                                    <th style="width: 22%;">Juros</th>
-                                    <th style="width: 24%;">Amort. Extra (R$)</th>
-                                </tr>
-                            </tbody>
-                            <tbody>
-                                <!-- Gerado dinamicamente via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <button type="button" class="btn-print-tabela" onclick="window.print()">Imprimir Planilha SAC</button>
-                </div>
-
-                <!-- Coluna do Sistema PRICE -->
-                <div class="speedsim-coluna-tabela">
-                    <div class="speedsim-titulo-tabela price">Sistema PRICE (Parcelas Fixas)</div>
-                    <div class="speedsim-scroll-wrapper">
-                        <table id="tabela-price">
-                            <thead>
-                                <tr>
-                                    <th style="width: 10%;">Nº</th>
-                                    <th style="width: 22%;">Parcela</th>
-                                    <th style="width: 22%;">Amort.</th>
-                                    <th style="width: 22%;">Juros</th>
-                                    <th style="width: 24%;">Amort. Extra (R$)</th>
-                                </tr>
-                            </tbody>
-                            <tbody>
-                                <!-- Gerado dinamicamente via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <button type="button" class="btn-print-tabela" onclick="window.print()">Imprimir Planilha PRICE</button>
-                </div>
-
+            <div id="resultado-validacao">
+                <h2 style="margin-top: 0; color: #444;">Processando...</h2>
+                <p>Conectando ao servidor de licenças do Speed Broker.</p>
             </div>
         </div>
     </div>
 
-    <!-- Elemento para Notificações Rápidas (Toast) -->
-    <div id="toast" class="toast-notificacao">Texto Copiado!</div>
+    <div class="header">
+        <h1 class="titulo-mrv-centro">
+            SPEED BROKER &nbsp;&bull;&nbsp; RESIDENCIAIS MRV EM SÃO PAULO &nbsp;&bull;&nbsp; JUN/26
+        </h1>
+        
+        <div class="container-botoes-mrv">
+            <button id="btn-anuncio">🚀 Anúncio Clique-Único (Breve)</button>
+            <button id="btn-documentos">Documentos</button>
+            <!-- Alteração Cirúrgica: ID mantido para compatibilidade do JS, texto alterado para Speedsim -->
+            <button id="btn-sobre">Speedsim</button>
+        </div>
+    </div>
 
-    <!-- ==========================================================================
-         CARREGAMENTO DE SCRIPTS DO SISTEMA
-         ========================================================================== -->
-    <script src="js/App.js"></script>
-    <script src="js/simulacao.js"></script>
+    <div class="wrapper">
+        <aside class="sidebar-esq" id="lista-imoveis">
+            <div style="padding:20px; color:#666; font-size: 0.8rem;">Carregando residenciais...</div>
+        </aside>
+        
+        <main class="conteudo-centro">
+            <div id="cidade-titulo">Selecione uma região no mapa</div> 
+            <div id="caixa-a"></div> 
+            <div id="caixa-b"></div> 
+        </main>
+
+        <aside class="sidebar-dir" id="ficha-tecnica">
+            <div style="text-align:center; color:#ccc; margin-top:100px;">
+                <p style="font-size: 30px;">📍</p>
+                <p>Clique em algum Residencial ou em alguma região verde do mapa</p>
+            </div>
+        </aside>
+    </div>
+
+    <div id="modal-sobre" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+            
+            <div class="modal-body" style="text-align: center;">
+                <p style="margin-bottom: 20px; color: #333; line-height: 1.5;">
+                    Esse dashboard foi feito para acessarmos de forma rápida informações básicas dos residenciais MRV durante atendimento a leads.
+                </p>
+                
+                <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
+                    <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
+                        As informações podem estar desatualizadas e até erradas, caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
+                    </p>
+                </div>
+
+                <a href="https://wa.me/5511992617026?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                    <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="mapa-SP.js" defer></script>
+    <script src="desktop.js" defer></script>
+    <script src="anuncios.js" defer></script>
+
+    <script>
+        window.addEventListener('load', () => {
+            console.log("Todos os recursos e scripts foram totalmente carregados.");
+            
+            // Verifica se a função iniciarApp foi declarada no desktop.js
+            if (typeof iniciarApp === 'function') {
+                iniciarApp();
+            } else {
+                console.error("Erro Crítico: A função 'iniciarApp' não foi encontrada no escopo global.");
+                // Tentativa de segurança caso haja delay no carregamento
+                setTimeout(() => {
+                    if (typeof iniciarApp === 'function') {
+                        iniciarApp();
+                    } else {
+                        alert("Não foi possível iniciar o aplicativo. Verifique o console do navegador (F12) para detalhes.");
+                    }
+                }, 500);
+            }
+        });
+    </script>
 </body>
 </html>
