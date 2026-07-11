@@ -173,14 +173,15 @@ const COL = {
 };
 
 
+
 /* ==========================================================================
-   BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS (ATUALIZADO COM SPEEDSIM)
+   BLOCO 02: INICIALIZAÇÃO E UTILITÁRIOS (CORRIGIDO)
    ========================================================================== */
 async function iniciarApp() {
     try { 
         await Promise.all([carregarPlanilha(), carregarAbaDocumentos()]);
         configurarBotaoDocumentos(); 
-        configurarBotaoSpeedsim(); // Ativa o modal reaproveitado de forma nativa no JS
+        configurarBotaoSpeedsim(); // Ativa o modal mapeando as classes corretas do HTML
     } catch (err) { 
         console.error(err); 
     }
@@ -189,10 +190,11 @@ async function iniciarApp() {
 function configurarBotaoSpeedsim() {
     const btnSpeedsim = document.getElementById('btn-sobre');
     const modalSobre = document.getElementById('modal-sobre');
-    const btnFechar = document.getElementById('fechar-modal-sobre');
+    // Ajustado para buscar pela classe contida no seu HTML (.modal-close)
+    const btnFechar = document.querySelector('.modal-close');
 
     if (btnSpeedsim && modalSobre) {
-        // Vincula nativamente o clique do botão superior à abertura do modal
+        // Vincula o clique do botão superior à abertura do modal
         btnSpeedsim.addEventListener('click', (e) => {
             e.preventDefault();
             modalSobre.style.display = 'block';
@@ -200,7 +202,7 @@ function configurarBotaoSpeedsim() {
     }
 
     if (btnFechar && modalSobre) {
-        // Vincula o clique no 'X' para fechar
+        // Vincula o clique no 'X' (.modal-close) para fechar
         btnFechar.addEventListener('click', () => {
             modalSobre.style.display = 'none';
         });
@@ -361,6 +363,7 @@ function abrirDocumentoDireto(url) {
         window.open(linkSeguro, '_blank');
     }
 }
+
 /* ==========================================================================
    BLOCO 03: CARREGAMENTO DE DADOS (GOOGLE SHEETS)
    ========================================================================= */
