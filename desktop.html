@@ -112,7 +112,6 @@
         <div class="container-botoes-mrv">
             <button id="btn-anuncio">🚀 Anúncio Clique-Único (Breve)</button>
             <button id="btn-documentos">Documentos</button>
-            <!-- Alteração Cirúrgica: ID mantido para compatibilidade do JS, texto alterado para Speedsim -->
             <button id="btn-sobre">Speedsim</button>
         </div>
     </div>
@@ -136,26 +135,26 @@
         </aside>
     </div>
 
+    <!-- ==========================================================================
+         MODAL REAPROVEITADO (Mantendo ID original para o JS não quebrar)
+         ========================================================================== -->
     <div id="modal-sobre" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h2 style="color: var(--mrv-verde); margin-bottom: 10px;">Sobre o Projeto</h2>
+            <h2 style="color: #004d24; margin-bottom: 10px; text-transform: uppercase; font-size: 1.3rem;">
+                SpeedSim - Simulador Comparativo
+            </h2>
             <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
             
-            <div class="modal-body" style="text-align: center;">
-                <p style="margin-bottom: 20px; color: #333; line-height: 1.5;">
-                    Esse dashboard foi feito para acessarmos de forma rápida informações básicas dos residenciais MRV durante atendimento a leads.
-                </p>
-                
-                <div style="background: #fff9c4; padding: 15px; border-radius: 8px; border-left: 5px solid #fbc02d; margin-bottom: 25px; text-align: left;">
-                    <p style="font-size: 0.9rem; color: #444; line-height: 1.6;">
-                        As informações podem estar desatualizadas e até erradas, caso encontre algum erro ou se você tiver algum material que esta faltando nele como books ou vídeos, por favor, envie pra mim pelo whatsapp através do botão abaixo:
+            <div class="modal-body">
+                <!-- Base branca onde vamos colocar as tabelas e inputs da nova funcionalidade -->
+                <div style="padding: 30px; text-align: center; border: 2px dashed #ccc; background: #fafafa; border-radius: 6px; color: #666;">
+                    <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">📊</span>
+                    <strong>Área do Simulador Ativada com Sucesso!</strong>
+                    <p style="font-size: 0.85rem; margin-top: 5px; color: #888;">
+                        Esta é a base flutuante onde renderizaremos os inputs e as tabelas comparativas SAC vs PRICE.
                     </p>
                 </div>
-
-                <a href="https://wa.me/5511992617026?text=Olá%20Carlos,%20encontrei%20um%20erro/material%20para%20o%20Dashboard" target="_blank" id="btn-whatsapp-feedback" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-                    <span style="margin-right: 10px;">📱</span> Carlos Custódio - Enviar Feedback
-                </a>
             </div>
         </div>
     </div>
